@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Reward of Illogical Action — Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="project-detail.css">
+<style>
+/* Watch-the-output button */
+.watch-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding: 1.1rem 2.2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .35s, transform .35s, box-shadow .35s;
+  box-shadow: 0 12px 32px oklch(74% 0.10 78 / .25);
+}
+.watch-cta:hover {
+  background: oklch(82% 0.11 78);
+  transform: translateY(-1px);
+  box-shadow: 0 16px 44px oklch(74% 0.10 78 / .4);
+}
+.watch-cta svg { width: 18px; height: 18px; fill: currentColor; }
+.watch-cta__arrow { transition: transform .35s; }
+.watch-cta:hover .watch-cta__arrow { transform: translateX(5px); }
+
+
+.inline-video {
+  display: block;
+}
+.inline-video__frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  box-shadow:
+    0 32px 90px oklch(2% 0.005 240 / .55),
+    0 8px 24px oklch(2% 0.005 240 / .35),
+    inset 0 0 0 1px oklch(96% 0.006 78 / .06);
+  background: #000;
+}
+.inline-video__frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+.inline-video__caption {
+  margin-top: 1rem;
+  font-size: .54rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Video modal */
+.video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: oklch(5% 0.005 50 / .94);
+  backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .45s;
+}
+.video-overlay.open { opacity: 1; pointer-events: auto; }
+
+.video-frame {
+  position: relative;
+  width: min(94vw, calc(82vh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  background: #000;
+  box-shadow: 0 40px 120px oklch(2% 0.005 240 / .65);
+}
+.video-frame iframe {
+  width: 100%; height: 100%;
+  border: 0;
+  display: block;
+}
+.video-close {
+  position: absolute;
+  top: -3rem; right: 0;
+  font-family: 'DM Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  padding: .6rem 1.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .25s;
+}
+.video-close:hover { background: var(--ivory); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="Projects.html" class="active">Projects</a></li>
+    <li><a href="About.html">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="read-progress" id="readProgress"></div>
+
+<!-- ═══════════ OPENING ═══════════ -->
+<section class="opening">
+  <div class="opening__bg" style="background-image: url('uploads/preview The Reward of Non-teleological Action.jpg'); background-size: cover; background-position: center;"></div>
+  <div class="opening__overlay"></div>
+  <div class="opening__inner">
+    <a href="Projects.html" class="back-link">← Back to Archive</a>
+    <div class="opening__eyebrow">Project · 02</div>
+    <h1 class="opening__title"><em>The Reward of Illogical Action</em></h1>
+    <p class="opening__concept">An interactive installation combining HTML / JavaScript game design, p5.js visual interaction, and an Arduino-based sensor system — designed to surface the paradox of non-teleological action: that the process itself can already be a form of result.</p>
+    <div class="opening__meta">
+      <div class="meta-item"><span class="meta-label">Year</span><span class="meta-value">2025</span></div>
+      <div class="meta-item"><span class="meta-label">Medium</span><span class="meta-value">Installation · p5.js · Arduino</span></div>
+      <div class="meta-item"><span class="meta-label">Discipline</span><span class="meta-value">Interaction Design</span></div>
+      <div class="meta-item"><span class="meta-label">Site</span><span class="meta-value">ZERO Space Studio</span></div>
+    </div>
+
+    <button class="watch-cta" id="openVideo" type="button">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <span>Watch the Video</span>
+      <span class="watch-cta__arrow">→</span>
+    </button>
+  </div>
+</section>
+
+<!-- ═══════════ CONCEPT QUOTE ═══════════ -->
+<section class="section section--quote">
+  <div class="section__inner narrow">
+    <div class="section-eyebrow">Concept</div>
+    <p class="big-quote">
+      The project aims to express that the process itself can already be a form of result, and that meaning does not require an external purpose to be worthwhile.
+      <em>Process and outcome are always relative.</em>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════ FRAME 21 — BACKGROUND & RESEARCH ═══════════ -->
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">Background</div>
+    <h2 class="section-title">Six steps — and the moral weight of <em>purpose</em></h2>
+    <p class="section-lede">On the left: a vertical progression of six beliefs, each a different way to find — or refuse to find — purpose in what we do. On the right: research into utilitarianism and why the optimized, outcome-driven life can feel cold even when it is correct.</p>
+
+    <figure class="full-figure">
+      <img src="uploads/Frame 21.png" alt="Background and research — six beliefs and utilitarianism analysis"/>
+      <figcaption>Background · the six-step belief progression and utilitarianism research · 2025</figcaption>
+    </figure>
+
+    <div class="belief-list">
+      <div class="belief-row">
+        <span class="belief-num">01</span>
+        <span class="belief-text">Doing without knowing why.</span>
+      </div>
+      <div class="belief-row">
+        <span class="belief-num">02</span>
+        <span class="belief-text">Discovering meaning in what I was told to do.</span>
+      </div>
+      <div class="belief-row">
+        <span class="belief-num">03</span>
+        <span class="belief-text">Acting with my own intention.</span>
+      </div>
+      <div class="belief-row">
+        <span class="belief-num">04</span>
+        <span class="belief-text">Finding meaning in the journey itself.</span>
+      </div>
+      <div class="belief-row">
+        <span class="belief-num">05</span>
+        <span class="belief-text">Seeing purpose in purposelessness.</span>
+      </div>
+      <div class="belief-row">
+        <span class="belief-num">06</span>
+        <span class="belief-text">Realization — everything has purpose.</span>
+      </div>
+    </div>
+
+    <p style="margin-top:3rem; font-size:.78rem; line-height:2; color:var(--mist); opacity:.72; max-width:60ch;">
+      The research panel surfaces a contradiction: utilitarianism, viewed across <strong>Social Psychology</strong>, <strong>Evolutionary Biology</strong>, and <strong>Cognitive Science</strong>, holds that the morally right choice is the one that maximizes welfare — yet utilitarian reasoners are consistently rated as colder, less trustworthy, less desirable as social partners. The "right" answer comes at the cost of the right kind of person. This tension became the seed of the installation.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════ FRAME 22 — DRAWING EXPERIMENT ═══════════ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">Experiment · Public Drawing</div>
+    <h2 class="section-title">Two signs, twenty-eight motivations</h2>
+    <p class="section-lede">A "Welcome to draw Together" sign in a park. Strangers stopped, sat down, drew portraits of one another. Afterward, each was interviewed about <em>why</em> they did it. Twenty-eight motivations clustered into two flows — instinctive (yellow) and intentional (green) — converging on two emotions: <strong>ADD 14</strong> instinctive paths leading to playful comfort, and <strong>10</strong> intentional paths leading to connection.</p>
+
+    <figure class="full-figure">
+      <img src="uploads/Frame 22.png" alt="Drawing experiment — portraits, motivation flows, and emotional outcomes"/>
+      <figcaption>Field experiment · drawing portraits with strangers · motivation flow analysis · 2025</figcaption>
+    </figure>
+
+    <div class="residue-grid">
+      <article class="residue-card">
+        <div class="residue-num">01 · Comfort</div>
+        <h3>Painting · drawing · writing</h3>
+        <p>Doing it to relax, release, or feel calm — the kind of doing that arrives <em>before</em> a reason.</p>
+      </article>
+      <article class="residue-card">
+        <div class="residue-num">02 · Expressive</div>
+        <h3>Phone · rearranging · doodling</h3>
+        <p>Expressing self or emotion through action when language doesn't fit.</p>
+      </article>
+      <article class="residue-card">
+        <div class="residue-num">03 · Social</div>
+        <h3>Talking · staying with friends</h3>
+        <p>Seeking or feeling connection — proximity is the point.</p>
+      </article>
+      <article class="residue-card">
+        <div class="residue-num">04 · Experimental</div>
+        <h3>To see what happens</h3>
+        <p>Curiosity acting before reason. The reward arrives in the surprise.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FRAME 23 — PROCESS ═══════════ -->
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">Process · References, Failed Game, Six Phases</div>
+    <h2 class="section-title">From a 2D game that revealed the wrong lesson, to a space that listens</h2>
+    <p class="section-lede">First came the references — <em>Photosynthetic</em> at ZERO Space Studio, the Windhover Contemplative Center. Then a 2D HTML game where the player held the spacebar to fight an attacker. Testing revealed players inferred the goal immediately from game conventions; the misdirection didn't land. The solution was to move out of game vocabulary entirely and into a meditation room — six sensor-driven phases that respond to stillness rather than action.</p>
+
+    <figure class="full-figure">
+      <img src="uploads/Frame 23.png" alt="Process — references, storyboards, game testing, six-phase installation flow"/>
+      <figcaption>Process · references · sketches · game prototype · six-phase storyboard · 2025</figcaption>
+    </figure>
+
+    <div class="phase-steps">
+      <div class="phase">
+        <div class="phase-num">1</div>
+        <h4>Enter</h4>
+        <p>A dark meditation room. Human-infrared sensor detects the audience entering and taking a seat.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-num">2</div>
+        <h4>Ripples</h4>
+        <p>Projections begin to display water ripples on the ground. A heart-rate sensor drives the wave animation.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-num">3</div>
+        <h4>Flowers</h4>
+        <p>Flowers beside the audience grow slowly upward. Weaker micro-vibrations → faster flower growth.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-num">4</div>
+        <h4>Trees</h4>
+        <p>When the timer reaches its value, the trees surrounding the audience begin to grow.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-num">5</div>
+        <h4>Bloom</h4>
+        <p>When the flower reaches its highest point, it begins to bloom slowly. The environment becomes increasingly rich as meditation duration lengthens.</p>
+      </div>
+      <div class="phase">
+        <div class="phase-num">6</div>
+        <h4>Light</h4>
+        <p>When both flower blooming and forest growth are finished, lights focus on the audience; motor rotation and birds circle overhead.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FRAME 24 — FINAL OUTPUT ═══════════ -->
+<section class="section section--installation">
+  <div class="section__inner">
+    <div class="section-eyebrow">Final Output · Built Installation</div>
+    <h2 class="section-title">Arduino sees, p5.js paints, the room remembers</h2>
+    <p class="section-lede">Two Arduino UNOs read presence, vibration, and biometric input. The signals pass via wireless serial to a p5.js sketch that paints water ripples, growing trees, and a blooming forest of copper flowers wrapped in fabric. The right side shows the built room — the audience meditates among lit lilies; a slow choreography of birds, light, and growth unfolds around them.</p>
+
+    <figure class="full-figure">
+      <img src="uploads/Frame 24.png" alt="Final output — Arduino electronics, code, immersive projection, copper flower details"/>
+      <figcaption>Final output · electronics · projection · installation views · 2025</figcaption>
+    </figure>
+
+    <div class="two-col" style="margin-top:4rem;">
+      <p><strong style="color:var(--ivory);">The system.</strong> Two Arduino UNOs sit in the side console — one wired to the human-infrared and vibration sensors, the other to the wireless module and projector relay. Values stream into p5.js, which renders the visual content in real time.</p>
+      <p><strong style="color:var(--ivory);">The space.</strong> Copper-wire lilies wrapped in translucent fabric stand around the meditation mat. Projections fall across the floor, the walls, and the petals themselves. The room responds to how still the body becomes.</p>
+    </div>
+
+    <div class="inline-video" style="margin-top: 4rem;">
+      <div class="inline-video__frame">
+        <iframe
+          src="https://www.youtube.com/embed/RSLAwjXT28A"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+      <div class="inline-video__caption">Final installation · documentation video · 2025</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ REFLECTION ═══════════ -->
+<section class="section section--closing">
+  <div class="section__inner narrow center">
+    <div class="section-eyebrow">Reflection</div>
+    <h2 class="closing-title">Meaning does not require<br>an external purpose<br>to be worthwhile.</h2>
+    <p class="closing-body">Recognizing the relativity of process and outcome allows us to <em>simply be in the experience</em>. What at first felt like a purposeless meditation reveals its quiet core: a slow attention to the changes happening in the room — and in the body — when no one is keeping score.</p>
+    <div class="closing-rule"></div>
+    <p class="closing-sig">— 2025 · Zhang Yichi</p>
+  </div>
+</section>
+
+<!-- ═══════════ NEXT PROJECT ═══════════ -->
+<section class="next-project">
+  <a href="Second-Collapse.html" class="next-link">
+    <span class="next-label">Next Project</span>
+    <h3 class="next-title">The Second <em>Collapse</em></h3>
+    <span class="next-arrow">→</span>
+  </a>
+</section>
+
+<!-- ═══════════ VIDEO MODAL ═══════════ -->
+<div class="video-overlay" id="videoOverlay" aria-hidden="true">
+  <div class="video-frame">
+    <button class="video-close" id="closeVideo" type="button">Close ✕</button>
+    <iframe id="videoFrame"
+      src=""
+      title="The Reward of Illogical Action — installation video"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="site-footer">
+  <div>
+    <div class="footer-brand">Zhang <em>Yichi</em></div>
+    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
+  </div>
+  <div>
+    <h4>Sitemap</h4>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Projects.html">Projects</a></li>
+      <li><a href="Photography.html">Photography</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="index.html#contact">Email</a></li>
+      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+  <div class="copyright">
+    <span>© 2026 Zhang Yichi</span>
+    <span>All works belong to Yichi</span>
+  </div>
+</footer>
+
+<script src="project-detail.js"></script>
+<script>
+(() => {
+  const overlay  = document.getElementById('videoOverlay');
+  const frame    = document.getElementById('videoFrame');
+  const openA    = document.getElementById('openVideo');
+  const openB    = document.getElementById('openVideo2');
+  const closeBtn = document.getElementById('closeVideo');
+  const VIDEO    = 'https://www.youtube.com/embed/RSLAwjXT28A?autoplay=1&rel=0';
+
+  function open() {
+    frame.src = VIDEO;
+    overlay.classList.add('open');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+  function close() {
+    frame.src = '';
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+  openA && openA.addEventListener('click', open);
+  openB && openB.addEventListener('click', open);
+  closeBtn.addEventListener('click', close);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+})();
+</script>
+</body>
+</html>

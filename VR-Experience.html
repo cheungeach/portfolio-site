@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SPACE TRAVEL — VR Experience</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* =========  RESET & BASE  ========= */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%; width: 100%;
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', system-ui, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  button { font-family: inherit; cursor: pointer; }
+  input { font-family: inherit; }
+
+  /* =========  LETTERBOX STAGE  =========
+     The original frames are 16:9. We center a 16:9 stage and letterbox
+     it inside the viewport so the layout matches the Figma source exactly. */
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: #000;
+  }
+  #frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    width: 100vw;
+    max-width: calc(100vh * 16 / 9);
+    max-height: 100vh;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 0 80px rgba(255,255,255,0.04);
+  }
+
+  /* =========  SCREEN LAYERING  ========= */
+  .screen {
+    position: absolute; inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 700ms ease;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .screen.active { opacity: 1; pointer-events: auto; }
+
+  /* =========  HOTSPOTS  =========
+     Invisible clickable rectangles placed in % over the background. */
+  .hot {
+    position: absolute;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    border-radius: 14px;
+    transition: background 250ms ease, box-shadow 250ms ease, transform 200ms ease;
+  }
+  .hot:hover {
+    background: rgba(255,255,255,0.06);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.18), 0 0 30px rgba(255,255,255,0.12) inset;
+  }
+  .hot.round { border-radius: 50%; }
+  .hot.subtle:hover { background: rgba(255,255,255,0.04); }
+
+  /* =========  PROMPT BUBBLE / TOAST  ========= */
+  #toast {
+    position: absolute;
+    left: 50%; bottom: 4%;
+    transform: translateX(-50%) translateY(20px);
+    padding: 10px 18px;
+    background: rgba(20,20,28,0.72);
+    border: 1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 999px;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 400ms ease, transform 400ms ease;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* =========  HINT BLINK on first screen  ========= */
+  .pulse { animation: pulse 2.2s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.35); }
+    50%      { box-shadow: 0 0 0 18px rgba(255,255,255,0); }
+  }
+
+  /* =========  LOGIN INPUTS  ========= */
+  .login-field {
+    position: absolute;
+    width: 30.5%;
+    height: 9%;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: clamp(12px, 1.6vw, 22px);
+    padding: 0 3.5%;
+    outline: none;
+    letter-spacing: 0.05em;
+  }
+  .login-field::placeholder { color: rgba(255,255,255,0.35); }
+
+  /* =========  COMMUNITY input  ========= */
+  .community-input {
+    position: absolute;
+    left: 6%;
+    top: 64%;
+    width: 51%;
+    height: 12%;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: clamp(12px, 1.5vw, 20px);
+    padding: 0 4%;
+    outline: none;
+    font-style: italic;
+  }
+  .community-input::placeholder { color: rgba(255,255,255,0.45); font-style: italic; }
+
+  /* =========  CAMERA FLASH  ========= */
+  #flash {
+    position: absolute; inset: 0;
+    background: white;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 200;
+  }
+  #flash.fire { animation: flash 0.5s ease-out; }
+  @keyframes flash {
+    0%   { opacity: 0; }
+    20%  { opacity: 0.95; }
+    100% { opacity: 0; }
+  }
+
+  /* =========  ACHIEVEMENT UNLOCK FX  ========= */
+  #unlock-fx {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 150;
+    opacity: 0;
+    background:
+      radial-gradient(circle at center, rgba(255,210,120,0.35) 0%, rgba(0,0,0,0) 60%);
+    transition: opacity 800ms ease;
+  }
+  #unlock-fx.show { opacity: 1; }
+
+  /* =========  WARP / TRANSITION  ========= */
+  #warp {
+    position: absolute; inset: 0;
+    background: black;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 180;
+    transition: opacity 400ms ease;
+  }
+  #warp.show { opacity: 1; }
+
+  /* =========  HINT FOR NAVIGATING  ========= */
+  #helpbar {
+    position: fixed;
+    left: 50%; bottom: 14px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.35);
+    z-index: 500;
+    pointer-events: none;
+    text-align: center;
+  }
+  #helpbar kbd {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.18);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* small-screen warning */
+  @media (max-width: 600px) and (orientation: portrait) {
+    #rotate-msg { display: flex !important; }
+  }
+  #rotate-msg {
+    display: none;
+    position: fixed; inset: 0;
+    background: #000;
+    color: #fff;
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px;
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  #rotate-msg h2 { font-size: 28px; margin-bottom: 12px; font-weight: 500; }
+  #rotate-msg p { font-size: 14px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; }
+
+  /* small detail: a flashing planet name on community */
+  .greeting-cycle {
+    position: absolute;
+    left: 50%; top: 41%;
+    transform: translateX(-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(20px, 2.6vw, 38px);
+    color: #f4c47a;
+    text-shadow: 0 0 30px rgba(255,180,80,0.6);
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 700ms ease;
+  }
+  .greeting-cycle.show { opacity: 1; }
+
+  /* RANK animation: subtle floating */
+  .floaty { animation: floaty 4s ease-in-out infinite; }
+  @keyframes floaty {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+
+</style>
+</head>
+<body>
+
+<div id="rotate-msg">
+  <h2>Please rotate your device</h2>
+  <p>SPACE TRAVEL is best experienced in landscape, on a larger screen.</p>
+</div>
+
+<!-- back-to-project link, top-left, always visible -->
+<a id="exit-vr" href="Space-Archaeology.html">← Exit VR</a>
+
+<style>
+  #exit-vr {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 9000;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    background: rgba(20,20,28,0.65);
+    border: 1px solid rgba(255,255,255,0.18);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 8px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 250ms ease, color 250ms ease;
+  }
+  #exit-vr:hover { background: rgba(255,255,255,0.12); color: #fff; }
+</style>
+
+<div id="stage">
+  <div id="frame">
+
+    <!-- ============ SCREEN 1 : START ============ -->
+    <div class="screen active" id="s-start" style="background-image:url('uploads/Frame2.jpg');">
+      <button class="hot pulse" style="left:39%;top:73%;width:22%;height:11%;"
+              data-goto="login"></button>
+    </div>
+
+    <!-- ============ SCREEN 2 : LOGIN ============ -->
+    <div class="screen" id="s-login" style="background-image:url('uploads/Frame3.jpg');">
+      <!-- "Enter" title clickable as submit -->
+      <input class="login-field" id="login-user"
+             style="left:35%;top:31%;" placeholder="commander" maxlength="24" />
+      <input class="login-field" id="login-pass" type="password"
+             style="left:35%;top:46%;" placeholder="••••••••" maxlength="32" />
+      <!-- "Enter" word at top is the submit button -->
+      <button class="hot" style="left:43%;top:7%;width:14%;height:10%;"
+              data-action="submit-login" title="Enter the World Space Base"></button>
+    </div>
+
+    <!-- ============ SCREEN 3 : MODE ============ -->
+    <div class="screen" id="s-mode" style="background-image:url('uploads/Frame4.jpg');">
+      <button class="hot" style="left:18%;top:22%;width:64%;height:21%;"
+              data-goto="guide" data-toast="Single Mode selected"></button>
+      <button class="hot" style="left:18%;top:51%;width:64%;height:21%;"
+              data-goto="guide" data-toast="Friends Mode — better with company"></button>
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile" data-toast="Profile"></button>
+    </div>
+
+    <!-- ============ SCREEN 4 : GUIDE ============ -->
+    <div class="screen" id="s-guide" style="background-image:url('uploads/Frame5.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- left tools column -->
+      <button class="hot round" style="left:10%;top:34%;width:7%;height:12%;"
+              data-toast="Tools"></button>
+      <button class="hot round" style="left:10%;top:50%;width:7%;height:12%;"
+              data-toast="Friends"></button>
+      <button class="hot round" style="left:10%;top:66%;width:7%;height:12%;"
+              data-toast="Bookmarks"></button>
+      <!-- 4 guide rows → next -->
+      <button class="hot" style="left:21%;top:25%;width:65%;height:12%;"
+              data-goto="outfit" data-toast="Catch an Object"></button>
+      <button class="hot" style="left:21%;top:39%;width:65%;height:12%;"
+              data-goto="outfit" data-toast="Select"></button>
+      <button class="hot" style="left:21%;top:53%;width:65%;height:12%;"
+              data-goto="outfit" data-toast="Change view or Expand"></button>
+      <button class="hot" style="left:21%;top:67%;width:65%;height:12%;"
+              data-goto="outfit" data-toast="Read the document"></button>
+    </div>
+
+    <!-- ============ SCREEN 5 : OUTFIT ============ -->
+    <div class="screen" id="s-outfit" style="background-image:url('uploads/Frame6.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- Suit selection row of small "rocket" icons (bottom) — clicking advances to destination -->
+      <button class="hot round" style="left:1%;top:67%;width:8%;height:14%;" data-toast="Apollo Suit"></button>
+      <button class="hot round" style="left:11%;top:67%;width:8%;height:14%;" data-toast="ACES Suit"></button>
+      <button class="hot round" style="left:22%;top:67%;width:8%;height:14%;" data-toast="EMU Suit"></button>
+      <button class="hot round pulse" style="left:33%;top:67%;width:8%;height:14%;"
+              data-goto="destination" data-toast="Hybrid Suit equipped"></button>
+      <button class="hot round" style="left:46%;top:67%;width:8%;height:14%;" data-toast="Orlan Suit"></button>
+      <button class="hot round" style="left:58%;top:67%;width:8%;height:14%;" data-toast="Z-2 Suit"></button>
+      <button class="hot round" style="left:69%;top:67%;width:8%;height:14%;" data-toast="Sokol Suit"></button>
+      <button class="hot round" style="left:81%;top:67%;width:8%;height:14%;" data-toast="Feitian Suit"></button>
+      <button class="hot round" style="left:92%;top:67%;width:8%;height:14%;" data-toast="Experimental"></button>
+      <!-- heart icon on info card -->
+      <button class="hot round" style="left:92%;top:21%;width:5%;height:9%;"
+              data-action="favorite" data-toast="Added to favorites ♥"></button>
+    </div>
+
+    <!-- ============ SCREEN 6 : DESTINATION ============ -->
+    <div class="screen" id="s-destination" style="background-image:url('uploads/Frame7.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- four planet cards. each launches the warp -->
+      <button class="hot" style="left:0%;top:5%;width:25%;height:92%;"
+              data-action="warp" data-planet="MARS"></button>
+      <button class="hot" style="left:25%;top:5%;width:25%;height:92%;"
+              data-action="warp" data-planet="Moon"></button>
+      <button class="hot" style="left:50%;top:5%;width:25%;height:92%;"
+              data-action="warp" data-planet="Jupiter"></button>
+      <button class="hot" style="left:75%;top:5%;width:25%;height:92%;"
+              data-action="warp" data-planet="Pluto"></button>
+    </div>
+
+    <!-- ============ SCREEN 7 : TRANSITION ============ -->
+    <div class="screen" id="s-transition" style="background-image:url('uploads/Frame8.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- click anywhere to continue -->
+      <button class="hot subtle" style="left:0;top:0;width:100%;height:100%;border-radius:0"
+              data-goto="cockpit-debris"></button>
+    </div>
+
+    <!-- ============ SCREEN 8 : COCKPIT - DEBRIS ============ -->
+    <div class="screen" id="s-cockpit-debris" style="background-image:url('uploads/Frame9.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- right side nav buttons (icon column) -->
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;"
+              data-goto="destination" data-toast="Home"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;"
+              data-action="camera" data-toast="Photo captured"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;"
+              data-action="save" data-toast="Saved"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;"
+              data-goto="community-share" data-toast="Community"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;"
+              data-goto="achievements" data-toast="Achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;"
+              data-action="share" data-toast="Link copied"></button>
+      <!-- bottom HUD: clickable rings -->
+      <button class="hot round" style="left:69%;top:87%;width:7%;height:12%;"
+              data-toast="Defunct Satellites — current view"></button>
+      <button class="hot round" style="left:77%;top:87%;width:7%;height:12%;"
+              data-goto="cockpit-glove" data-toast="Lost Tools"></button>
+      <button class="hot round" style="left:85%;top:87%;width:7%;height:12%;"
+              data-goto="cockpit-docking" data-toast="Remnants of Explosions"></button>
+      <button class="hot round" style="left:93%;top:87%;width:7%;height:12%;"
+              data-goto="document" data-toast="Documents"></button>
+    </div>
+
+    <!-- ============ SCREEN 9 : COCKPIT - LOST GLOVE ============ -->
+    <div class="screen" id="s-cockpit-glove" style="background-image:url('uploads/Frame11.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- target reticle in center -->
+      <button class="hot round pulse" style="left:46.5%;top:69%;width:7%;height:12%;"
+              data-action="capture-object" data-toast="Object identified: Jerry Linenger's Lost Glove"></button>
+      <!-- right column -->
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- bottom rings -->
+      <button class="hot round" style="left:69%;top:87%;width:7%;height:12%;"
+              data-goto="cockpit-debris" data-toast="Defunct Satellites"></button>
+      <button class="hot round" style="left:77%;top:87%;width:7%;height:12%;"
+              data-toast="Lost Tools — current view"></button>
+      <button class="hot round" style="left:85%;top:87%;width:7%;height:12%;"
+              data-goto="cockpit-docking" data-toast="Remnants of Explosions"></button>
+      <button class="hot round" style="left:93%;top:87%;width:7%;height:12%;"
+              data-goto="document" data-toast="Documents"></button>
+    </div>
+
+    <!-- ============ SCREEN 10 : COCKPIT - DOCKING ============ -->
+    <div class="screen" id="s-cockpit-docking" style="background-image:url('uploads/Frame12.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- eye icon center → triggers actual docking view -->
+      <button class="hot round pulse" style="left:46.5%;top:69%;width:7%;height:12%;"
+              data-goto="docking-view" data-toast="Switching windows..."></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <button class="hot round" style="left:69%;top:87%;width:7%;height:12%;"
+              data-goto="cockpit-debris" data-toast="Defunct Satellites"></button>
+      <button class="hot round" style="left:77%;top:87%;width:7%;height:12%;"
+              data-goto="cockpit-glove" data-toast="Lost Tools"></button>
+      <button class="hot round" style="left:85%;top:87%;width:7%;height:12%;"
+              data-toast="Remnants — current view"></button>
+      <button class="hot round" style="left:93%;top:87%;width:7%;height:12%;"
+              data-goto="document" data-toast="Documents"></button>
+    </div>
+
+    <!-- ============ SCREEN 11 : DOCKING VIEW ============ -->
+    <div class="screen" id="s-docking-view" style="background-image:url('uploads/Frame13.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- two reticles -->
+      <button class="hot round pulse" style="left:46%;top:38%;width:7%;height:12%;"
+              data-action="capture-object" data-toast="Spacecraft identified"></button>
+      <button class="hot round" style="left:62%;top:65%;width:7%;height:12%;"
+              data-goto="mars-approach" data-toast="Expand view"></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+    </div>
+
+    <!-- ============ SCREEN 12 : DOCUMENT ============ -->
+    <div class="screen" id="s-document" style="background-image:url('uploads/Frame14.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <!-- mail icon -->
+      <button class="hot round" style="left:14%;top:18%;width:8%;height:14%;" data-toast="Inbox"></button>
+      <!-- right column -->
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- read full → trigger achievement -->
+      <button class="hot pulse" style="left:18%;top:34%;width:60%;height:42%;border-radius:24px;"
+              data-action="unlock-achievement" data-toast="Reading Outer Space Treaty…"></button>
+    </div>
+
+    <!-- ============ SCREEN 13 : MARS APPROACH ============ -->
+    <div class="screen" id="s-mars-approach" style="background-image:url('uploads/Frame15.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <button class="hot" style="left:55%;top:30%;width:35%;height:40%;"
+              data-goto="mars-surface" data-toast="Approaching surface"></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+    </div>
+
+    <!-- ============ SCREEN 14 : MARS SURFACE ============ -->
+    <div class="screen" id="s-mars-surface" style="background-image:url('uploads/Frame16.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- bottom rings -->
+      <button class="hot round" style="left:25%;top:84%;width:6%;height:13%;"
+              data-toast="Curiosity & Perseverance Rovers"></button>
+      <button class="hot round" style="left:32%;top:84%;width:6%;height:13%;"
+              data-goto="cockpit-glove" data-toast="Lost Tools"></button>
+      <button class="hot round" style="left:39%;top:84%;width:6%;height:13%;"
+              data-goto="cockpit-docking"></button>
+      <button class="hot round" style="left:46%;top:84%;width:6%;height:13%;"
+              data-goto="document" data-toast="Documents"></button>
+    </div>
+
+    <!-- ============ SCREEN 15 : ACHIEVEMENT UNLOCK ============ -->
+    <div class="screen" id="s-achievement" style="background-image:url('uploads/Frame17.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- click the medal to view achievement collection -->
+      <button class="hot" style="left:25%;top:80%;width:50%;height:14%;border-radius:36px;"
+              data-goto="achievements" data-toast="View all achievements"></button>
+    </div>
+
+    <!-- ============ SCREEN 16 : ACHIEVEMENTS WALL ============ -->
+    <div class="screen" id="s-achievements" style="background-image:url('uploads/Frame18.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="ranking"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- eye icon to view detail -->
+      <button class="hot round" style="left:82%;top:42%;width:7%;height:11%;"
+              data-goto="profile" data-toast="View profile"></button>
+    </div>
+
+    <!-- ============ SCREEN 17 : RANKING ============ -->
+    <div class="screen" id="s-ranking" style="background-image:url('uploads/Frame19-4752ea29.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="profile"></button>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <button class="hot" style="left:14%;top:33%;width:74%;height:16%;border-radius:28px;"
+              data-toast="Smart E — 287 explorations"></button>
+      <button class="hot" style="left:14%;top:50%;width:74%;height:16%;border-radius:28px;"
+              data-toast="Conqueror — 246 explorations"></button>
+      <button class="hot" style="left:14%;top:67%;width:74%;height:16%;border-radius:28px;"
+              data-toast="PixelPPT — 198 explorations"></button>
+    </div>
+
+    <!-- ============ SCREEN 18 : COMMUNITY - SHARE ============ -->
+    <div class="screen" id="s-community-share" style="background-image:url('uploads/Frame20-ab726ddd.jpg');">
+      <input class="community-input" id="community-text"
+             placeholder='type "hello" here to the universe' />
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;"
+              data-goto="community-greeting" data-toast="Posted to the universe"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- spaceship side -->
+      <button class="hot" style="left:62%;top:14%;width:38%;height:42%;"
+              data-goto="community-greeting" data-toast="Boarding the express line"></button>
+    </div>
+
+    <!-- ============ SCREEN 19 : COMMUNITY - GREETING ============ -->
+    <div class="screen" id="s-community-greeting" style="background-image:url('uploads/Frame21-64606acb.jpg');">
+      <div class="greeting-cycle" id="greeting-cycle"></div>
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <button class="hot" style="left:42%;top:32%;width:18%;height:18%;border-radius:50%;"
+              data-goto="solar-map" data-toast="Open the universe map"></button>
+    </div>
+
+    <!-- ============ SCREEN 20 : PROFILE ============ -->
+    <div class="screen" id="s-profile" style="background-image:url('uploads/Frame23-68491930.jpg');">
+      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
+              data-goto="destination" data-toast="Back to destinations"></button>
+      <!-- four planet cards -->
+      <button class="hot" style="left:7%;top:22%;width:21%;height:65%;border-radius:18px;"
+              data-toast="Mars — visited 2004.08.19"></button>
+      <button class="hot" style="left:30%;top:22%;width:21%;height:65%;border-radius:18px;"
+              data-toast="Moon — visited 2005.03.07"></button>
+      <button class="hot" style="left:53%;top:22%;width:21%;height:65%;border-radius:18px;"
+              data-toast="Neptune — visited 2006.11.05"></button>
+      <button class="hot" style="left:76%;top:22%;width:21%;height:65%;border-radius:18px;"
+              data-toast="Pluto — unvisited"></button>
+      <!-- bottom-right rocket -->
+      <button class="hot round" style="left:91.5%;top:82%;width:7%;height:14%;"
+              data-goto="solar-map" data-toast="Open the universe map"></button>
+    </div>
+
+    <!-- ============ SCREEN 21 : SOLAR MAP ============ -->
+    <div class="screen" id="s-solar-map" style="background-image:url('uploads/Frame25-afdd2fbb.jpg');">
+      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
+      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
+      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
+      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
+      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
+      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
+      <!-- planets clickable -->
+      <button class="hot round" style="left:6%;top:32%;width:11%;height:24%;"
+              data-action="warp" data-planet="Mercury"></button>
+      <button class="hot round" style="left:22%;top:23%;width:14%;height:38%;"
+              data-action="warp" data-planet="Uranus"></button>
+      <button class="hot round" style="left:42%;top:0%;width:10%;height:16%;"
+              data-action="warp" data-planet="Mars" data-toast=""></button>
+      <button class="hot round" style="left:41%;top:15%;width:10%;height:18%;"
+              data-action="warp" data-planet="Jupiter"></button>
+      <button class="hot round" style="left:40%;top:33%;width:12%;height:24%;"
+              data-action="warp" data-planet="Earth"></button>
+      <button class="hot round" style="left:39%;top:57%;width:14%;height:24%;"
+              data-action="warp" data-planet="Moon"></button>
+      <button class="hot round" style="left:39%;top:83%;width:14%;height:22%;"
+              data-action="warp" data-planet="Sun"></button>
+      <button class="hot round" style="left:55%;top:18%;width:22%;height:38%;"
+              data-action="warp" data-planet="Saturn"></button>
+      <button class="hot round" style="left:81%;top:33%;width:6%;height:14%;"
+              data-action="warp" data-planet="Neptune"></button>
+    </div>
+
+    <!-- ============ OVERLAYS ============ -->
+    <div id="warp"></div>
+    <div id="flash"></div>
+    <div id="unlock-fx"></div>
+    <div id="toast"></div>
+
+  </div>
+</div>
+
+<div id="helpbar">
+  press <kbd>Esc</kbd> for menu · <kbd>←</kbd> back · <kbd>H</kbd> home
+</div>
+
+<script>
+  /* =========  STATE  ========= */
+  const state = {
+    history: ['start'],
+    achievements: new Set(),
+  };
+
+  /* =========  CORE: GO TO SCREEN  ========= */
+  function go(id, opts = {}) {
+    const target = document.getElementById('s-' + id);
+    if (!target) return;
+    const current = document.querySelector('.screen.active');
+    if (current === target) return;
+    if (current) current.classList.remove('active');
+    target.classList.add('active');
+    if (!opts.silent) state.history.push(id);
+  }
+  function back() {
+    if (state.history.length < 2) return;
+    state.history.pop();
+    const prev = state.history[state.history.length - 1];
+    go(prev, { silent: true });
+  }
+
+  /* =========  TOAST  ========= */
+  let toastTimer;
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  /* =========  CAMERA FLASH  ========= */
+  function fireFlash() {
+    const f = document.getElementById('flash');
+    f.classList.remove('fire');
+    void f.offsetWidth; // restart anim
+    f.classList.add('fire');
+  }
+
+  /* =========  WARP TRANSITION  ========= */
+  function warpTo(planet) {
+    const w = document.getElementById('warp');
+    w.classList.add('show');
+    setTimeout(() => {
+      go('transition');
+      w.classList.remove('show');
+      toast('Destination set: ' + planet);
+    }, 420);
+  }
+
+  /* =========  ACHIEVEMENT UNLOCK  ========= */
+  function unlockAchievement(name) {
+    if (state.achievements.has(name)) {
+      go('achievement');
+      return;
+    }
+    state.achievements.add(name);
+    const fx = document.getElementById('unlock-fx');
+    fx.classList.add('show');
+    toast('Achievement unlocked!');
+    setTimeout(() => {
+      go('achievement');
+      setTimeout(() => fx.classList.remove('show'), 800);
+    }, 700);
+  }
+
+  /* =========  BIND HOTSPOTS  ========= */
+  document.querySelectorAll('.hot').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const dest = btn.dataset.goto;
+      const toastMsg = btn.dataset.toast;
+      const action = btn.dataset.action;
+
+      if (action === 'submit-login') {
+        const user = document.getElementById('login-user').value.trim();
+        if (!user) {
+          toast('Please enter a commander name');
+          document.getElementById('login-user').focus();
+          return;
+        }
+        toast('Welcome aboard, ' + user);
+        setTimeout(() => go('mode'), 600);
+        return;
+      }
+      if (action === 'warp') {
+        warpTo(btn.dataset.planet || 'Destination');
+        return;
+      }
+      if (action === 'camera') {
+        fireFlash();
+        toast(toastMsg || 'Photo captured');
+        return;
+      }
+      if (action === 'save') {
+        toast(toastMsg || 'Saved to logbook');
+        return;
+      }
+      if (action === 'share') {
+        toast(toastMsg || 'Link copied');
+        return;
+      }
+      if (action === 'favorite') {
+        toast(toastMsg || 'Added to favorites');
+        return;
+      }
+      if (action === 'capture-object') {
+        toast(toastMsg || 'Object captured');
+        setTimeout(() => unlockAchievement('Object Catcher'), 700);
+        return;
+      }
+      if (action === 'unlock-achievement') {
+        unlockAchievement('Outer Space Treaty Witness');
+        return;
+      }
+
+      if (toastMsg) toast(toastMsg);
+      if (dest) go(dest);
+    });
+  });
+
+  /* =========  KEYBOARD  ========= */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      go('mode');
+    } else if (e.key === 'ArrowLeft') {
+      back();
+    } else if (e.key === 'h' || e.key === 'H') {
+      go('destination');
+    }
+  });
+
+  /* =========  COMMUNITY: GREETING CYCLE  ========= */
+  const greetings = [
+    'Hello', '你好', 'Hola', 'Bonjour', 'Hallo', 'Ciao',
+    'Olá', 'Здравствуйте', 'مرحبا', 'नमस्ते', 'こんにちは',
+    'Merhaba', '안녕하세요', 'Sawubona', 'Kia ora'
+  ];
+  let gi = 0;
+  const gEl = document.getElementById('greeting-cycle');
+  function cycleGreeting() {
+    if (!document.getElementById('s-community-greeting').classList.contains('active')) {
+      setTimeout(cycleGreeting, 1500);
+      return;
+    }
+    gEl.textContent = greetings[gi % greetings.length];
+    gEl.classList.add('show');
+    setTimeout(() => {
+      gEl.classList.remove('show');
+      gi++;
+      setTimeout(cycleGreeting, 400);
+    }, 1500);
+  }
+  setTimeout(cycleGreeting, 800);
+
+  /* =========  PRELOAD IMAGES  ========= */
+  const allImgs = [
+    'Frame2','Frame3','Frame4','Frame5','Frame6','Frame7','Frame8','Frame9',
+    'Frame11','Frame12','Frame13','Frame14','Frame15','Frame16','Frame17',
+    'Frame18','Frame19-4752ea29','Frame20-ab726ddd','Frame21-64606acb','Frame23-68491930','Frame25-afdd2fbb'
+  ];
+  allImgs.forEach(name => {
+    const img = new Image();
+    img.src = 'uploads/' + name + '.jpg';
+  });
+
+  /* =========  HELP BAR AUTO-FADE  ========= */
+  setTimeout(() => {
+    document.getElementById('helpbar').style.transition = 'opacity 1.5s';
+    document.getElementById('helpbar').style.opacity = '0';
+  }, 7000);
+</script>
+
+</body>
+</html>

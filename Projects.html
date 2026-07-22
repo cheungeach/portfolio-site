@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Archive — Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink:    oklch(8%  0.005 50);
+  --ivory:  oklch(96% 0.006 78);
+  --mist:   oklch(70% 0.006 78);
+  --dim:    oklch(48% 0.005 78);
+  --gold:   oklch(74% 0.10  78);
+  --line:   oklch(96% 0.006 78 / .10);
+}
+
+html { overflow-x: hidden; scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--ivory);
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ═══════════════════════════════════════════════
+   STICKY TOP NAV
+═══════════════════════════════════════════════ */
+.topnav {
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 3rem;
+  background: rgba(22, 22, 23, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  height: 64px;
+}
+
+.topnav__brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: 1rem;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  opacity: .9;
+  line-height: 1.4;
+}
+.topnav__brand em { font-style: italic; color: var(--gold); }
+
+.topnav__links {
+  display: flex;
+  gap: 2.4rem;
+  list-style: none;
+  align-items: center;
+}
+
+.topnav__links a {
+  font-size: .56rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
+  transition: color .25s;
+  position: relative;
+  padding: .3rem 0;
+}
+
+.topnav__links a:hover { color: rgba(255, 255, 255, 1); }
+
+.topnav__links a.active {
+  color: rgba(255, 255, 255, 1);
+}
+.topnav__links a.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -.32rem;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* Body padding to clear fixed nav */
+body { padding-top: 64px; }
+
+/* ═══════════════════════════════════════════════
+   PAGE HERO
+═══════════════════════════════════════════════ */
+.page-hero {
+  position: relative;
+  padding: 18vh 3rem 14vh;
+  margin: 0;
+  width: 100%;
+  background-image: url('uploads/art.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+
+/* Right-side dark gradient — keeps the art visible on the left,
+   fades to pure black on the right so the headline text is fully readable. */
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0) 30%,
+    rgba(0, 0, 0, 0.55) 55%,
+    rgba(0, 0, 0, 0.88) 78%,
+    var(--ink) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.page-hero__inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.page-hero__eyebrow {
+  font-size: .55rem;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2.4rem;
+}
+
+.page-hero__rule {
+  width: 40px; height: 1px;
+  background: var(--gold); opacity: .35;
+  margin-bottom: 2.6rem;
+}
+
+.page-hero__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(3rem, 6vw, 6rem);
+  line-height: .98;
+  letter-spacing: -.025em;
+  margin-bottom: 2rem;
+  max-width: 18ch;
+  color: #ffffff;
+}
+
+.page-hero__title em {
+  font-style: italic;
+  color: #ffffff;
+}
+
+.page-hero__sub {
+  font-size: .78rem;
+  line-height: 2;
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 56ch;
+}
+
+.page-hero__meta {
+  margin-top: 3.5rem;
+  display: flex;
+  gap: 4rem;
+  flex-wrap: wrap;
+}
+
+.page-hero__meta-item {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: .57rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.page-hero__meta-item strong {
+  display: block;
+  color: #ffffff;
+  font-weight: 400;
+  font-size: .82rem;
+  letter-spacing: .04em;
+  text-transform: none;
+  margin-top: .3rem;
+}
+
+/* ═══════════════════════════════════════════════
+   VIEW SWITCHER
+═══════════════════════════════════════════════ */
+.view-switcher {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  height: 56px;
+}
+
+.view-switcher__label {
+  font-size: .54rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.view-switcher__buttons { display: flex; gap: .4rem; }
+
+.view-btn {
+  font-family: inherit;
+  font-size: .55rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--mist);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: .55rem 1.1rem;
+  cursor: pointer;
+  border-radius: 999px;
+  transition: all .25s;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+}
+
+.view-btn svg { width: 12px; height: 12px; opacity: .65; transition: opacity .25s; }
+
+.view-btn:hover {
+  color: var(--ivory);
+  border-color: var(--line);
+}
+.view-btn:hover svg { opacity: 1; }
+
+.view-btn.active {
+  color: var(--ink);
+  background: var(--ivory);
+}
+.view-btn.active svg { opacity: 1; }
+.view-btn.active svg path,
+.view-btn.active svg rect,
+.view-btn.active svg line { stroke: var(--ink); }
+
+/* ═══════════════════════════════════════════════
+   PROJECT FOLDERS — GRID VIEW
+═══════════════════════════════════════════════ */
+.proj-stage {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 8vh 3rem 4vh;
+}
+
+.proj-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6vh 2.4vw;
+}
+
+.proj-folder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 1.2s cubic-bezier(.4,0,.2,1),
+    transform 1.2s cubic-bezier(.4,0,.2,1);
+}
+.proj-folder.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+.proj-folder:nth-child(2).in { transition-delay: .12s; }
+.proj-folder:nth-child(3).in { transition-delay: .24s; }
+
+@media (max-width: 920px) {
+  .proj-grid { grid-template-columns: 1fr; gap: 4vh 0; }
+  .proj-stage { padding: 6vh 1.5rem 4vh; }
+}
+
+.folder-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: oklch(13% 0.01 240);
+  box-shadow:
+    0 32px 90px oklch(2% 0.005 240 / .55),
+    0 8px 24px oklch(2% 0.005 240 / .35),
+    inset 0 0 0 1px oklch(96% 0.006 78 / .05);
+  transition:
+    transform .9s cubic-bezier(.2,.7,.1,1),
+    box-shadow .6s cubic-bezier(.4,0,.2,1);
+}
+
+.folder-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transform: scale(1.04);
+  transition: transform 1.6s cubic-bezier(.2,.7,.1,1), filter .6s ease;
+  filter: saturate(.9) contrast(1.02);
+}
+
+.proj-folder:hover .folder-cover {
+  transform: translateY(-6px);
+  box-shadow:
+    0 48px 120px oklch(2% 0.005 240 / .68),
+    0 16px 36px oklch(2% 0.005 240 / .42),
+    inset 0 0 0 1px oklch(74% 0.10 78 / .28);
+}
+
+.proj-folder:hover .folder-cover img {
+  transform: scale(1.08);
+  filter: saturate(1) contrast(1.04);
+}
+
+/* Folder number badge */
+.folder-number {
+  position: absolute;
+  top: 1.2rem;
+  left: 1.4rem;
+  z-index: 4;
+  font-size: .55rem;
+  letter-spacing: .28em;
+  color: oklch(96% 0.006 78 / .8);
+  text-shadow: 0 1px 4px oklch(8% 0.005 50 / .8);
+}
+
+/* "Open project" chip on hover */
+.folder-chip {
+  position: absolute;
+  bottom: 1.2rem;
+  right: 1.4rem;
+  z-index: 4;
+  font-size: .52rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  padding: .5rem .9rem;
+  background: oklch(8% 0.005 50 / .55);
+  border: 1px solid oklch(96% 0.006 78 / .2);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity .4s cubic-bezier(.4,0,.2,1),
+    transform .4s cubic-bezier(.4,0,.2,1);
+}
+.proj-folder:hover .folder-chip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Vignette overlay for legibility */
+.folder-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent 0%, transparent 55%, oklch(8% 0.005 50 / .35) 100%),
+    linear-gradient(to top,    transparent 0%, transparent 72%, oklch(8% 0.005 50 / .35) 100%);
+}
+
+.folder-meta {
+  padding: 1.6rem .2rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.folder-tag {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  font-size: .53rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.folder-tag-dot {
+  width: 4px; height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+}
+
+.folder-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(1.8rem, 2.6vw, 2.6rem);
+  line-height: 1.04;
+  letter-spacing: -.015em;
+  color: var(--ivory);
+}
+
+.folder-title em {
+  font-style: italic;
+  color: #ffffff;
+}
+
+.folder-desc {
+  font-size: .72rem;
+  line-height: 1.92;
+  color: var(--mist);
+  opacity: .62;
+  max-width: 44ch;
+}
+
+.folder-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: .4rem;
+  font-size: .55rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.folder-bottom .arrow {
+  color: var(--gold);
+  opacity: .9;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+.proj-folder:hover .folder-bottom .arrow {
+  transform: translateX(4px);
+}
+
+/* ═══════════════════════════════════════════════
+   LIST VIEW (alternative)
+═══════════════════════════════════════════════ */
+.proj-list {
+  display: none;
+  flex-direction: column;
+}
+
+body.list-view .proj-grid { display: none; }
+body.list-view .proj-list { display: flex; }
+
+.list-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 1.5fr 100px 28px;
+  gap: 2rem;
+  padding: 2.2rem 0;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  transition: background .35s cubic-bezier(.4,0,.2,1);
+}
+.list-row:hover { background: oklch(96% 0.006 78 / .03); }
+
+.list-row__num {
+  font-size: .56rem;
+  letter-spacing: .26em;
+  color: var(--gold);
+}
+
+.list-row__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(1.4rem, 2.4vw, 2.4rem);
+  line-height: 1.04;
+  color: var(--ivory);
+}
+.list-row__title em { font-style: italic; color: var(--gold); }
+
+.list-row__desc {
+  font-size: .68rem;
+  line-height: 1.85;
+  color: var(--mist);
+  opacity: .6;
+}
+
+.list-row__year {
+  font-size: .56rem;
+  letter-spacing: .22em;
+  color: var(--dim);
+  text-transform: uppercase;
+}
+
+.list-row__arrow {
+  font-size: 1.2rem;
+  color: var(--gold);
+  opacity: .55;
+  transition: transform .35s, opacity .35s;
+}
+.list-row:hover .list-row__arrow {
+  transform: translateX(6px);
+  opacity: 1;
+}
+
+@media (max-width: 760px) {
+  .list-row { grid-template-columns: 36px 1fr 24px; gap: 1rem; padding: 1.6rem 0; }
+  .list-row__desc, .list-row__year { display: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+.site-footer {
+  max-width: 1320px;
+  margin: 14vh auto 0;
+  padding: 6vh 3rem;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.site-footer h4 {
+  font-size: .55rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.6rem;
+  font-weight: 400;
+}
+
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--ivory);
+  margin-bottom: 1rem;
+}
+.footer-brand em { font-style: italic; color: var(--gold); }
+
+.footer-tagline {
+  font-size: .7rem;
+  line-height: 1.9;
+  color: var(--mist);
+  opacity: .6;
+  max-width: 38ch;
+}
+
+.site-footer ul { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
+.site-footer ul a {
+  font-size: .65rem;
+  letter-spacing: .1em;
+  color: var(--mist);
+  opacity: .7;
+  transition: opacity .25s, color .25s;
+}
+.site-footer ul a:hover { opacity: 1; color: var(--ivory); }
+
+.copyright {
+  grid-column: 1 / -1;
+  padding-top: 4rem;
+  margin-top: 4rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  font-size: .54rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+@media (max-width: 880px) {
+  .topnav { padding: 1rem 1.5rem; }
+  .topnav__links { gap: 1.2rem; }
+  .topnav__links a { font-size: .5rem; }
+  .page-hero { padding: 6vh 1.5rem 3vh; }
+  .view-switcher { padding: 0 1.5rem; }
+  .site-footer {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    padding: 4vh 1.5rem;
+  }
+  .copyright { flex-direction: column; gap: 1rem; }
+}
+
+/* ═══════════════════════════════════════════════
+   LIGHTBOX (for opening project covers full-screen)
+═══════════════════════════════════════════════ */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: oklch(5% 0.005 50 / .95);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .45s cubic-bezier(.4,0,.2,1);
+}
+
+.lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox__img {
+  max-width: 92vw;
+  max-height: 82vh;
+  object-fit: contain;
+  box-shadow: 0 40px 120px oklch(2% 0.005 240 / .6);
+}
+
+.lightbox__close {
+  position: absolute;
+  top: 2rem; right: 2.4rem;
+  font-size: .58rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: .65rem 1.2rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .25s;
+}
+.lightbox__close:hover {
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.lightbox__caption {
+  position: absolute;
+  bottom: 2.4rem;
+  left: 0; right: 0;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--mist);
+  opacity: .7;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     STICKY TOP NAV
+═══════════════════════════════════════════ -->
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="Projects.html" class="active">Projects</a></li>
+    <li><a href="About.html">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     PAGE HERO
+═══════════════════════════════════════════ -->
+<section class="page-hero">
+  <div class="page-hero__inner">
+    <div class="page-hero__eyebrow">Project Archive · 2022 — 2025</div>
+    <div class="page-hero__rule"></div>
+    <h1 class="page-hero__title">Selected<br><em>work</em></h1>
+    <p class="page-hero__sub">A small, deliberate body of work — three projects that sit at the threshold of perception, action, and collapse. Each one is a folder you can step into.</p>
+
+    <div class="page-hero__meta">
+      <div class="page-hero__meta-item">Projects<strong>3</strong></div>
+      <div class="page-hero__meta-item">Disciplines<strong>Cognition · Action · System</strong></div>
+      <div class="page-hero__meta-item">Status<strong>Open archive</strong></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     VIEW SWITCHER
+═══════════════════════════════════════════ -->
+<div class="view-switcher">
+  <span class="view-switcher__label">3 Folders</span>
+  <div class="view-switcher__buttons">
+    <button class="view-btn active" data-view="grid" aria-label="Grid view">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="1" y="1" width="4" height="4"/>
+        <rect x="7" y="1" width="4" height="4"/>
+        <rect x="1" y="7" width="4" height="4"/>
+        <rect x="7" y="7" width="4" height="4"/>
+      </svg>
+      <span>Grid</span>
+    </button>
+    <button class="view-btn" data-view="list" aria-label="List view">
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+        <line x1="1" y1="3" x2="11" y2="3"/>
+        <line x1="1" y1="6" x2="11" y2="6"/>
+        <line x1="1" y1="9" x2="11" y2="9"/>
+      </svg>
+      <span>List</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PROJECT FOLDERS — GRID
+     Each folder auto-loads the preview image from the project.
+═══════════════════════════════════════════ -->
+<main class="proj-stage">
+  <div class="proj-grid">
+
+    <a class="proj-folder"
+       href="Space-Archaeology.html"
+       data-cover="uploads/preview%20Space%20Archaeology.jpg"
+       data-title="Space Archaeology"
+       data-caption="A reading of the residue left behind by occupied space.">
+      <div class="folder-cover">
+        <img src="uploads/preview Space Archaeology.jpg" alt="Space Archaeology preview" loading="lazy"/>
+        <span class="folder-number">— 01 —</span>
+        <span class="folder-chip">Open Project</span>
+      </div>
+      <div class="folder-meta">
+        <div class="folder-tag"><span class="folder-tag-dot"></span>VR · Cognitive Systems</div>
+        <h2 class="folder-title"><em>Space Archaeology</em></h2>
+        <p class="folder-desc">A virtual archaeology of human activity in orbit — debris, residue, and forgotten artifacts of the space age.</p>
+        <div class="folder-bottom">
+          <span>2025 · VR Experience</span>
+          <span class="arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="proj-folder"
+       href="Illogical-Action.html"
+       data-cover="uploads/preview%20The%20Reward%20of%20Non-teleological%20Action.jpg"
+       data-title="The Reward of Illogical Action"
+       data-caption="On the value of acting without a destination.">
+      <div class="folder-cover">
+        <img src="uploads/preview The Reward of Non-teleological Action.jpg" alt="The Reward of Illogical Action preview" loading="lazy"/>
+        <span class="folder-number">— 02 —</span>
+        <span class="folder-chip">Open Project</span>
+      </div>
+      <div class="folder-meta">
+        <div class="folder-tag"><span class="folder-tag-dot"></span>Interactive Installation</div>
+        <h2 class="folder-title">The Reward of<br><em>Illogical Action</em></h2>
+        <p class="folder-desc">An immersive meditation installation where the absence of purpose becomes the discovery itself.</p>
+        <div class="folder-bottom">
+          <span>2025 · Installation</span>
+          <span class="arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="proj-folder"
+       href="Second-Collapse.html"
+       data-cover="uploads/preview-the-second-collapse.jpg"
+       data-title="The Second Collapse"
+       data-caption="What follows after a system stops failing and starts forgetting.">
+      <div class="folder-cover">
+        <img src="uploads/preview-the-second-collapse.jpg" alt="The Second Collapse preview" loading="lazy"/>
+        <span class="folder-number">— 03 —</span>
+        <span class="folder-chip">Open Project</span>
+      </div>
+      <div class="folder-meta">
+        <div class="folder-tag"><span class="folder-tag-dot"></span>System · Memory</div>
+        <h2 class="folder-title">The Second <em>Collapse</em></h2>
+        <p class="folder-desc">An inquiry into the moment after rupture — when a system stops failing and starts forgetting it ever broke.</p>
+        <div class="folder-bottom">
+          <span>2025 · Visual Essay</span>
+          <span class="arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- LIST VIEW (alternative rendering) -->
+  <div class="proj-list">
+    <a class="list-row" href="Space-Archaeology.html">
+      <div class="list-row__num">01</div>
+      <div class="list-row__title"><em>Space Archaeology</em></div>
+      <div class="list-row__desc">A VR archaeology of human activity in orbit.</div>
+      <div class="list-row__year">2025</div>
+      <div class="list-row__arrow">→</div>
+    </a>
+    <a class="list-row" href="Illogical-Action.html">
+      <div class="list-row__num">02</div>
+      <div class="list-row__title">The Reward of <em>Illogical Action</em></div>
+      <div class="list-row__desc">An immersive installation on purpose and process.</div>
+      <div class="list-row__year">2025</div>
+      <div class="list-row__arrow">→</div>
+    </a>
+    <a class="list-row" href="Second-Collapse.html">
+      <div class="list-row__num">03</div>
+      <div class="list-row__title">The Second <em>Collapse</em></div>
+      <div class="list-row__desc">An inquiry into what follows after a system breaks.</div>
+      <div class="list-row__year">2025</div>
+      <div class="list-row__arrow">→</div>
+    </a>
+  </div>
+</main>
+
+<!-- ═══════════════════════════════════════════
+     LIGHTBOX (cover preview overlay)
+═══════════════════════════════════════════ -->
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lightbox__close" id="lbClose">Close ✕</button>
+  <img class="lightbox__img" id="lbImg" alt=""/>
+  <div class="lightbox__caption" id="lbCaption"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div>
+    <div class="footer-brand">Zhang <em>Yichi</em></div>
+    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
+  </div>
+  <div>
+    <h4>Sitemap</h4>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Projects.html">Projects</a></li>
+      <li><a href="Photography.html">Photography</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="index.html#contact">Email</a></li>
+      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Archive</h4>
+    <ul>
+      <li><a href="#">2025</a></li>
+      <li><a href="#">2023</a></li>
+      <li><a href="#">2022</a></li>
+      <li><a href="#">Older</a></li>
+    </ul>
+  </div>
+  <div class="copyright">
+    <span>© 2026 Zhang Yichi</span>
+    <span>All works belong to Yichi</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // ── View switcher (Grid / List) ─────────────────
+  const viewButtons = document.querySelectorAll('.view-btn');
+  viewButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      viewButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.body.classList.toggle('list-view', btn.dataset.view === 'list');
+    });
+  });
+
+  // ── IntersectionObserver entrance for folders ───
+  const folders = document.querySelectorAll('.proj-folder');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+  folders.forEach(f => io.observe(f));
+
+  // ── Optional cover lightbox on shift-click of cover ─
+  // (Main click still opens the PDF — shift+click previews cover)
+  const lightbox = document.getElementById('lightbox');
+  const lbImg    = document.getElementById('lbImg');
+  const lbCap    = document.getElementById('lbCaption');
+  const lbClose  = document.getElementById('lbClose');
+
+  folders.forEach(f => {
+    f.addEventListener('click', (e) => {
+      if (e.shiftKey) {
+        e.preventDefault();
+        lbImg.src = f.dataset.cover;
+        lbImg.alt = f.dataset.title;
+        lbCap.textContent = f.dataset.caption;
+        lightbox.classList.add('open');
+      }
+    });
+  });
+
+  function closeLb() { lightbox.classList.remove('open'); }
+  lbClose.addEventListener('click', closeLb);
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLb(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLb(); });
+})();
+</script>
+</body>
+</html>

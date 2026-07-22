@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yichi Zhang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink:   oklch(7%  0.005 50);
+  --ivory: oklch(96% 0.006 78);
+  --mist:  oklch(70% 0.006 78);
+  --gold:  oklch(73% 0.10  76);
+  --dim:   oklch(52% 0.005 78);
+}
+
+html, body {
+  background: var(--ink);
+  color: var(--ivory);
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+  overflow-x: hidden;
+}
+
+/* spacer so after-hero content sits below the fixed stage */
+#spacer { height: 100vh; }
+
+/* ──────────────────────────────────────────────
+   STICKY STAGE  (always 100vh, always visible)
+────────────────────────────────────────────── */
+#stage {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Stage stays fixed; opacity/transform driven by scroll progress for reversibility */
+#stage {
+  will-change: opacity, transform;
+}
+
+/* ──────────────────────────────────────────────
+   VIDEO
+────────────────────────────────────────────── */
+#hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+/* ──────────────────────────────────────────────
+   CINEMATIC VIGNETTE
+────────────────────────────────────────────── */
+#vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(to top,    oklch(7% 0.005 50 / .65) 0%,   transparent 55%),
+    linear-gradient(to bottom, oklch(7% 0.005 50 / .5)  0%,   transparent 38%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, oklch(7% 0.005 50 / .4) 100%);
+}
+
+/* ──────────────────────────────────────────────
+   GRAIN OVERLAY
+────────────────────────────────────────────── */
+#grain {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: .032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  mix-blend-mode: overlay;
+}
+
+/* ──────────────────────────────────────────────
+   BLACKOUT  (JS drives opacity 0→1 at end)
+────────────────────────────────────────────── */
+#blackout {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ──────────────────────────────────────────────
+   LETTERBOX BARS
+────────────────────────────────────────────── */
+.bar {
+  position: absolute;
+  left: 0; right: 0;
+  height: 4.5vh;
+  background: #000;
+  z-index: 9;
+  pointer-events: none;
+}
+.bar-top    { top: 0; }
+.bar-bottom { bottom: 0; }
+
+/* ──────────────────────────────────────────────
+   HEADER
+────────────────────────────────────────────── */
+#site-header {
+  position: absolute;
+  top: 4.5vh;
+  left: 0; right: 0;
+  padding: 1.6rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 20;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: .92rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  line-height: 1.55;
+  color: var(--ivory);
+  opacity: .7;
+}
+
+nav { display: flex; gap: 2.4rem; list-style: none; }
+nav a {
+  font-size: .54rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--mist);
+  text-decoration: none;
+  opacity: .5;
+  transition: opacity .3s;
+}
+nav a:hover { opacity: 1; }
+
+/* ──────────────────────────────────────────────
+   SCENE SYSTEM
+────────────────────────────────────────────── */
+.scene {
+  position: absolute;
+  top: 4.5vh; bottom: 4.5vh;
+  left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.scene.in  { opacity: 1; }
+
+/* Child enter animation */
+.rise {
+  transform: translateY(20px);
+  opacity: 0;
+  transition:
+    transform 1.1s cubic-bezier(.4, 0, .2, 1),
+    opacity   1.1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.scene.in .rise { transform: translateY(0); opacity: 1; }
+
+/* Stagger delays */
+.d1 { transition-delay: .06s; }
+.d2 { transition-delay: .16s; }
+.d3 { transition-delay: .27s; }
+.d4 { transition-delay: .38s; }
+.d5 { transition-delay: .50s; }
+.d6 { transition-delay: .62s; }
+
+/* ── Layouts ─────────────────────────────────── */
+.layout-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.layout-lower-left {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 3.5rem 9vh;
+}
+
+.layout-lower-center {
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  padding: 0 2rem 9vh;
+}
+
+.layout-story {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 3.5rem 9vh;
+  max-width: 64rem;
+  /* centering trick without transform */
+  margin-left: auto;
+  margin-right: auto;
+  left: 0; right: 0;
+}
+
+.layout-cta {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* ──────────────────────────────────────────────
+   TYPE STYLES
+────────────────────────────────────────────── */
+.t-eyebrow {
+  font-size: .53rem;
+  letter-spacing: .4em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.t-display {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(4rem, 7vw, 7.5rem);
+  line-height: .91;
+  letter-spacing: -.025em;
+  color: var(--ivory);
+}
+.t-display em { font-style: italic; color: var(--gold); }
+
+.t-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.2rem, 3.6vw, 3.7rem);
+  line-height: 1.07;
+  color: var(--ivory);
+}
+
+.t-location {
+  font-size: .58rem;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--mist);
+  opacity: .45;
+  margin-top: 6.5rem;
+}
+
+.t-body {
+  font-size: .65rem;
+  line-height: 2.15;
+  color: var(--mist);
+  max-width: 58ch;
+}
+
+.t-body-dim { opacity: .5; }
+
+.t-rule {
+  width: 30px; height: 1px;
+  background: var(--gold);
+  opacity: .45;
+  margin: 1.1rem 0 1.4rem;
+}
+
+.t-cta-main {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.6rem, 4.2vw, 4.4rem);
+  letter-spacing: -.015em;
+  color: var(--ivory);
+}
+
+.t-cta-sub {
+  font-size: .56rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-top: 1.2rem;
+  border-bottom: 1px solid oklch(52% 0.005 78 / .28);
+  padding-bottom: .2rem;
+}
+
+/* ──────────────────────────────────────────────
+   PROGRESS BAR
+────────────────────────────────────────────── */
+#progress {
+  position: absolute;
+  bottom: 4.5vh;
+  left: 0; right: 0;
+  height: 1px;
+  z-index: 25;
+  background: oklch(96% 0.006 78 / .06);
+}
+#progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  opacity: .5;
+}
+
+/* ──────────────────────────────────────────────
+   SCROLL HINT
+────────────────────────────────────────────── */
+#scroll-hint {
+  position: absolute;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  transition: opacity .8s;
+}
+#scroll-hint span {
+  font-size: .47rem;
+  letter-spacing: .36em;
+  text-transform: uppercase;
+  color: var(--mist);
+  opacity: .32;
+}
+.hint-line {
+  width: 1px;
+  height: 2.2rem;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: hintPulse 2.4s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%,100% { opacity: .28; transform: scaleY(1);    }
+  50%      { opacity: .75; transform: scaleY(1.28); }
+}
+
+/* ──────────────────────────────────────────────
+   AFTER HERO
+────────────────────────────────────────────── */
+.after {
+  padding: 12rem 3.5rem 8rem;
+  max-width: 900px;
+}
+.after-eyebrow {
+  font-size: .53rem;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2.4rem;
+}
+.after-rule {
+  width: 40px; height: 1px;
+  background: var(--gold); opacity: .3;
+  margin-bottom: 3rem;
+}
+.after h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.2rem, 3.5vw, 3.4rem);
+  line-height: 1.18;
+  margin-bottom: 2rem;
+}
+.after p {
+  font-size: .67rem;
+  line-height: 2.15;
+  color: var(--mist);
+  opacity: .58;
+  max-width: 52ch;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SCROLL ZONE
+═══════════════════════════════════════════ -->
+
+  <div id="stage">
+
+    <video
+      id="hero-video"
+      data-src="uploads/u5781372566_The_buildings_at_the_back_gradually_rose_and_even_4fb11ea9-18ad-4d15-aeef-206956015f1e_3.mp4"
+      muted playsinline preload="auto" webkit-playsinline
+    ></video>
+
+    <div id="vignette"></div>
+    <div id="grain"></div>
+    <div id="blackout"></div>
+    <div class="bar bar-top"></div>
+    <div class="bar bar-bottom"></div>
+
+    <header id="site-header">
+      <div class="logo">Yichi<br>Zhang</div>
+      <nav>
+        <li><a href="#">Work</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Process</a></li>
+        <li><a href="#">Contact</a></li>
+      </nav>
+    </header>
+
+    <!-- ═══ PHASE 1 · 0–14% · Identity ════ -->
+    <div class="scene layout-center" data-in="0" data-out="0.14">
+      <div class="rise d2 t-display"><em>Yichi Zhang</em></div>
+      <div class="rise d3 t-location">Based in Bay Area</div>
+    </div>
+
+    <!-- ═══ PHASE 2 · 20–42% · Direction ════ -->
+    <div class="scene layout-lower-left" data-in="0.20" data-out="0.42">
+      <div class="rise d1 t-title" style="max-width:26ch;">Designing human-centered systems through Interactive Experience, Cognitive Systems and Visual Storytelling.</div>
+    </div>
+
+    <!-- ═══ PHASE 3 · 48–74% · 0→1 ════ -->
+    <div class="scene layout-center" data-in="0.48" data-out="0.74">
+      <div class="rise d1" style="
+        text-align:center;
+        font-family:'Cormorant Garamond',serif;
+        font-weight:300;
+        font-size:clamp(1rem,1.5vw,1.35rem);
+        line-height:1.75;
+        color:rgba(255,255,255,0.82);
+        max-width:46ch;
+        margin-bottom:2rem;
+        text-shadow:0 1px 16px rgba(0,10,30,.95),0 2px 32px rgba(0,10,30,.9);
+      ">I'm drawn to traditional forms of art,<br>
+      because they let me fully live through the process —<br>
+      from 0 to 1, and from 1 to 100.</div>
+      <div class="rise d3" style="
+        text-align:center;
+        font-family:'Cormorant Garamond',serif;
+        font-weight:300;
+        font-size:clamp(1rem,1.5vw,1.35rem);
+        line-height:1.75;
+        color:rgba(255,255,255,0.95);
+        max-width:46ch;
+        text-shadow:0 1px 16px rgba(0,10,30,.95),0 2px 32px rgba(0,10,30,.9);
+      ">I use AI to accelerate what comes after,<br>
+      but the beginning — the 0 to 1 —<br>
+      is where I define myself.</div>
+    </div>
+
+    <!-- ═══ PHASE 4 · 79–95% · All qualities ════ -->
+    <div class="scene layout-lower-left" data-in="0.79" data-out="0.955">
+      <div class="rise d1 t-title" style="margin-bottom:.6rem;">Designer's human-centered thinking</div>
+      <div class="rise d2 t-title" style="margin-bottom:.6rem;opacity:.75;">Founder's market awareness</div>
+      <div class="rise d3 t-title" style="margin-bottom:.6rem;opacity:.55;">Engineer's hands-on execution</div>
+      <div class="rise d4 t-title" style="opacity:.4;">Student's curiosity and idealism</div>
+    </div>
+
+    <!-- ═══ FINAL · 95–100% · CTA ════ -->
+    <div class="scene layout-cta" data-in="0.955" data-out="1.01">
+      <div class="rise d1 t-cta-main">Enter the Work ↓</div>
+      <div class="rise d3 t-cta-sub">Or understand my process</div>
+    </div>
+
+    <div id="progress"><div id="progress-fill"></div></div>
+
+    <div id="scroll-hint">
+      <span>Scroll</span>
+      <div class="hint-line"></div>
+    </div>
+
+  </div><!-- /#stage -->
+  <div id="spacer" style="height:100vh;"></div>
+
+<section class="after">
+  <div class="after-eyebrow">Selected Work</div>
+  <div class="after-rule"></div>
+  <h2>Projects that live<br>at the edge</h2>
+  <p>Six years of building across architecture, cognitive systems, and interaction design — from physical spaces to digital experiences.</p>
+</section>
+
+<script>
+(() => {
+  const video    = document.getElementById('hero-video');
+  const stage    = document.getElementById('stage');
+  const fill     = document.getElementById('progress-fill');
+  const hint     = document.getElementById('scroll-hint');
+  const blackout = document.getElementById('blackout');
+
+  const scenes = [...document.querySelectorAll('.scene')].map(el => ({
+    el,
+    in:  parseFloat(el.dataset.in),
+    out: parseFloat(el.dataset.out),
+  }));
+
+  // ── Lock the page; scroll input drives video time ──
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
+  window.scrollTo(0, 0);
+
+  // ── State ──────────────────────────────────────────
+  let dur          = 0;       // video duration (set on metadata)
+  let videoReady   = false;
+  let unlocked     = false;   // play/pause kick to enable seeks
+  let progress     = 0;       // target progress 0..1 (driven by scroll)
+  let displayProg  = 0;       // smoothed display progress 0..1
+
+  // Tunables
+  const SCROLL_SCALE = 0.00075; // progress per wheel pixel — full timeline ≈ ~1300px of scroll
+  const TIME_LERP    = 0.12;    // smoothing — symmetric in both directions
+  const SEEK_EPS     = 0.012;   // min delta to issue a new seek
+
+  // ── Load video as blob URL so seeking works regardless of moov atom position ──
+  (async () => {
+    try {
+      const url = video.dataset.src;
+      const res = await fetch(url);
+      const blob = await res.blob();
+      video.src = URL.createObjectURL(blob);
+    } catch (e) {
+      // Fallback to direct src if fetch fails
+      video.src = video.dataset.src;
+    }
+  })();
+
+  // ── Unlock video for scrubbing ─────────────────────
+  let unlockPromise = null;
+  function unlockVideo() {
+    if (unlocked) return unlockPromise;
+    unlocked = true;
+    try {
+      const p = video.play();
+      unlockPromise = (p && p.then)
+        ? p.then(() => { video.pause(); video.currentTime = 0; }).catch(() => {})
+        : Promise.resolve().then(() => { try { video.pause(); video.currentTime = 0; } catch (e) {} });
+    } catch (e) {
+      unlockPromise = Promise.resolve();
+    }
+    return unlockPromise;
+  }
+
+  function onMeta() {
+    if (!isFinite(video.duration) || video.duration <= 0) return;
+    dur = video.duration;
+    videoReady = true;
+    unlockVideo();
+  }
+  video.addEventListener('loadedmetadata', onMeta);
+  video.addEventListener('durationchange', onMeta);
+  video.addEventListener('canplay',        onMeta);
+  if (video.readyState >= 1) onMeta();
+
+  // First user gesture also unlocks (covers strict autoplay policies)
+  ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
+    window.addEventListener(evt, unlockVideo, { once: true, passive: true })
+  );
+
+  // ── Wheel input drives progress (forward & reverse) ──
+  window.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    progress = Math.max(0, Math.min(1, progress + e.deltaY * SCROLL_SCALE));
+  }, { passive: false });
+
+  // ── Touch input drives progress ────────────────────
+  let touchY = 0;
+  window.addEventListener('touchstart', (e) => {
+    touchY = e.touches[0].clientY;
+  }, { passive: true });
+  window.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const dy = touchY - e.touches[0].clientY;
+    touchY = e.touches[0].clientY;
+    // touch is ~3x more sensitive than wheel
+    progress = Math.max(0, Math.min(1, progress + dy * SCROLL_SCALE * 3));
+  }, { passive: false });
+
+  // ── Keyboard fallback ──────────────────────────────
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ')
+      progress = Math.min(1, progress + 0.04);
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp')
+      progress = Math.max(0, progress - 0.04);
+    else if (e.key === 'Home') progress = 0;
+    else if (e.key === 'End')  progress = 1;
+  });
+
+  // ── Cinematic hold-zone remap ──────────────────────
+  // Anchors placed at each scene's narrative center.
+  // Identity-mapped values mean total progress stays the same,
+  // but smootherstep easing between anchors makes motion slow AT
+  // each anchor (the "hold") and fast between (transitions).
+  // Bidirectional by construction — reverse scroll inherits the holds.
+  const HOLD_ANCHORS = [
+    { in: 0.000, out: 0.000 },
+    { in: 0.060, out: 0.060 },   // Phase 1 · name beat
+    { in: 0.260, out: 0.260 },   // Phase 2 · systems beat
+    { in: 0.520, out: 0.520 },   // Phase 3 · 0→1 beat
+    { in: 0.745, out: 0.745 },   // Phase 4 · qualities beat
+    { in: 0.880, out: 0.880 },   // Final approach beat
+    { in: 1.000, out: 1.000 },
+  ];
+
+  function smootherstep(t) {
+    // 6t^5 - 15t^4 + 10t^3 — zero derivative at both endpoints
+    return t * t * t * (t * (t * 6 - 15) + 10);
+  }
+
+  function remapHolds(p) {
+    if (p <= 0) return 0;
+    if (p >= 1) return 1;
+    for (let i = 0; i < HOLD_ANCHORS.length - 1; i++) {
+      const a = HOLD_ANCHORS[i], b = HOLD_ANCHORS[i + 1];
+      if (p <= b.in) {
+        const t = (p - a.in) / (b.in - a.in);
+        return a.out + (b.out - a.out) * smootherstep(Math.max(0, Math.min(1, t)));
+      }
+    }
+    return 1;
+  }
+
+  // ── RAF loop ───────────────────────────────────────
+  // Single source of truth: `progress` (target) → `displayProg` (smoothed)
+  //                       → `eased` (held at scene beats)
+  // Symmetric lerp + pure remap = identical feel forward & reverse.
+  function loop() {
+    displayProg += (progress - displayProg) * TIME_LERP;
+
+    // Apply cinematic holds — slow at scene anchors, fast between
+    const eased = remapHolds(displayProg);
+
+    // Map full timeline:
+    //   0.00 – 0.85  →  video scrub (0 → dur)
+    //   0.85 – 1.00  →  stage fade out
+    const VIDEO_END = 0.85;
+    const videoProg = Math.min(1, eased / VIDEO_END);
+
+    // Drive video.currentTime — only seek when not already seeking,
+    // and only when the unlock kick has completed.
+    if (videoReady && dur > 0 && !video.seeking) {
+      const target = videoProg * dur;
+      if (Math.abs(video.currentTime - target) > SEEK_EPS) {
+        try { video.currentTime = target; } catch (e) {}
+      }
+    }
+
+    // Progress bar
+    fill.style.width = (videoProg * 100) + '%';
+
+    // Scroll hint — visible only at the very start
+    hint.style.opacity = displayProg < 0.012 ? '1' : '0';
+
+    // Blackout — eases in near the end, eases out on reverse
+    blackout.style.opacity = videoProg >= 0.92
+      ? Math.min(1, (videoProg - 0.92) / 0.06)
+      : 0;
+
+    // Stage exit: fade + subtle scale between 0.85 → 1.00
+    const exitProg = Math.max(0, Math.min(1, (eased - VIDEO_END) / (1 - VIDEO_END)));
+    stage.style.opacity   = 1 - exitProg;
+    stage.style.transform = `scale(${1 + exitProg * 0.04})`;
+    stage.style.pointerEvents = exitProg > 0.98 ? 'none' : '';
+
+    // Once the stage is fully exited, allow native page scroll for the "after" section
+    if (exitProg >= 1) {
+      if (document.body.style.overflow !== '') {
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+      }
+    } else {
+      if (document.body.style.overflow === '') {
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        window.scrollTo(0, 0);
+      }
+    }
+
+    // Scene visibility — bidirectional (driven purely by videoProg)
+    scenes.forEach(({ el, in: wIn, out: wOut }) =>
+      el.classList.toggle('in', videoProg >= wIn && videoProg < wOut)
+    );
+
+    requestAnimationFrame(loop);
+  }
+
+  if (scenes.length) scenes[0].el.classList.add('in');
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

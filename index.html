@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink:   oklch(7%  0.005 50);
+  --ivory: oklch(96% 0.006 78);
+  --mist:  oklch(70% 0.006 78);
+  --gold:  oklch(73% 0.10  76);
+  --dim:   oklch(52% 0.005 78);
+}
+
+html { overflow-x: hidden; }
+html, body {
+  background: var(--ink);
+  color: var(--ivory);
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+}
+
+/* spacer so after-hero content sits below the fixed stage */
+#spacer { height: 100vh; }
+
+/* ══════════════════════════════════════════════════
+   ABOUT ME — Apple-style scroll storytelling
+══════════════════════════════════════════════════ */
+.about {
+  position: relative;
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+/* Sticky portrait stage */
+.about-portrait {
+  position: relative;
+  height: 260vh; /* scroll runway */
+}
+
+.about-portrait__sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-portrait__bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, oklch(18% 0.02 60) 0%, oklch(7% 0.005 50) 70%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 0;
+}
+
+.about-portrait__frame {
+  position: relative;
+  /* Fills the viewport entirely at start; scales down on scroll */
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  z-index: 2;
+  will-change: transform, width, height;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  transition:
+    width 0.6s cubic-bezier(.4,0,.2,1),
+    height 0.6s cubic-bezier(.4,0,.2,1),
+    transform 0.4s cubic-bezier(.2,.7,.1,1);
+}
+
+.about-portrait__frame img {
+  width: 100%;
+  height: 100%;
+  /* Preserve original aspect; never crop */
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  background: #000;
+  filter: brightness(1) saturate(1);
+  transition: filter 0.6s ease;
+}
+
+.about-portrait__text {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 6vw 10vh;
+  text-align: center;
+  pointer-events: none;
+}
+
+.about-line {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(1.4rem, 2.6vw, 2.4rem);
+  line-height: 1.45;
+  letter-spacing: -.005em;
+  color: var(--ivory);
+  max-width: 38ch;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .9s ease, transform .9s ease;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 2px 24px oklch(5% 0.005 50 / .85);
+}
+
+.about-line em { font-style: italic; color: var(--gold); }
+.about-line.in { opacity: 1; transform: translateY(0); }
+
+/* ═══ Identity sections ═══ */
+.identity {
+  padding: 18vh 6vw 14vh;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.identity__head {
+  text-align: center;
+  margin-bottom: 8vh;
+  max-width: 880px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.identity__num {
+  display: inline-block;
+  font-size: .58rem;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2rem;
+}
+
+.identity__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.4rem, 5vw, 4.6rem);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  margin-bottom: 2.2rem;
+}
+.identity__title em { font-style: italic; color: var(--gold); }
+
+.identity__lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+  line-height: 1.5;
+  color: var(--ivory);
+  opacity: .9;
+  max-width: 50ch;
+  margin: 0 auto 1.6rem;
+}
+
+.identity__sub {
+  font-size: .76rem;
+  line-height: 1.95;
+  color: var(--mist);
+  opacity: .7;
+  max-width: 58ch;
+  margin: 0 auto;
+}
+
+/* ═══ Showcase media switcher ═══ */
+.showcase {
+  position: relative;
+}
+
+.showcase__stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #000;
+  border-radius: 12px;
+  box-shadow:
+    0 32px 90px oklch(2% 0.005 240 / .55),
+    inset 0 0 0 1px oklch(96% 0.006 78 / .06);
+}
+
+.showcase__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .7s cubic-bezier(.4,0,.2,1);
+}
+
+.showcase__slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.showcase__slide img,
+.showcase__slide video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.showcase__slide--card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at 30% 30%, oklch(20% 0.04 60 / .9), oklch(8% 0.005 50) 70%);
+  padding: 6vw;
+}
+
+.showcase__card {
+  max-width: 50ch;
+  text-align: left;
+}
+
+.showcase__card-eyebrow {
+  display: block;
+  font-size: .54rem;
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.4rem;
+}
+
+.showcase__card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(1.6rem, 3vw, 2.8rem);
+  line-height: 1.2;
+  letter-spacing: -.015em;
+  margin-bottom: 1.4rem;
+  color: var(--ivory);
+}
+.showcase__card-title em { font-style: italic; color: var(--gold); }
+
+.showcase__card-body {
+  font-size: .82rem;
+  line-height: 1.95;
+  color: var(--mist);
+  opacity: .85;
+  margin-bottom: 1.6rem;
+}
+
+.showcase__card-cta {
+  display: inline-block;
+  font-size: .58rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  border-bottom: 1px solid var(--gold);
+  padding-bottom: .25rem;
+}
+
+.showcase__nav {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2.6rem;
+}
+
+.showcase__tab {
+  font-family: 'DM Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--mist);
+  background: transparent;
+  border: 1px solid oklch(96% 0.006 78 / .15);
+  padding: .7rem 1.3rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all .3s;
+}
+
+.showcase__tab:hover {
+  color: var(--ivory);
+  border-color: oklch(96% 0.006 78 / .35);
+}
+
+.showcase__tab.active {
+  background: var(--ivory);
+  color: var(--ink);
+  border-color: var(--ivory);
+}
+
+/* ═══ Audio toggle button (showcase) ═══ */
+.audio-toggle {
+  position: absolute;
+  bottom: 1.2rem;
+  right: 1.2rem;
+  z-index: 5;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ivory);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background .25s, border-color .25s, transform .25s;
+}
+.audio-toggle:hover {
+  background: rgba(0, 0, 0, 0.65);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: scale(1.05);
+}
+.audio-toggle svg { width: 18px; height: 18px; }
+.audio-toggle .audio-toggle__unmuted { display: none; }
+.audio-toggle.is-on .audio-toggle__muted { display: none; }
+.audio-toggle.is-on .audio-toggle__unmuted { display: block; }
+
+@media (max-width: 760px) {
+  .about-portrait__frame {
+    width: 84vw;
+    height: 84vw;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   PHOTOGRAPHY — intro + art-book shelf
+══════════════════════════════════════════════════ */
+.photo {
+  position: relative;
+  background: #000;
+  color: var(--ivory);
+}
+
+/* ── Intro scroll runway ── */
+.photo-intro {
+  position: relative;
+  height: 320vh;
+}
+.photo-intro__sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+.photo-intro__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+.photo-intro__dim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Stage 1: image-masked headline. */
+.photo-intro__mask-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  display: block;
+}
+.photo-intro__mask-svg text {
+  /* Font-size is animated via JS — start huge, end readable */
+  transition: font-size 0.05s linear;
+}
+
+/* Stage 2: final readable composition */
+.photo-intro__final {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 6vw;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  will-change: opacity, transform;
+}
+.photo-intro__final.in { opacity: 1; pointer-events: auto; }
+
+.photo-intro__title {
+  font-family: 'SF Pro Display', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 7vw, 7rem);
+  line-height: .98;
+  letter-spacing: -.035em;
+  color: #ffffff;
+  margin-bottom: 2.2rem;
+  text-shadow: 0 4px 28px rgba(0,0,0,0.55);
+  transition: opacity 0.5s ease;
+}
+.photo-intro__title em { font-style: normal; color: #ffffff; }
+
+.photo-intro__lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.15rem, 1.7vw, 1.65rem);
+  line-height: 1.65;
+  color: #ffffff;
+  opacity: 0;
+  max-width: 64ch;
+  text-align: center;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.7);
+  transition: opacity 0.5s ease;
+}
+
+/* ── The shelf ── */
+.photo-shelf {
+  background: #000;
+  padding: 14vh 0 18vh;
+  perspective: 1600px;
+}
+.photo-shelf__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 6vw;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5vw;
+  align-items: end;
+}
+
+/* Individual book */
+.book {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  transform: rotateY(-22deg) translateZ(0);
+  transition: transform 0.6s cubic-bezier(.2,.7,.1,1);
+}
+.book:hover {
+  transform: rotateY(-14deg) translateY(-8px);
+}
+
+.book__spine {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -22px;
+  width: 22px;
+  background: linear-gradient(to right, #1a1a1a 0%, #2d2d2d 50%, #0d0d0d 100%);
+  transform: rotateY(85deg);
+  transform-origin: right center;
+  box-shadow: inset -2px 0 6px rgba(0,0,0,0.6);
+}
+
+.book__cover {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-shadow:
+    18px 30px 60px rgba(0,0,0,0.55),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
+  background: #111;
+}
+.book__cover-img {
+  position: absolute;
+  inset: 0;
+  background-image: var(--cover);
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.9) brightness(0.85);
+  transition: filter 0.6s ease, transform 1.2s ease;
+}
+.book:hover .book__cover-img {
+  filter: saturate(1) brightness(1);
+  transform: scale(1.04);
+}
+.book__cover-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      transparent 0%,
+      transparent 45%,
+      rgba(0,0,0,0.85) 100%);
+}
+.book__cover-meta {
+  position: absolute;
+  left: 1.6rem;
+  right: 1.6rem;
+  bottom: 1.6rem;
+  color: #fff;
+}
+.book__cover-label {
+  display: block;
+  font-size: .54rem;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .9rem;
+}
+.book__cover-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -.01em;
+  margin-bottom: .9rem;
+}
+.book__cover-cta {
+  display: inline-block;
+  font-size: .55rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  border-bottom: 1px solid rgba(255,255,255,0.4);
+  padding-bottom: .25rem;
+}
+
+/* Book opening animation */
+.book.opening {
+  transform: rotateY(0deg);
+}
+.book.opening .book__cover {
+  transform-origin: left center;
+  animation: bookOpen 1s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes bookOpen {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(-160deg); }
+}
+
+/* ══════════════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════════════ */
+.contact {
+  background: #000;
+  color: var(--ivory);
+  padding: 22vh 6vw 18vh;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.contact__inner {
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.contact__eyebrow {
+  font-size: .58rem;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.6rem;
+}
+.contact__rule {
+  width: 36px; height: 1px;
+  background: var(--gold);
+  opacity: .5;
+  margin-bottom: 2.4rem;
+}
+.contact__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(3rem, 7vw, 6.4rem);
+  line-height: 1;
+  letter-spacing: -.025em;
+  color: var(--ivory);
+  margin-bottom: 1.4rem;
+}
+.contact__lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1rem, 1.4vw, 1.3rem);
+  color: var(--mist);
+  opacity: .85;
+  max-width: 44ch;
+  margin-bottom: 3.6rem;
+}
+.contact__email {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 1.4rem 2.4rem;
+  border: 1px solid oklch(96% 0.006 78 / .14);
+  border-radius: 14px;
+  margin-bottom: 4rem;
+  text-decoration: none;
+  transition: border-color .25s, background .25s, transform .25s;
+}
+.contact__email:hover {
+  border-color: var(--gold);
+  background: oklch(74% 0.10 78 / .06);
+  transform: translateY(-1px);
+}
+.contact__email-label {
+  font-size: .54rem;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.contact__email-addr {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  color: var(--ivory);
+}
+
+/* Form */
+.contact__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 4.5rem;
+}
+.contact__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.4rem;
+}
+@media (max-width: 600px) {
+  .contact__row { grid-template-columns: 1fr; }
+}
+.contact__field {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+.contact__label {
+  font-size: .54rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--mist);
+  opacity: .75;
+}
+.contact__field input,
+.contact__field textarea {
+  font-family: 'DM Mono', monospace;
+  font-weight: 300;
+  font-size: .85rem;
+  line-height: 1.6;
+  color: var(--ivory);
+  background: oklch(96% 0.006 78 / .03);
+  border: 1px solid oklch(96% 0.006 78 / .14);
+  border-radius: 8px;
+  padding: .9rem 1rem;
+  outline: none;
+  transition: border-color .25s, background .25s;
+  resize: vertical;
+}
+.contact__field input::placeholder,
+.contact__field textarea::placeholder {
+  color: oklch(50% 0.005 78);
+  opacity: .8;
+}
+.contact__field input:focus,
+.contact__field textarea:focus {
+  border-color: var(--gold);
+  background: oklch(96% 0.006 78 / .05);
+}
+.contact__submit {
+  align-self: center;
+  margin-top: 1.4rem;
+  padding: 1rem 2.4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .6rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .8rem;
+  transition: background .25s, transform .25s, box-shadow .25s;
+  box-shadow: 0 10px 28px oklch(74% 0.10 78 / .22);
+}
+.contact__submit:hover {
+  background: oklch(82% 0.11 78);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 36px oklch(74% 0.10 78 / .35);
+}
+.contact__submit-arrow { transition: transform .25s; }
+.contact__submit:hover .contact__submit-arrow { transform: translateX(4px); }
+.contact__note {
+  text-align: center;
+  margin-top: 1.4rem;
+  font-size: .68rem;
+  color: var(--mist);
+  opacity: .55;
+}
+.contact__note a { color: var(--gold); border-bottom: 1px dotted oklch(74% 0.10 78 / .4); }
+
+/* Social */
+.contact__social {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 1rem;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: contactSocialIn 1s cubic-bezier(.4,0,.2,1) .4s forwards;
+}
+@keyframes contactSocialIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.contact__social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  color: oklch(78% 0.006 78 / .68);
+  font-size: .56rem;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: .55rem .9rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  transition: color .3s, background .3s, border-color .3s, transform .3s;
+}
+.contact__social-link svg {
+  width: 18px; height: 18px;
+}
+.contact__social-link:hover {
+  color: var(--ivory);
+  border-color: oklch(96% 0.006 78 / .2);
+  background: oklch(96% 0.006 78 / .04);
+  transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════════
+   BOOK OPENING ANIMATION (clicked book expands to fill)
+══════════════════════════════════════════════════ */
+.book.expanding {
+  position: fixed !important;
+  z-index: 8500;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotateY(0deg) !important;
+  width: min(80vw, 70vh) !important;
+  height: min(106vw, 93vh) !important;
+  aspect-ratio: auto !important;
+  transition:
+    top .9s cubic-bezier(.4,0,.2,1),
+    left .9s cubic-bezier(.4,0,.2,1),
+    width .9s cubic-bezier(.4,0,.2,1),
+    height .9s cubic-bezier(.4,0,.2,1),
+    transform .9s cubic-bezier(.4,0,.2,1);
+}
+.book-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 8400;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .6s ease;
+}
+.book-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ══ READER ══ */
+.reader {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.92);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.7s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.reader.open { opacity: 1; pointer-events: auto; }
+
+.reader__close {
+  position: absolute;
+  top: 1.4rem; right: 1.4rem;
+  z-index: 20;
+  width: 44px; height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.92);
+  background: rgba(0,0,0,0.55);
+  border: 1px solid rgba(255,255,255,0.22);
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all .25s;
+}
+.reader__close:hover {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.55);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.reader__title {
+  position: absolute;
+  top: 1.7rem; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1rem;
+  letter-spacing: .04em;
+  color: rgba(255,255,255,0.85);
+}
+
+.reader__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 0;
+  padding: 8vh 6vw 8vh 0;
+  overflow: hidden;
+}
+
+/* Left sidebar — thumbnail previews */
+.reader__sidebar {
+  height: 100%;
+  overflow-y: auto;
+  padding: 0 1rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.18) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+}
+.reader__sidebar::-webkit-scrollbar { width: 4px; }
+.reader__sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 999px; }
+
+.reader__thumb {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: #111;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  opacity: .55;
+  transition: opacity .3s, border-color .3s, transform .3s;
+  position: relative;
+}
+.reader__thumb:hover {
+  opacity: .85;
+  border-color: rgba(255,255,255,0.3);
+}
+.reader__thumb.active {
+  opacity: 1;
+  border-color: rgba(255,255,255,0.85);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18);
+}
+.reader__thumb-num {
+  position: absolute;
+  top: .3rem; left: .4rem;
+  font-family: 'DM Mono', monospace;
+  font-size: .42rem;
+  letter-spacing: .2em;
+  color: rgba(255,255,255,0.7);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+/* Carousel — horizontal track */
+.reader__viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.reader__track {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.75s cubic-bezier(.4,0,.2,1);
+  will-change: transform;
+}
+.reader__slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2vw;
+}
+.reader__slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.55),
+    0 12px 30px rgba(0,0,0,0.4);
+}
+
+.reader__nav {
+  position: absolute;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-family: 'Cormorant Garamond', serif;
+  color: rgba(255,255,255,0.8);
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: translateY(-50%);
+  transition: all .25s;
+  z-index: 5;
+}
+.reader__nav:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  border-color: rgba(255,255,255,0.35);
+}
+.reader__nav--prev { left: 1.8rem; }
+.reader__nav--next { right: 1.8rem; }
+
+.reader__counter {
+  position: absolute;
+  bottom: 1.8rem; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'DM Mono', monospace;
+  font-size: .54rem;
+  letter-spacing: .32em;
+  color: rgba(255,255,255,0.6);
+}
+
+/* ──────────────────────────────────────────────
+   STICKY STAGE  (always 100vh, always visible)
+────────────────────────────────────────────── */
+#stage {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Stage stays fixed; opacity/transform driven by scroll progress for reversibility */
+#stage {
+  will-change: opacity, transform;
+}
+
+/* ──────────────────────────────────────────────
+   VIDEO
+────────────────────────────────────────────── */
+#hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+
+/* ──────────────────────────────────────────────
+   CINEMATIC VIGNETTE
+────────────────────────────────────────────── */
+#vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(to top,    oklch(7% 0.005 50 / .65) 0%,   transparent 55%),
+    linear-gradient(to bottom, oklch(7% 0.005 50 / .5)  0%,   transparent 38%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 40%, oklch(7% 0.005 50 / .4) 100%);
+}
+
+/* ──────────────────────────────────────────────
+   GRAIN OVERLAY
+────────────────────────────────────────────── */
+#grain {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: .032;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  mix-blend-mode: overlay;
+}
+
+/* ──────────────────────────────────────────────
+   BLACKOUT  (JS drives opacity 0→1 at end)
+────────────────────────────────────────────── */
+#blackout {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+#loader{position:absolute;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:#050505;opacity:1;transition:opacity .7s ease}
+#loader.done{opacity:0;pointer-events:none}
+.loader__inner{display:flex;flex-direction:column;align-items:center;gap:2.2rem}
+.loader__logo{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:2rem;line-height:1.1;letter-spacing:.35em;text-transform:uppercase;color:var(--ivory,#f4f1ea);text-align:center;text-indent:.35em}
+.loader__track{width:180px;height:1px;background:rgba(255,255,255,.16);overflow:hidden}
+.loader__fill{width:0;height:100%;background:var(--gold,#e8c48a);transition:width .3s ease}
+.loader__pct{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.32em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+
+/* ──────────────────────────────────────────────
+   LETTERBOX BARS
+────────────────────────────────────────────── */
+.bar {
+  position: absolute;
+  left: 0; right: 0;
+  height: 4.5vh;
+  background: #000;
+  z-index: 9;
+  pointer-events: none;
+}
+.bar-top    { top: 0; }
+.bar-bottom { bottom: 0; }
+
+/* ──────────────────────────────────────────────
+   GLOBAL HEADER — blends with hero video on Hero page
+────────────────────────────────────────────── */
+.topnav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 3rem;
+  background: rgba(22, 22, 23, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  height: 64px;
+}
+
+.topnav__brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: 1rem;
+  letter-spacing: .35em;
+  text-transform: uppercase;
+  color: var(--ivory);
+  opacity: .9;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.topnav__brand em { font-style: italic; color: var(--gold); }
+
+.topnav__links {
+  display: flex;
+  gap: 2.4rem;
+  list-style: none;
+  align-items: center;
+}
+
+.topnav__links a {
+  font-size: .56rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  opacity: 1;
+  transition: color .25s;
+  position: relative;
+  padding: .3rem 0;
+  text-decoration: none;
+}
+
+.topnav__links a:hover { color: rgba(255, 255, 255, 1); }
+
+.topnav__links a.active {
+  color: rgba(255, 255, 255, 1);
+}
+.topnav__links a.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -.32rem;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* ──────────────────────────────────────────────
+   HEADER — legacy (no longer used, replaced by topnav)
+────────────────────────────────────────────── */
+#site-header {
+  display: none;
+}
+
+/* ──────────────────────────────────────────────
+   SCENE SYSTEM
+────────────────────────────────────────────── */
+.scene {
+  position: absolute;
+  top: 4.5vh; bottom: 4.5vh;
+  left: 0; right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.scene.in  { opacity: 1; }
+
+/* Child enter animation */
+.rise {
+  transform: translateY(20px);
+  opacity: 0;
+  transition:
+    transform 1.1s cubic-bezier(.4, 0, .2, 1),
+    opacity   1.1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.scene.in .rise { transform: translateY(0); opacity: 1; }
+
+/* Stagger delays */
+.d1 { transition-delay: .06s; }
+.d2 { transition-delay: .16s; }
+.d3 { transition-delay: .27s; }
+.d4 { transition-delay: .38s; }
+.d5 { transition-delay: .50s; }
+.d6 { transition-delay: .62s; }
+
+/* ── Layouts ─────────────────────────────────── */
+.layout-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.layout-lower-left {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 3.5rem 9vh;
+}
+
+.layout-lower-center {
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+  padding: 0 2rem 9vh;
+}
+
+.layout-story {
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0 3.5rem 9vh;
+  max-width: 64rem;
+  /* centering trick without transform */
+  margin-left: auto;
+  margin-right: auto;
+  left: 0; right: 0;
+}
+
+.layout-cta {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* ──────────────────────────────────────────────
+   TYPE STYLES
+────────────────────────────────────────────── */
+.t-eyebrow {
+  font-size: .53rem;
+  letter-spacing: .4em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.t-display {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: clamp(4rem, 7vw, 7.5rem);
+  line-height: .91;
+  letter-spacing: -.025em;
+  color: var(--ivory);
+  white-space: nowrap;
+}
+.t-display em { font-style: italic; color: #fff; }
+
+.t-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.2rem, 3.6vw, 3.7rem);
+  line-height: 1.07;
+  color: var(--ivory);
+}
+
+.t-location {
+  font-size: .58rem;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: #fff;
+  opacity: .92;
+  margin-top: 6.5rem;
+  white-space: nowrap;
+}
+
+.t-body {
+  font-size: .65rem;
+  line-height: 2.15;
+  color: var(--mist);
+  max-width: 58ch;
+}
+
+.t-body-dim { opacity: .5; }
+
+.t-rule {
+  width: 30px; height: 1px;
+  background: var(--gold);
+  opacity: .45;
+  margin: 1.1rem 0 1.4rem;
+}
+
+.t-cta-main {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.6rem, 4.2vw, 4.4rem);
+  letter-spacing: -.015em;
+  color: var(--ivory);
+}
+
+.t-cta-sub {
+  font-size: .56rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-top: 1.2rem;
+  border-bottom: 1px solid oklch(52% 0.005 78 / .28);
+  padding-bottom: .2rem;
+}
+
+/* ──────────────────────────────────────────────
+   PROGRESS BAR
+────────────────────────────────────────────── */
+#progress {
+  position: absolute;
+  bottom: 4.5vh;
+  left: 0; right: 0;
+  height: 1px;
+  z-index: 25;
+  background: oklch(96% 0.006 78 / .06);
+}
+#progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  opacity: .5;
+}
+
+/* ──────────────────────────────────────────────
+   SCROLL HINT
+────────────────────────────────────────────── */
+#scroll-hint {
+  position: absolute;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  transition: opacity .8s;
+}
+#scroll-hint span {
+  font-size: .47rem;
+  letter-spacing: .36em;
+  text-transform: uppercase;
+  color: var(--mist);
+  opacity: .32;
+}
+.hint-line {
+  width: 1px;
+  height: 2.2rem;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: hintPulse 2.4s ease-in-out infinite;
+}
+@keyframes hintPulse {
+  0%,100% { opacity: .28; transform: scaleY(1);    }
+  50%      { opacity: .75; transform: scaleY(1.28); }
+}
+
+/* ──────────────────────────────────────────────
+   HERO RUNWAY — gives the fixed stage scroll distance
+────────────────────────────────────────────── */
+#hero-runway {
+  width: 100%;
+  /* height set inline by JS */
+}
+
+/* ──────────────────────────────────────────────
+   MINDMAP — logic of creation (static diagram)
+────────────────────────────────────────────── */
+#mindmap-section{--mm:#e8c48a;min-height:110vh;padding:5rem 6vw 14vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(130% 95% at 50% 6%,#161005 0%,#05070d 66%)}
+.mm-wrap{width:min(880px,100%);display:flex;flex-direction:column;align-items:center;text-align:center;gap:2rem;padding:clamp(2.6rem,5vw,4.5rem) clamp(1.8rem,5vw,4rem);border:1px solid rgba(232,196,138,.22);border-radius:28px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));box-shadow:0 24px 80px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.06)}
+.mm-pair{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto;gap:.6rem clamp(1.4rem,4vw,3rem);width:100%;max-width:720px;align-items:start}
+.mm-col{display:contents}
+.mm-term{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(2rem,4.4vw,3.2rem);color:#fff;line-height:1.02;text-align:center;grid-row:1;align-self:center}
+.mm-pair small{display:block;font-family:'DM Mono',monospace;font-weight:400;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mm);align-self:start;text-align:center;grid-row:2}
+.mm-val{grid-row:3;margin-top:.8rem}
+.mm-term small{display:block;font-family:'DM Mono',monospace;font-weight:400;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mm);margin-top:.6rem}
+.mm-bridge{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1rem,1.6vw,1.35rem);color:rgba(255,255,255,.6);max-width:13ch;line-height:1.4}
+.mm-values{display:contents}
+.mm-val{font-family:'DM Mono',monospace;font-size:clamp(.74rem,1.15vw,.9rem);letter-spacing:.03em;color:rgba(255,255,255,.75)}
+.mm-val b{color:#fff;font-weight:500}
+.mm-val .mm-src{color:var(--mm)}
+.mm-merge{font-family:'DM Mono',monospace;font-size:clamp(.82rem,1.3vw,1.02rem);letter-spacing:.03em;color:rgba(255,255,255,.7)}
+.mm-merge b{color:#fff;font-weight:500}
+.mm-arrow{font-family:'DM Mono',monospace;font-size:1.5rem;color:var(--mm);line-height:.3}
+.mm-product{font-family:'Cormorant Garamond',serif;font-weight:600;font-style:italic;font-size:clamp(3rem,7vw,5rem);color:var(--mm);line-height:1;letter-spacing:.01em}
+.mm-kws{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem clamp(1.2rem,2.5vw,2.4rem);width:100%;max-width:760px}
+.mm-kws span{font-family:'DM Mono',monospace;font-size:clamp(.6rem,1vw,.78rem);letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);text-align:center}
+@media(max-width:640px){.mm-kws{grid-template-columns:repeat(2,1fr)}.mm-pair{grid-template-columns:1fr}}
+
+/* Hero phase-3 line — matches .t-title; second sentence stays on one line on desktop */
+.hero-l3{max-width:none}
+@media(min-width:761px){.hero-l3 .l3b{white-space:nowrap}}
+@media(max-width:760px){.hero-l3{padding:0 5vw}.hero-l3 .l3b{white-space:normal}}
+
+/* About teaser CTA — identical style to the train "Continue" button */
+.about-cta{display:inline-flex;align-items:center;gap:1rem;margin-top:2.2rem;padding:1.05rem 2.3rem;border:1px solid oklch(96% 0.006 78 / .7);background:oklch(20% 0.04 250 / .35);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:oklch(99% 0.006 78);text-decoration:none;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;border-radius:999px;opacity:0;transform:translateY(20px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1),background .35s cubic-bezier(.4,0,.2,1),border-color .35s cubic-bezier(.4,0,.2,1);pointer-events:none}
+.about-cta.in{opacity:1;transform:none;pointer-events:auto}
+.about-cta:hover{background:oklch(99% 0.006 78 / .15);border-color:oklch(99% 0.006 78);transform:translateY(-1px)}
+.about-cta span{font-size:.9rem;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.about-cta:hover span{transform:translateX(4px)}
+
+/* SPACE section */
+#space{background:radial-gradient(120% 100% at 50% 0%,#0d0f18 0%,#050506 70%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:7rem 6vw;position:relative;overflow:hidden}
+.space__inner{max-width:760px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.4rem;position:relative;z-index:2}
+.space__eyebrow{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.42em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.space__title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(4rem,11vw,9rem);color:#fff;line-height:1;letter-spacing:.02em}
+.space__quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.1rem,1.9vw,1.55rem);line-height:1.55;color:rgba(255,255,255,.82);max-width:640px}
+.space__quote--2{color:var(--gold,#e8c48a);opacity:.92}
+.space__planet{position:relative;width:246px;height:246px;border-radius:50%;margin-top:2.6rem;display:flex;align-items:center;justify-content:center;text-decoration:none;background:radial-gradient(circle at 33% 28%,#f6e6bd 0%,#e8c48a 26%,#c89a54 58%,#7a5320 100%);box-shadow:0 0 62px rgba(232,196,138,.3),inset -20px -24px 52px rgba(0,0,0,.5);transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s}
+.space__planet:hover{transform:scale(1.05);box-shadow:0 0 98px rgba(232,196,138,.55),inset -20px -24px 52px rgba(0,0,0,.48)}
+.space__planet-ring{position:absolute;inset:-16% -36%;border:1.5px solid rgba(232,196,138,.38);border-radius:50%;transform:rotate(-18deg) rotateX(74deg);pointer-events:none}
+.space__planet-label{position:relative;z-index:2;display:inline-flex;align-items:center;gap:.6rem;font-family:'DM Mono',monospace;font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.space__arrow{transition:transform .3s}
+.space__planet:hover .space__arrow{transform:translateX(4px)}
+
+/* ──────────────────────────────────────────────
+   TRAIN TRANSITION — uploaded image layers
+────────────────────────────────────────────── */
+#train-section {
+  position: relative;
+  height: 360vh;
+  background: var(--ink);
+}
+
+.train-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #88B7C9;
+}
+
+/* Background — fills viewport, static */
+.train-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 38%;
+  display: block;
+  z-index: 1;
+}
+
+/* Subtle atmospheric overlay for cinematic mood */
+.train-atmosphere {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 60%, oklch(20% 0.04 250 / .12) 100%);
+}
+
+/* Train image — flat layer above background, moves horizontally */
+.train-img {
+  position: absolute;
+  top: 56%;
+  left: 0;
+  width: 72vw;
+  height: auto;
+  transform: translate3d(100vw, -50%, 0);
+  will-change: transform;
+  z-index: 3;
+  pointer-events: none;
+  /* Slight motion blur + a soft drop-shadow on the bridge */
+  filter:
+    drop-shadow(0 6px 18px oklch(20% 0.04 250 / .35))
+    drop-shadow(0 2px 4px oklch(20% 0.04 250 / .25));
+}
+
+/* Grain for cinematic continuity with hero */
+.train-grain {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+  mix-blend-mode: overlay;
+}
+
+/* Letterbox bars matching hero */
+.train-letterbox {
+  position: absolute;
+  left: 0; right: 0;
+  height: 4.5vh;
+  background: var(--ink);
+  z-index: 10;
+  pointer-events: none;
+}
+.train-lb-top    { top: 0; }
+.train-lb-bottom { bottom: 0; }
+
+/* CTA overlay — fades in as train approaches left exit */
+.train-cta-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 12vh;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 1s cubic-bezier(.4,0,.2,1), transform 1s cubic-bezier(.4,0,.2,1);
+}
+
+.train-cta-wrap.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.train-cta-eyebrow {
+  font-size: .56rem;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: oklch(96% 0.006 78);
+  opacity: .92;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 2px 18px oklch(20% 0.04 250 / .85);
+}
+
+.train-cta-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.6rem, 5.4vw, 5.2rem);
+  line-height: .98;
+  letter-spacing: -.025em;
+  color: oklch(99% 0.006 78);
+  margin-bottom: 2.4rem;
+  text-shadow:
+    0 4px 28px oklch(20% 0.04 250 / .85),
+    0 2px 6px oklch(20% 0.04 250 / .9);
+}
+
+.train-cta-title em {
+  font-style: italic;
+  color: oklch(85% 0.10 75);
+}
+
+.train-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.05rem 2.3rem;
+  border: 1px solid oklch(96% 0.006 78 / .7);
+  background: oklch(20% 0.04 250 / .35);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: oklch(99% 0.006 78);
+  font-size: .62rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 999px;
+  transition:
+    background .35s cubic-bezier(.4,0,.2,1),
+    border-color .35s cubic-bezier(.4,0,.2,1),
+    transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+.train-cta-button:hover {
+  background: oklch(99% 0.006 78 / .15);
+  border-color: oklch(99% 0.006 78);
+  transform: translateY(-1px);
+}
+
+.train-cta-button::after {
+  content: '→';
+  font-size: .9rem;
+  letter-spacing: 0;
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+}
+
+.train-cta-button:hover::after { transform: translateX(4px); }
+
+/* ──────────────────────────────────────────────
+   AFTER HERO
+────────────────────────────────────────────── */
+.after {
+  padding: 12rem 3.5rem 8rem;
+  max-width: 900px;
+}
+.after-eyebrow {
+  font-size: .53rem;
+  letter-spacing: .32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2.4rem;
+}
+.after-rule {
+  width: 40px; height: 1px;
+  background: var(--gold); opacity: .3;
+  margin-bottom: 3rem;
+}
+.after h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: clamp(2.2rem, 3.5vw, 3.4rem);
+  line-height: 1.18;
+  margin-bottom: 2rem;
+}
+.after p {
+  font-size: .67rem;
+  line-height: 2.15;
+  color: var(--mist);
+  opacity: .58;
+  max-width: 52ch;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     GLOBAL TOP NAV — identical on every page
+═══════════════════════════════════════════ -->
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html" data-nav="home" class="active">Home</a></li>
+    <li><a href="Projects.html" data-nav="projects">Projects</a></li>
+    <li><a href="About.html" data-nav="about">About</a></li>
+    <li><a href="Photography.html" data-nav="photography">Photography</a></li>
+    <li><a href="Space.html" data-nav="space">Space</a></li>
+    <li><a href="#contact" data-nav="contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     SCROLL ZONE
+═══════════════════════════════════════════ -->
+
+  <div id="stage">
+
+    <div id="loader" aria-hidden="true">
+      <div class="loader__inner">
+        <div class="loader__logo">Zhang<br>Yichi</div>
+        <div class="loader__track"><div class="loader__fill" id="loader-fill"></div></div>
+        <div class="loader__pct" id="loader-pct">Loading 0%</div>
+      </div>
+    </div>
+
+    <video
+      id="hero-video"
+      data-src="uploads/u5781372566_The_buildings_at_the_back_gradually_rose_and_even_4fb11ea9-18ad-4d15-aeef-206956015f1e_3.mp4"
+      muted playsinline preload="auto" webkit-playsinline
+    ></video>
+
+    <div id="vignette"></div>
+    <div id="grain"></div>
+    <div id="blackout"></div>
+    <div class="bar bar-top"></div>
+    <div class="bar bar-bottom"></div>
+
+    <header id="site-header">
+      <div class="logo">Zhang<br>Yichi</div>
+      <nav>
+        <li><a href="#">Work</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Process</a></li>
+        <li><a href="#">Contact</a></li>
+      </nav>
+    </header>
+
+    <!-- ═══ PHASE 1 · 0–14% · Identity ════ -->
+    <div class="scene" data-in="0" data-out="0.14" style="
+      justify-content: flex-start;
+      align-items: center;
+      text-align: center;
+      padding-top: 66.66vh;
+    ">
+      <div class="rise d2 t-display" style="color:#fff;"><em style="color:#fff;">Zhang Yichi</em></div>
+      <div class="rise d3 t-location" style="color:#fff;opacity:.92;margin-top:1.1rem;">Based in Bay Area</div>
+    </div>
+
+    <!-- ═══ PHASE 2 · 20–42% · Direction ════ -->
+    <div class="scene layout-lower-left" data-in="0.20" data-out="0.42">
+      <div class="rise d1 t-title" style="max-width:26ch;">Designing human-centered systems through Interactive Experience, Cognitive Systems and Visual Storytelling.</div>
+    </div>
+
+    <!-- ═══ PHASE 3 · 48–74% · 0→1 ════ -->
+    <div class="scene" data-in="0.48" data-out="0.74" style="
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+    ">
+      <div class="rise d1 t-title hero-l3" style="color:#fff;text-align:center;max-width:none;text-shadow:0 2px 24px rgba(0,10,30,.85),0 4px 48px rgba(0,10,30,.7);">Stay human. Keep learning.<br><span class="l3b">Bridge emerging technology with market needs.</span></div>
+    </div>
+
+    <!-- ═══ PHASE 4 · 0.75–1.01 · qualities stay lit until full black ════ -->
+    <div class="scene layout-lower-left" id="phase4" data-in="0.75" data-out="1.02">
+      <div class="rise d1 t-title" style="margin-bottom:.6rem;color:#fff;">Designer's human-centered thinking</div>
+      <div class="rise d2 t-title" style="margin-bottom:.6rem;color:#fff;">Founder's market awareness</div>
+      <div class="rise d3 t-title" style="margin-bottom:.6rem;color:#fff;">Engineer's hands-on execution</div>
+      <div class="rise d4 t-title" style="color:#fff;">Student's curiosity and idealism</div>
+    </div>
+
+    <div id="progress"><div id="progress-fill"></div></div>
+
+    <div id="scroll-hint">
+      <span>Scroll</span>
+      <div class="hint-line"></div>
+    </div>
+
+  </div><!-- /#stage -->
+  <!-- ═══════════════════════════════════════════
+       HERO SCROLL RUNWAY
+       Hero stage is position:fixed; this spacer gives
+       it scroll distance to scrub the video timeline.
+  ═══════════════════════════════════════════ -->
+  <div id="hero-runway"></div>
+
+  <!-- ═══════════════════════════════════════════
+       MINDMAP — the logic of how I create value
+       Enters after the hero fully blacks out. Nodes
+       reveal in logical order as the section scrolls.
+  ═══════════════════════════════════════════ -->
+  <section id="mindmap-section">
+    <div class="mm-wrap">
+      <div class="mm-pair">
+        <div class="mm-term">Cognitive Science</div>
+        <div class="mm-term">Art</div>
+        <small>AI technology + social science</small>
+        <small>a process of self-cognition &amp; expression</small>
+        <div class="mm-val">→ <b>market competitiveness</b></div>
+        <div class="mm-val">→ <b>aesthetics competitiveness</b></div>
+      </div>
+
+      <div class="mm-merge">combined with <b>Market Insight</b> × <b>Management</b></div>
+
+      <div class="mm-arrow">↓</div>
+
+      <div class="mm-product">Product</div>
+
+      <div class="mm-kws"><span>Aesthetic Experience</span><span>Practical Value</span><span>Market Recognition</span><span>Technical Edge</span></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       TRAIN TRANSITION — flat-vector cinematic bridge
+       Train moves left → right based on scroll progress.
+       When near right edge, CTA fades in to invite navigation
+       into the standalone Projects archive page.
+  ═══════════════════════════════════════════ -->
+  <section id="train-section">
+    <div class="train-sticky">
+
+      <img
+        class="train-bg-img"
+        src="uploads/train%20bg.png"
+        alt="San Francisco Bay Area skyline with railway bridge"
+      />
+
+      <div class="train-atmosphere"></div>
+
+      <img
+        class="train-img"
+        id="train-img"
+        src="uploads/train.png"
+        alt="Amtrak train"
+      />
+
+      <div class="train-grain"></div>
+
+      <div class="train-letterbox train-lb-top"></div>
+      <div class="train-letterbox train-lb-bottom"></div>
+
+      <!-- CTA — fades in as train approaches right edge -->
+      <div class="train-cta-wrap" id="train-cta">
+        <div class="train-cta-eyebrow">Now arriving</div>
+        <h2 class="train-cta-title">Enter the <em>Project Archive</em></h2>
+        <a class="train-cta-button" href="Projects.html">
+          <span>Continue</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       ABOUT ME — Apple-style scroll storytelling
+  ═══════════════════════════════════════════ -->
+  <section id="about" class="about">
+
+    <!-- Self-portrait stage — sticky while scrolling -->
+    <div class="about-portrait" id="aboutPortrait">
+      <div class="about-portrait__sticky">
+        <div class="about-portrait__bg" id="aboutBg"></div>
+        <div class="about-portrait__frame" id="aboutFrame">
+          <img src="uploads/SELF_PORTRAIT-2f15848c.jpg" alt="Self-portrait — Zhang Yichi" id="aboutImg"/>
+        </div>
+        <div class="about-portrait__text" id="aboutText">
+          <p class="about-line about-line--1">My creation exists at the intersection of <em>technology</em>, <em>community</em>, and <em>visual storytelling</em>.</p>
+          <p class="about-line about-line--2">My work combines AI-assisted creation, immersive media, photography, and design research to create experiences that feel emotionally resonant and socially connected.</p>
+          <a class="about-cta" href="About.html">My Experience <span>→</span></a>
+        </div>
+      </div>
+    </div>
+
+    </section>
+
+  <!-- ═══════════════════════════════════════════
+       SPACE — the personal side
+  ═══════════════════════════════════════════ -->
+  <section id="space" class="space">
+    <div class="space__inner">
+      <div class="space__eyebrow">Space</div>
+      <h2 class="space__title">Space</h2>
+      <p class="space__quote">"A star in the universe, a domain on the internet,<br>a place where I leave pieces of myself."</p>
+      <p class="space__quote space__quote--2">"A king lives on a star. He has no subjects,<br>only visitors who are welcome to stop by."</p>
+      <a class="space__planet" href="Space.html" aria-label="Come visit">
+        <span class="space__planet-ring"></span>
+        <span class="space__planet-label">Come visit <span class="space__arrow">→</span></span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       CONTACT
+  ═══════════════════════════════════════════ -->
+  <section id="contact" class="contact">
+    <div class="contact__inner">
+      <div class="contact__eyebrow">Get in touch</div>
+      <div class="contact__rule"></div>
+      <h2 class="contact__title">Contact</h2>
+      <p class="contact__lede">For collaboration, commissions, or quiet conversation — drop a line.</p>
+
+      <a class="contact__email" href="mailto:zhang.yyyc@gmail.com">
+        <span class="contact__email-label">Email</span>
+        <span class="contact__email-addr">zhang.yyyc@gmail.com</span>
+      </a>
+
+      <form class="contact__form" id="contactForm" action="https://formsubmit.co/zhang.yyyc@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="New message from studio site"/>
+        <input type="hidden" name="_template" value="table"/>
+
+        <div class="contact__row">
+          <label class="contact__field">
+            <span class="contact__label">Name</span>
+            <input type="text" name="name" required autocomplete="name" placeholder="Your name"/>
+          </label>
+          <label class="contact__field">
+            <span class="contact__label">Email</span>
+            <input type="email" name="email" required autocomplete="email" placeholder="you@example.com"/>
+          </label>
+        </div>
+
+        <label class="contact__field">
+          <span class="contact__label">Message</span>
+          <textarea name="message" required rows="5" placeholder="Tell me a little about what you have in mind…"></textarea>
+        </label>
+
+        <button class="contact__submit" type="submit">
+          <span>Send message</span>
+          <span class="contact__submit-arrow">→</span>
+        </button>
+        <p class="contact__note" id="contactNote">Or write directly to <a href="mailto:zhang.yyyc@gmail.com">zhang.yyyc@gmail.com</a></p>
+      </form>
+
+      <div class="contact__social">
+        <a class="contact__social-link" href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <line x1="8" y1="11" x2="8" y2="17"/>
+            <circle cx="8" cy="7.5" r="1" fill="currentColor"/>
+            <path d="M12 17v-4a2 2 0 0 1 4 0v4M16 13a2 2 0 0 1 4 0v4"/>
+          </svg>
+          <span>LinkedIn</span>
+        </a>
+        <a class="contact__social-link" href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/>
+          </svg>
+          <span>Instagram</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+<script>
+(() => {
+  const aboutPortrait = document.getElementById('aboutPortrait');
+  const aboutBg       = document.getElementById('aboutBg');
+  const aboutFrame    = document.getElementById('aboutFrame');
+  const aboutImg      = document.getElementById('aboutImg');
+  const aboutLines    = document.querySelectorAll('.about-line');
+  const aboutCta      = document.querySelector('.about-cta');
+
+  function updateAbout() {
+    if (!aboutPortrait) return;
+    const rect = aboutPortrait.getBoundingClientRect();
+    const total = aboutPortrait.offsetHeight - window.innerHeight;
+    if (total <= 0) return;
+    const p = Math.max(0, Math.min(1, -rect.top / total));
+
+    // 0.00 → 0.25: image fills; nothing happens yet
+    // 0.25 → 0.45: background darkens
+    // 0.30 → 0.55: line 1 fades in
+    // 0.45 → 0.70: image shrinks, frame appears
+    // 0.55 → 0.78: line 2 fades in
+    // 0.70 → 0.95: framed image slides upward
+
+    // Darken
+    const darken = Math.max(0, Math.min(1, (p - 0.25) / 0.20));
+    aboutBg.style.opacity = darken;
+    aboutImg.style.filter = `brightness(${1 - darken * 0.35}) saturate(${1 - darken * 0.15})`;
+
+    // Image shrink — preserves ORIGINAL aspect ratio, never crops.
+    // Starts full-viewport; scales DOWN proportionally on scroll.
+    const shrink = Math.max(0, Math.min(1, (p - 0.45) / 0.25));
+    // Width shrinks from 100vw → 55vw; same proportion for height
+    const wStart = 100, wEnd = 55;
+    const hStart = 100, hEnd = 78;
+    const widthVW  = wStart - (wStart - wEnd) * shrink;
+    const heightVH = hStart - (hStart - hEnd) * shrink;
+    aboutFrame.style.width  = widthVW  + 'vw';
+    aboutFrame.style.height = heightVH + 'vh';
+
+    // Image slide upward in late stage
+    const slide  = Math.max(0, Math.min(1, (p - 0.70) / 0.25)) * -14;
+    aboutFrame.style.transform = `translateY(${slide}vh)`;
+
+    // Lines
+    const showLine1 = p >= 0.30;
+    const showLine2 = p >= 0.55;
+    aboutLines[0] && aboutLines[0].classList.toggle('in', showLine1);
+    aboutLines[1] && aboutLines[1].classList.toggle('in', showLine2);
+    aboutCta && aboutCta.classList.toggle('in', showLine2);
+  }
+
+  window.addEventListener('scroll', updateAbout, { passive: true });
+  window.addEventListener('resize', updateAbout);
+  updateAbout();
+
+  /* ── Showcase: tab + slide switcher (one per identity) ── */
+  document.querySelectorAll('.showcase').forEach(showcase => {
+    const tabs   = showcase.querySelectorAll('.showcase__tab');
+    const slides = showcase.querySelectorAll('.showcase__slide');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const idx = parseInt(tab.dataset.tab, 10);
+        tabs.forEach((t, i) => t.classList.toggle('active', i === idx));
+        slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      });
+    });
+  });
+
+  /* ── AI video audio toggle ── */
+  const aiVideo  = document.getElementById('aiVideo');
+  const aiToggle = document.getElementById('aiAudioToggle');
+  if (aiVideo && aiToggle) {
+    aiToggle.addEventListener('click', () => {
+      aiVideo.muted = !aiVideo.muted;
+      aiToggle.classList.toggle('is-on', !aiVideo.muted);
+      if (!aiVideo.muted) aiVideo.play().catch(()=>{});
+    });
+  }
+
+  /* ── PHOTOGRAPHY intro: scroll-driven mask + final stage ── */
+  const photoIntro = document.getElementById('photoIntro');
+  const dim        = document.getElementById('photoIntroDim');
+  const maskWrap   = document.getElementById('photoMask');
+  const finalStage = document.getElementById('photoFinal');
+
+  function makeMaskSVG(scale) {
+    // Bolder font weight + condensed for impact. Apple-style MASSIVE typography.
+    const fontSize = Math.round(scale * 1400);
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2000 1000' preserveAspectRatio='xMidYMid slice'>
+      <defs>
+        <mask id='m' maskUnits='userSpaceOnUse' x='0' y='0' width='2000' height='1000'>
+          <rect x='0' y='0' width='2000' height='1000' fill='white'/>
+          <text x='1000' y='540' text-anchor='middle' dominant-baseline='middle'
+                font-family='SF Pro Display, -apple-system, Helvetica Neue, Arial, sans-serif'
+                font-weight='800'
+                font-size='${fontSize}'
+                letter-spacing='-60'
+                fill='black'>My Photography</text>
+        </mask>
+      </defs>
+      <rect x='0' y='0' width='2000' height='1000' fill='white' mask='url(%23m)'/>
+    </svg>`;
+    return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+  }
+
+  function updatePhoto() {
+    if (!photoIntro) return;
+    const rect = photoIntro.getBoundingClientRect();
+    const total = photoIntro.offsetHeight - window.innerHeight;
+    if (total <= 0) return;
+    const p = Math.max(0, Math.min(1, -rect.top / total));
+
+    // Simple timeline:
+    // 0.00–0.15  Pure looping start.mp4, no overlay
+    // 0.15–0.40  Title fades in over slightly darkened video
+    // 0.40–0.65  Intro paragraph fades in below the title
+    // 0.65–1.00  Composition holds, then drifts upward as user keeps scrolling
+
+    // Always hide the SVG mask — keep video clean
+    dim.style.setProperty('--mask-img', 'none');
+
+    if (p < 0.15) {
+      dim.style.opacity = 0;
+      finalStage.classList.remove('in');
+      finalStage.style.opacity = 0;
+      finalStage.style.transform = 'translateY(0)';
+      return;
+    }
+
+    // Gentle dim over the video so white text stays readable
+    const dimT = Math.min(1, (p - 0.15) / 0.20);
+    dim.style.background = '#000';
+    dim.style.opacity = dimT * 0.45;
+
+    // Title fade in
+    const titleT = Math.min(1, (p - 0.15) / 0.25);
+    // Intro paragraph fade in
+    const introT = Math.max(0, Math.min(1, (p - 0.40) / 0.25));
+    // Drift upward in late stage
+    const driftT = Math.max(0, Math.min(1, (p - 0.70) / 0.30));
+
+    finalStage.style.opacity = Math.max(titleT, introT) * (1 - driftT * 0.85);
+    finalStage.style.transform = `translateY(${-driftT * 8}vh)`;
+    finalStage.classList.toggle('in', titleT > 0.6 && driftT < 0.85);
+
+    // Inner element opacity for staggered fade
+    const titleEl = finalStage.querySelector('.photo-intro__title');
+    const ledeEl  = finalStage.querySelector('.photo-intro__lede');
+    if (titleEl) titleEl.style.opacity = titleT;
+    if (ledeEl)  ledeEl.style.opacity  = introT;
+  }
+  if (photoIntro) {
+    window.addEventListener('scroll', updatePhoto, { passive: true });
+    window.addEventListener('resize', updatePhoto);
+    updatePhoto();
+  }
+
+  /* ── ART BOOK READER — horizontal slide carousel + sidebar previews ── */
+  const reader        = document.getElementById('reader');
+  const readerTrack   = document.getElementById('readerTrack');
+  const readerSidebar = document.getElementById('readerSidebar');
+  const readerTitle   = document.getElementById('readerTitle');
+  const readerCount   = document.getElementById('readerCounter');
+  const readerClose   = document.getElementById('readerClose');
+  const readerPrev    = document.getElementById('readerPrev');
+  const readerNext    = document.getElementById('readerNext');
+
+  if (reader) {
+    const collections = {
+      portrait: {
+        title: 'Portrait',
+        pages: [
+          'uploads/portrait%20photo1.JPG.jpg',
+          'uploads/portrait%20photo2.JPG.jpg',
+          'uploads/portrait%20photo3.JPG.jpg',
+          'uploads/portrait%20photo4.JPG.jpg',
+          'uploads/portrait%20photo5.JPG.jpg',
+          'uploads/portrait%20photo6.JPG.jpg',
+          'uploads/portrait%20photo7.JPG.jpg',
+          'uploads/portrait%20photo8.JPG.jpg',
+          'uploads/portrait%20photo9.JPG.jpg',
+          'uploads/portrait%20photo10.jpg',
+        ],
+      },
+      landscape: {
+        title: 'Landscape',
+        pages: [
+          'uploads/landscape1.jpg',
+          'uploads/landscape2.jpg',
+          'uploads/landscape3.jpg',
+          'uploads/landscape4.jpg',
+          'uploads/landscape5.jpg',
+          'uploads/landscape6.jpg',
+          'uploads/landscape7.jpg',
+        ],
+      },
+      humanity: {
+        title: 'Humanity',
+        pages: [
+          'uploads/humanity1.jpg',
+          'uploads/humanity2.jpg',
+          'uploads/humanity3.jpg',
+          'uploads/humanity4.jpg',
+          'uploads/humanity5.jpg',
+          'uploads/humanity6-ee0c7e5e.jpg',
+        ],
+      },
+    };
+
+    let currentBook = null;
+    let pageIdx = 0;
+    const pad2 = n => String(n).padStart(2, '0');
+
+    function renderBook(book) {
+      // Build slides
+      readerTrack.innerHTML = '';
+      book.pages.forEach((src, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'reader__slide';
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `${book.title} ${i + 1}`;
+        slide.appendChild(img);
+        readerTrack.appendChild(slide);
+      });
+      // Build sidebar thumbnails
+      readerSidebar.innerHTML = '';
+      book.pages.forEach((src, i) => {
+        const t = document.createElement('div');
+        t.className = 'reader__thumb';
+        t.style.backgroundImage = `url("${src}")`;
+        t.dataset.idx = i;
+        const num = document.createElement('span');
+        num.className = 'reader__thumb-num';
+        num.textContent = pad2(i + 1);
+        t.appendChild(num);
+        t.addEventListener('click', () => showPage(i));
+        readerSidebar.appendChild(t);
+      });
+    }
+
+    function showPage(idx) {
+      if (!currentBook) return;
+      const total = currentBook.pages.length;
+
+      // Auto-exit when user tries to navigate past the last photo
+      if (idx >= total) {
+        // Brief pause on the final frame, then close back to the 3-book layout
+        setTimeout(closeBook, 350);
+        return;
+      }
+      // Don't wrap backward past first; just clamp
+      pageIdx = Math.max(0, Math.min(total - 1, idx));
+
+      // Slide track horizontally
+      readerTrack.style.transform = `translate3d(-${pageIdx * 100}%, 0, 0)`;
+      readerCount.textContent = `${pad2(pageIdx + 1)} / ${pad2(total)}`;
+      // Sidebar active state
+      readerSidebar.querySelectorAll('.reader__thumb').forEach((el, i) => {
+        el.classList.toggle('active', i === pageIdx);
+      });
+      // Auto-scroll sidebar so the active thumb is visible
+      const activeThumb = readerSidebar.querySelectorAll('.reader__thumb')[pageIdx];
+      if (activeThumb) {
+        const sRect = readerSidebar.getBoundingClientRect();
+        const tRect = activeThumb.getBoundingClientRect();
+        if (tRect.top < sRect.top || tRect.bottom > sRect.bottom) {
+          activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+
+    function openBook(key) {
+      currentBook = collections[key];
+      if (!currentBook) return;
+      readerTitle.textContent = currentBook.title;
+      renderBook(currentBook);
+      pageIdx = 0;
+      // Reset to first slide without animation
+      readerTrack.style.transition = 'none';
+      showPage(0);
+      // Re-enable transition next frame
+      requestAnimationFrame(() => {
+        readerTrack.style.transition = '';
+      });
+      reader.classList.add('open');
+      reader.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeBook() {
+      const expanded = document.querySelector('.book.expanding');
+      const ov = document.querySelector('.book-overlay');
+
+      // 1) Close the reader first
+      reader.classList.remove('open');
+      reader.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+
+      if (expanded && expanded.__shelfRect) {
+        const target = expanded.__shelfRect;
+
+        // 2) Make sure the expanded book is visible at its current centered size
+        expanded.style.visibility = '';
+        expanded.style.opacity = '';
+
+        // 3) Animate it back to its shelf rectangle
+        // First remove the .expanding class so the !important rules drop,
+        // and inline styles take over.
+        expanded.classList.remove('expanding');
+        // Force fixed position with current centered rect
+        const currentRect = expanded.getBoundingClientRect();
+        expanded.style.position = 'fixed';
+        expanded.style.transition = 'none';
+        expanded.style.top    = currentRect.top + 'px';
+        expanded.style.left   = currentRect.left + 'px';
+        expanded.style.width  = currentRect.width + 'px';
+        expanded.style.height = currentRect.height + 'px';
+        expanded.style.transform = 'none';
+        expanded.style.zIndex = '8500';
+        // Force layout
+        void expanded.offsetWidth;
+        expanded.style.transition = 'top .9s cubic-bezier(.4,0,.2,1), left .9s cubic-bezier(.4,0,.2,1), width .9s cubic-bezier(.4,0,.2,1), height .9s cubic-bezier(.4,0,.2,1)';
+        requestAnimationFrame(() => {
+          expanded.style.top    = target.top + 'px';
+          expanded.style.left   = target.left + 'px';
+          expanded.style.width  = target.width + 'px';
+          expanded.style.height = target.height + 'px';
+        });
+
+        // 4) Hide overlay after the animation
+        if (ov) ov.classList.remove('show');
+
+        setTimeout(() => {
+          // 5) Strip inline styles → book returns to natural flow
+          expanded.style.cssText = '';
+          delete expanded.__shelfRect;
+        }, 950);
+      } else if (ov) {
+        ov.classList.remove('show');
+      }
+    }
+
+    document.querySelectorAll('.book').forEach(book => {
+      book.addEventListener('click', () => {
+        if (book.classList.contains('expanding')) return;
+        // Create overlay if not present
+        let bookOverlay = document.querySelector('.book-overlay');
+        if (!bookOverlay) {
+          bookOverlay = document.createElement('div');
+          bookOverlay.className = 'book-overlay';
+          document.body.appendChild(bookOverlay);
+        }
+        // Remember the book's natural shelf rect for the close animation
+        const rect = book.getBoundingClientRect();
+        book.__shelfRect = rect;
+        book.style.width  = rect.width + 'px';
+        book.style.height = rect.height + 'px';
+        book.style.top    = rect.top + 'px';
+        book.style.left   = rect.left + 'px';
+        book.style.position = 'fixed';
+        book.style.margin = '0';
+        book.style.transform = 'none';
+        book.style.zIndex = '8500';
+        bookOverlay.classList.add('show');
+
+        // Next frame: animate to centered expanded
+        requestAnimationFrame(() => {
+          book.classList.add('expanding');
+          book.style.top = '';
+          book.style.left = '';
+          book.style.width = '';
+          book.style.height = '';
+        });
+
+        // After expansion completes, open reader. Keep the expanded
+        // book visible underneath (darkened) — its cover stays in view
+        // through the reader's translucent black backdrop.
+        setTimeout(() => {
+          openBook(book.dataset.book);
+        }, 900);
+      });
+    });
+    function resetBookExpansion() {
+      document.querySelectorAll('.book.expanding').forEach(b => {
+        b.classList.remove('expanding');
+        b.style.cssText = '';
+      });
+      const ov = document.querySelector('.book-overlay');
+      if (ov) ov.classList.remove('show');
+    }
+    readerClose.addEventListener('click', closeBook);
+    readerPrev.addEventListener('click', () => showPage(pageIdx - 1));
+    readerNext.addEventListener('click', () => showPage(pageIdx + 1));
+    document.addEventListener('keydown', (e) => {
+      if (!reader.classList.contains('open')) return;
+      if (e.key === 'Escape')     closeBook();
+      if (e.key === 'ArrowRight') showPage(pageIdx + 1);
+      if (e.key === 'ArrowLeft')  showPage(pageIdx - 1);
+    });
+    // Wheel scroll → page change (debounced)
+    let wheelLock = false;
+    reader.addEventListener('wheel', (e) => {
+      if (!reader.classList.contains('open')) return;
+      // Allow native scroll inside the sidebar
+      if (e.target.closest('.reader__sidebar')) return;
+      e.preventDefault();
+      if (wheelLock) return;
+      if (Math.abs(e.deltaY) < 12 && Math.abs(e.deltaX) < 12) return;
+      // Use whichever axis has greater magnitude
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (delta > 0)        showPage(pageIdx + 1);
+      else if (delta < 0)   showPage(pageIdx - 1);
+      wheelLock = true;
+      setTimeout(() => { wheelLock = false; }, 600);
+    }, { passive: false });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    reader.addEventListener('touchstart', (e) => {
+      if (!reader.classList.contains('open')) return;
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    reader.addEventListener('touchend', (e) => {
+      if (!reader.classList.contains('open')) return;
+      const dx = touchStartX - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 50) {
+        if (dx > 0) showPage(pageIdx + 1);
+        else        showPage(pageIdx - 1);
+      }
+    }, { passive: true });
+  }
+})();
+</script>
+
+<script>
+(() => {
+  const video    = document.getElementById('hero-video');
+  const stage    = document.getElementById('stage');
+  const fill     = document.getElementById('progress-fill');
+  const hint     = document.getElementById('scroll-hint');
+  const blackout = document.getElementById('blackout');
+  const runway   = document.getElementById('hero-runway');
+  const trainSec = document.getElementById('train-section');
+  const trainImg = document.getElementById('train-img');
+  const trainCta = document.getElementById('train-cta');
+  const phase4   = document.getElementById('phase4');
+  const mindmap  = document.getElementById('mindmap-section');
+
+  const scenes = [...document.querySelectorAll('.scene')].map(el => ({
+    el,
+    in:  parseFloat(el.dataset.in),
+    out: parseFloat(el.dataset.out),
+  }));
+
+  // ── Hero scroll distance (px) ──────────────────────
+  // Total scroll required to play the hero timeline.
+  // Larger = slower scrubbing, more room for holds.
+  const HERO_SCROLL_PX = window.innerHeight * 11;
+
+  // Position the hero runway and the train section
+  runway.style.height = HERO_SCROLL_PX + 'px';
+
+  // ── Video state ────────────────────────────────────
+  let dur         = 0;
+  let videoReady  = false;
+  let unlocked    = false;
+  let displayProg = 0;          // smoothed hero progress 0..1
+  const TIME_LERP = 0.12;       // symmetric — identical feel both directions
+  const SEEK_EPS  = 0.012;
+
+  // ── Loading overlay: hold the site until the video can play through ──
+  const loader     = document.getElementById('loader');
+  const loaderFill = document.getElementById('loader-fill');
+  const loaderPct  = document.getElementById('loader-pct');
+  let loaderDone   = false;
+  function setLoad(frac){
+    const p = Math.max(0, Math.min(1, frac));
+    if (loaderFill) loaderFill.style.width = (p * 100) + '%';
+    if (loaderPct)  loaderPct.textContent = 'Loading ' + Math.round(p * 100) + '%';
+  }
+  function hideLoader(){
+    if (loaderDone || !loader) return;
+    loaderDone = true;
+    setLoad(1);
+    loader.classList.add('done');
+    setTimeout(() => { if (loader) loader.style.display = 'none'; }, 700);
+  }
+  video.addEventListener('canplaythrough', hideLoader, { once: true });
+  // Safety net: never trap the user if the event never fires.
+  setTimeout(hideLoader, 15000);
+
+  // ── Load video as blob URL (so seeking always works) ──
+  (async () => {
+    try {
+      const url = video.dataset.src;
+      const res = await fetch(url);
+      const total = +res.headers.get('Content-Length') || 0;
+      if (res.body && total) {
+        const reader = res.body.getReader();
+        const chunks = []; let received = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value); received += value.length;
+          setLoad((received / total) * 0.92);
+        }
+        video.src = URL.createObjectURL(new Blob(chunks, { type: res.headers.get('Content-Type') || 'video/mp4' }));
+      } else {
+        const blob = await res.blob();
+        setLoad(0.92);
+        video.src = URL.createObjectURL(blob);
+      }
+      video.load();
+    } catch (e) {
+      video.src = video.dataset.src;
+    }
+  })();
+
+  // ── Unlock for scrubbing ────────────────────────────
+  function unlockVideo() {
+    if (unlocked) return;
+    unlocked = true;
+    try {
+      const p = video.play();
+      if (p && p.then) p.then(() => { video.pause(); video.currentTime = 0; }).catch(() => {});
+      else { try { video.pause(); video.currentTime = 0; } catch (e) {} }
+    } catch (e) {}
+  }
+  function onMeta() {
+    if (!isFinite(video.duration) || video.duration <= 0) return;
+    dur = video.duration;
+    videoReady = true;
+    unlockVideo();
+  }
+  video.addEventListener('loadedmetadata', onMeta);
+  video.addEventListener('durationchange', onMeta);
+  video.addEventListener('canplay', onMeta);
+  if (video.readyState >= 1) onMeta();
+  ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
+    window.addEventListener(evt, unlockVideo, { once: true, passive: true })
+  );
+
+  // ── Cinematic hold-zone remap ──────────────────────
+  // Plateaus advance slowly (not flat) so the video keeps drifting —
+  // each phase lingers ~2s worth of gentle motion instead of freezing.
+  const HOLD_ANCHORS = [
+    { in: 0.000, out: 0.000 },
+    { in: 0.050, out: 0.055 },   // Phase 1 · name — arrive
+    { in: 0.170, out: 0.090 },   // Phase 1 · slow drift
+    { in: 0.240, out: 0.255 },   // Phase 2 · systems — arrive
+    { in: 0.370, out: 0.295 },   // Phase 2 · slow drift
+    { in: 0.440, out: 0.510 },   // Phase 3 · 0→1 — arrive
+    { in: 0.580, out: 0.560 },   // Phase 3 · slow drift
+    { in: 0.650, out: 0.700 },   // Phase 4 · qualities — arrive
+    { in: 0.860, out: 0.760 },   // Phase 4 · slow drift
+    { in: 1.000, out: 1.000 },   // fade to black
+  ];
+  function smootherstep(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+  function remapHolds(p) {
+    if (p <= 0) return 0;
+    if (p >= 1) return 1;
+    for (let i = 0; i < HOLD_ANCHORS.length - 1; i++) {
+      const a = HOLD_ANCHORS[i], b = HOLD_ANCHORS[i + 1];
+      if (p <= b.in) {
+        const t = (p - a.in) / (b.in - a.in);
+        return a.out + (b.out - a.out) * smootherstep(Math.max(0, Math.min(1, t)));
+      }
+    }
+    return 1;
+  }
+
+  // ── RAF loop ───────────────────────────────────────
+  function loop() {
+    // ── Hero progress driven purely by window.scrollY ──
+    // Native scroll → fully bidirectional. The hero is
+    // position:fixed, so the user perceives no page scroll
+    // while it's active (the scene just morphs in place).
+    const scrollY = window.scrollY;
+    const target = Math.max(0, Math.min(1, scrollY / HERO_SCROLL_PX));
+
+    // Symmetric lerp toward target — same in forward & reverse
+    displayProg += (target - displayProg) * TIME_LERP;
+
+    // Apply scene-anchor holds
+    const eased = remapHolds(displayProg);
+
+    // Video timeline completes at VIDEO_END; the tail drives the exit.
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const VIDEO_END = 0.80;
+    const videoProg = Math.min(1, eased / VIDEO_END);
+
+    if (videoReady && dur > 0 && !video.seeking) {
+      const tt = videoProg * dur;
+      if (Math.abs(video.currentTime - tt) > SEEK_EPS) {
+        try { video.currentTime = tt; } catch (e) {}
+      }
+    }
+
+    fill.style.width = (videoProg * 100) + '%';
+    hint.style.opacity = displayProg < 0.012 ? '1' : '0';
+
+    // 1) Video eases to full black over the tail of its own timeline (span .12).
+    blackout.style.opacity = clamp01((eased - 0.68) / 0.12);
+
+    // 2) On full black the text lingers, then fades out on a smooth ease
+    //    curve — with an added hold on empty black before the next section.
+    const tRaw = clamp01((eased - 0.80) / 0.13);
+    const textFade = tRaw * tRaw * (3 - 2 * tRaw);
+    if (phase4) phase4.style.opacity = eased >= 0.78 ? String(1 - textFade) : '';
+
+    // 3) After the text is gone, hold the empty black for a beat, then the
+    //    black stage lifts and the mindmap rises up from the bottom.
+    const reveal = clamp01((eased - 0.94) / 0.06);
+    stage.style.opacity = String(1 - reveal);
+    stage.style.pointerEvents = reveal > 0.5 ? 'none' : 'auto';
+    if (mindmap) {
+      mindmap.style.opacity = String(reveal);
+      mindmap.style.transform = 'translateY(' + ((1 - reveal) * 60) + 'px)';
+    }
+
+    scenes.forEach(({ el, in: wIn, out: wOut }) =>
+      el.classList.toggle('in', videoProg >= wIn && videoProg < wOut)
+    );
+
+    // ── Train section animation ──────────────────────
+    // Right → Left horizontal pass across the bridge.
+    // Background image is static; only the train moves.
+    if (trainSec && trainImg) {
+      const rect  = trainSec.getBoundingClientRect();
+      const vh    = window.innerHeight;
+      const total = trainSec.offsetHeight - vh;
+      const tp    = total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0;
+
+      // Cinematic smoothstep ease — slow start, slow end, smooth middle
+      const eased = tp * tp * (3 - 2 * tp);
+
+      // Train travels from off-screen RIGHT to off-screen LEFT.
+      // Anchored at left:0, so translateX(100vw) = fully off right,
+      // translateX(-trainWidth) = fully off left.
+      const vw = window.innerWidth;
+      const trainWidth = trainImg.offsetWidth || vw * 0.72;
+      const startX = vw + 80;             // fully past right edge
+      const endX   = -trainWidth - 80;    // fully past left edge
+      const tx     = startX + (endX - startX) * eased;
+
+      // Lock vertical alignment to bridge level (top:56%, translateY(-50%))
+      trainImg.style.transform = `translate3d(${tx}px, -50%, 0)`;
+
+      // CTA: fade in as train is centered/exiting (tp 0.55 → 1.0)
+      if (trainCta) {
+        trainCta.classList.toggle('visible', tp >= 0.55);
+      }
+    }
+
+        requestAnimationFrame(loop);
+  }
+
+  if (scenes.length) scenes[0].el.classList.add('in');
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+/* ── Nav scroll-spy: highlight the section currently in view ── */
+(() => {
+  const navLinks = [...document.querySelectorAll('.topnav__links a[data-nav]')];
+  const byNav = {};
+  navLinks.forEach(a => { byNav[a.dataset.nav] = a; });
+
+  // Map nav keys → the element that marks each section's region.
+  // "home" = top hero (everything before #about).
+  const spaceEl = document.getElementById('space');
+  const contactEl = document.getElementById('contact');
+
+  function setActive(key) {
+    navLinks.forEach(a => a.classList.toggle('active', a.dataset.nav === key));
+  }
+
+  function onScroll() {
+    const y = window.scrollY + window.innerHeight * 0.4;
+    let key = 'home';
+    if (spaceEl && y >= spaceEl.offsetTop) key = 'space';
+    if (contactEl && y >= contactEl.offsetTop) key = 'contact';
+    setActive(key);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+</script>
+</body>
+</html>

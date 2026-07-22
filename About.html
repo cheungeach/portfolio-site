@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --ink:    oklch(8%  0.005 50);
+  --ivory:  oklch(96% 0.006 78);
+  --mist:   oklch(70% 0.006 78);
+  --dim:    oklch(48% 0.005 78);
+  --gold:   oklch(74% 0.10  78);
+  --line:   oklch(96% 0.006 78 / .10);
+}
+html { overflow-x: hidden; scroll-behavior: smooth; }
+body { background: var(--ink); color: var(--ivory); font-family: 'DM Mono', monospace; font-weight: 300; }
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--gold); }
+
+/* ── Top nav (shared) ── */
+.topnav { position: fixed; top: 0; z-index: 100; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 1.4rem 3rem; background: rgba(22,22,23,.72); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid rgba(255,255,255,.08); height: 64px; }
+.topnav__brand { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 1rem; letter-spacing: .35em; text-transform: uppercase; color: var(--ivory); opacity: .9; }
+.topnav__brand em { font-style: italic; color: var(--gold); }
+.topnav__links { display: flex; gap: 2.4rem; list-style: none; align-items: center; }
+.topnav__links a { font-size: .56rem; letter-spacing: .24em; text-transform: uppercase; color: rgba(255,255,255,.72); transition: color .25s; position: relative; padding: .3rem 0; }
+.topnav__links a:hover { color: #fff; }
+.topnav__links a.active { color: #fff; }
+.topnav__links a.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 1px; background: var(--gold); }
+
+/* ── Profile hero ── */
+.about-wrap { max-width: 1180px; margin: 0 auto; padding: 128px 3rem 0; }
+.profile { display: grid; grid-template-columns: 0.82fr 1fr; gap: 5rem; align-items: center; min-height: calc(100vh - 128px); }
+.profile__photo { position: relative; border-radius: 4px; overflow: hidden; aspect-ratio: 3 / 4.2; background: oklch(20% 0.01 60); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.profile__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.profile__eyebrow { font-size: .58rem; letter-spacing: .42em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.4rem; }
+.profile__name { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(3rem, 6vw, 5rem); line-height: .98; letter-spacing: .01em; margin-bottom: .5rem; }
+.profile__name em { font-style: italic; color: var(--gold); }
+.profile__role { font-family: 'DM Mono', monospace; font-size: .68rem; letter-spacing: .26em; text-transform: uppercase; color: var(--mist); margin-bottom: 2.2rem; }
+.profile__lede { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.15rem, 1.7vw, 1.5rem); font-style: italic; line-height: 1.6; color: var(--ivory); max-width: 42ch; margin-bottom: 1.6rem; }
+.profile__body { font-size: .8rem; line-height: 2; color: var(--mist); max-width: 48ch; margin-bottom: 2.6rem; }
+.resume-btn { display: inline-flex; align-items: center; gap: .7rem; padding: 1rem 2.1rem; border: 1px solid var(--gold); border-radius: 2px; color: var(--gold); font-family: 'DM Mono', monospace; font-size: .62rem; letter-spacing: .28em; text-transform: uppercase; transition: background .3s, color .3s, transform .3s; }
+.resume-btn:hover { background: var(--gold); color: var(--ink); transform: translateY(-1px); }
+.resume-btn svg { width: 14px; height: 14px; }
+
+/* ── Experience ── */
+.experience { max-width: 1180px; margin: 0 auto; padding: 6rem 3rem 2rem; }
+.section-eyebrow { font-size: .58rem; letter-spacing: .42em; text-transform: uppercase; color: var(--gold); margin-bottom: .8rem; }
+.section-head { display: flex; align-items: baseline; gap: 1.4rem; border-bottom: 1px solid var(--line); padding-bottom: 2.4rem; margin-bottom: 2.8rem; }
+.section-title { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(2rem, 4vw, 3rem); line-height: 1; }
+.xp { display: grid; grid-template-columns: 0.9fr 2fr; gap: 2.5rem; padding: 2.2rem 0; border-bottom: 1px solid var(--line); }
+.xp:last-child { border-bottom: none; }
+.xp__when { font-family: 'DM Mono', monospace; font-size: .62rem; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; }
+.xp__place { color: var(--gold); margin-top: .5rem; font-size: .68rem; letter-spacing: .06em; }
+.xp__role { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 400; margin-bottom: .7rem; }
+.xp__desc { font-size: .78rem; line-height: 1.95; color: var(--mist); max-width: 60ch; }
+.edu { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1.2rem; margin-top: 3.2rem; padding: 2rem 2.2rem; border: 1px solid var(--line); border-radius: 4px; }
+.edu__school { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; }
+.edu__meta { font-size: .68rem; letter-spacing: .08em; color: var(--mist); }
+.edu__gpa { margin-left: auto; font-size: .66rem; letter-spacing: .12em; color: var(--gold); }
+
+/* ── Footer (shared with Projects) ── */
+.site-footer { max-width: 1320px; margin: 10vh auto 0; padding: 6vh 3rem; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 4rem; align-items: start; }
+.site-footer h4 { font-size: .55rem; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin-bottom: 1.6rem; font-weight: 400; }
+.footer-brand { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 2rem; line-height: 1; color: var(--ivory); margin-bottom: 1rem; }
+.footer-brand em { font-style: italic; color: var(--gold); }
+.footer-tagline { font-size: .7rem; line-height: 1.9; color: var(--mist); opacity: .6; max-width: 38ch; }
+.site-footer ul { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
+.site-footer ul a { font-size: .65rem; letter-spacing: .1em; color: var(--mist); opacity: .7; transition: opacity .25s, color .25s; }
+.site-footer ul a:hover { opacity: 1; color: var(--ivory); }
+.copyright { grid-column: 1 / -1; padding-top: 4rem; margin-top: 4rem; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: .54rem; letter-spacing: .24em; text-transform: uppercase; color: var(--dim); }
+
+@media (max-width: 900px) {
+  .topnav { padding: 1rem 1.5rem; }
+  .topnav__links { gap: 1.2rem; }
+  .topnav__links a { font-size: .5rem; }
+  .about-wrap { padding: 100px 1.5rem 0; }
+  .profile { grid-template-columns: 1fr; gap: 2.5rem; min-height: 0; padding-top: 1rem; }
+  .profile__photo { aspect-ratio: 3 / 4; max-width: 380px; }
+  .experience { padding: 4rem 1.5rem 2rem; }
+  .xp { grid-template-columns: 1fr; gap: .8rem; }
+  .edu { flex-direction: column; }
+  .edu__gpa { margin-left: 0; }
+  .site-footer { grid-template-columns: 1fr; gap: 2.5rem; padding: 4vh 1.5rem; }
+  .copyright { flex-direction: column; gap: 1rem; }
+}
+
+/* ═══ Experience — identity sections with tabbed showcases ═══ */
+.identity{max-width:1180px;margin:0 auto;padding:5rem 3rem;border-top:1px solid var(--line)}
+.identity:first-of-type{border-top:none}
+.identity__num{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.3em;color:var(--gold)}
+.identity__title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2rem,4.5vw,3.4rem);line-height:1.05;margin:.6rem 0 1.1rem}
+.identity__title em{font-style:italic;color:var(--gold)}
+.identity__lede{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.1rem,1.7vw,1.45rem);line-height:1.5;color:var(--ivory);margin-bottom:1rem;max-width:48ch}
+.identity__sub{font-size:.8rem;line-height:2;color:var(--mist);max-width:58ch;margin-bottom:2.4rem}
+.showcase__stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:4px;overflow:hidden;background:oklch(16% 0.01 60);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.showcase__slide{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .6s}
+.showcase__slide.active{opacity:1;pointer-events:auto}
+.showcase__slide img,.showcase__slide video{width:100%;height:100%;object-fit:cover;display:block}
+.showcase__slide--card{display:flex;align-items:center;padding:clamp(1.5rem,5vw,4rem);background:oklch(12% 0.008 60)}
+.showcase__card{max-width:52ch;text-align:left}
+.showcase__card-eyebrow{display:block;font-size:.54rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.showcase__card-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(1.3rem,2.4vw,2rem);line-height:1.3;margin-bottom:1rem}
+.showcase__card-title em{font-style:italic;color:var(--gold)}
+.showcase__card-body{font-size:.78rem;line-height:1.95;color:var(--mist)}
+.showcase__nav{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.showcase__tab{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mist);background:transparent;border:1px solid oklch(96% 0.006 78 / .18);border-radius:2px;padding:.5rem .9rem;cursor:pointer;transition:color .25s,background .25s,border-color .25s}
+.showcase__tab:hover{color:var(--ivory);border-color:oklch(96% 0.006 78 / .35)}
+.showcase__tab.active{background:var(--ivory);color:var(--ink);border-color:var(--ivory)}
+@media(max-width:900px){.identity{padding:3.2rem 1.5rem}}
+
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="Projects.html">Projects</a></li>
+    <li><a href="About.html" class="active">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="about-wrap">
+  <section class="profile">
+    <div class="profile__photo">
+      <img src="uploads/about photo.jpg" alt="Zhang Yichi" />
+    </div>
+    <div class="profile__intro">
+      <div class="profile__eyebrow">About</div>
+      <h1 class="profile__name">Zhang Yichi</h1>
+      <div class="profile__role">AI Product Researcher &amp; Designer</div>
+      <p class="profile__lede">I build AI products that are human-centered, aesthetic, and recognized by the market.</p>
+      <p class="profile__body">A Cognitive Science &amp; Art Practice student at UC Berkeley, I work across AI-assisted creation, user research, and design — turning market insight and cross-disciplinary teams into products people genuinely value.</p>
+      <a class="resume-btn" href="uploads/resume.pdf" download="Zhang Yichi - Resume.pdf">
+        Download résumé
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+      </a>
+    </div>
+  </section>
+</div>
+
+<section class="experience" id="experience">
+  <div class="section-head">
+    <div>
+      <div class="section-eyebrow">Experience</div>
+      <h2 class="section-title">How I work — three ways of creating</h2>
+    </div>
+  </div>
+
+  <article class="identity">
+    <div class="identity__num">01</div>
+    <h2 class="identity__title">AI &amp; <em>Humanistic Creation</em></h2>
+    <p class="identity__lede">I explore how humanistic thinking can collaborate with AI to create interactive experiences.</p>
+    <p class="identity__sub">Using vibe coding, AI-assisted storytelling, and interactive media, I create works that preserve reflection and creativity within technological systems.</p>
+    <div class="showcase">
+      <div class="showcase__stage">
+        <div class="showcase__slide active" data-slide="0">
+          <video src="uploads/AI video.mp4" muted loop playsinline autoplay></video>
+        </div>
+        <div class="showcase__slide showcase__slide--card" data-slide="1">
+          <div class="showcase__card">
+            <span class="showcase__card-eyebrow">Vibe Coding · 2025</span>
+            <h3 class="showcase__card-title">The website you see now was created through <em>vibe coding</em>, in collaboration with Claude Design.</h3>
+            <p class="showcase__card-body">Every scroll, every transition, every micro-interaction here was prompted, refined, and felt into shape — a dialogue between a human designer and an AI partner.</p>
+          </div>
+        </div>
+      </div>
+      <div class="showcase__nav">
+        <button class="showcase__tab active" data-tab="0" type="button">AI Video</button>
+        <button class="showcase__tab" data-tab="1" type="button">Vibe Coding</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="identity">
+    <div class="identity__num">02</div>
+    <h2 class="identity__title">Leadership &amp; <em>Community</em></h2>
+    <p class="identity__lede">I connect people, platforms, and cultures — turning scattered energy into communities that last.</p>
+    <p class="identity__sub">As Project Lead at ASUCD's Office of International Student, I manage a 16-person cross-functional team, built the department platform from zero, and led cross-cultural events reaching 900+ participants.</p>
+    <div class="showcase">
+      <div class="showcase__stage">
+        <div class="showcase__slide active" data-slide="0">
+          <img src="uploads/ASUCD International Student Office.jpg" alt="ASUCD Office of International Student"/>
+        </div>
+        <div class="showcase__slide" data-slide="1">
+          <img src="uploads/Student Event Organizer.JPG" alt="Campus event"/>
+        </div>
+        <div class="showcase__slide showcase__slide--card" data-slide="2">
+          <div class="showcase__card">
+            <span class="showcase__card-eyebrow">Community · 2025</span>
+            <h3 class="showcase__card-title">From <em>0 to 1</em> — building platforms and the teams behind them.</h3>
+            <p class="showcase__card-body">SOPs in Jira, biweekly user interviews, and data-driven iteration — driving a 30% budget increase and partnerships with 20+ student organizations.</p>
+          </div>
+        </div>
+      </div>
+      <div class="showcase__nav">
+        <button class="showcase__tab active" data-tab="0" type="button">ASUCD Office</button>
+        <button class="showcase__tab" data-tab="1" type="button">Campus Events</button>
+        <button class="showcase__tab" data-tab="2" type="button">Impact</button>
+      </div>
+    </div>
+  </article>
+
+  <article class="identity">
+    <div class="identity__num">03</div>
+    <h2 class="identity__title">Commercially Aware <em>Artist</em></h2>
+    <p class="identity__lede">I make art that stands on its own — and knows its market.</p>
+    <p class="identity__sub">Founder of a 400+ member photography community, I've partnered with brands like SONY and DJI, secured five-figure sponsorships, and turned creative vision into commercially successful events.</p>
+    <div class="showcase">
+      <div class="showcase__stage">
+        <div class="showcase__slide active" data-slide="0">
+          <img src="uploads/UC Athletes Photographer.JPG" alt="Sports photography"/>
+        </div>
+        <div class="showcase__slide" data-slide="1">
+          <img src="uploads/portrait photo1.JPG.jpg" alt="Portrait photography"/>
+        </div>
+        <div class="showcase__slide showcase__slide--card" data-slide="2">
+          <div class="showcase__card">
+            <span class="showcase__card-eyebrow">Commercial · 2022 —</span>
+            <h3 class="showcase__card-title">Creative direction with a <em>commercial backbone</em>.</h3>
+            <p class="showcase__card-body">Redesigned a contest submission flow for an 85% rise in entries; secured ~¥70k sponsorship and cut ticket prices 44% while lifting attendance 40%.</p>
+          </div>
+        </div>
+      </div>
+      <div class="showcase__nav">
+        <button class="showcase__tab active" data-tab="0" type="button">Photography</button>
+        <button class="showcase__tab" data-tab="1" type="button">Portrait</button>
+        <button class="showcase__tab" data-tab="2" type="button">Commercial</button>
+      </div>
+    </div>
+  </article>
+
+  <div class="edu">
+    <div class="edu__school">University of California, Berkeley</div>
+    <div class="edu__meta">B.A. Cognitive Science &amp; Art Practice · Expected 2028</div>
+    <div class="edu__gpa">GPA 3.84 / 4.00</div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div>
+    <div class="footer-brand">Zhang <em>Yichi</em></div>
+    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
+  </div>
+  <div>
+    <h4>Sitemap</h4>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Projects.html">Projects</a></li>
+      <li><a href="Photography.html">Photography</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="index.html#contact">Email</a></li>
+      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Archive</h4>
+    <ul>
+      <li><a href="#">2025</a></li>
+      <li><a href="#">2023</a></li>
+      <li><a href="#">2022</a></li>
+      <li><a href="#">Older</a></li>
+    </ul>
+  </div>
+  <div class="copyright">
+    <span>© 2026 Zhang Yichi</span>
+    <span>All works belong to Yichi</span>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.showcase').forEach(sc => {
+  const slides = sc.querySelectorAll('.showcase__slide');
+  const tabs = sc.querySelectorAll('.showcase__tab');
+  tabs.forEach(t => t.addEventListener('click', () => {
+    const i = +t.dataset.tab;
+    slides.forEach((sl, k) => sl.classList.toggle('active', k === i));
+    tabs.forEach((tb, k) => tb.classList.toggle('active', k === i));
+  }));
+});
+</script>
+</body>
+</html>
