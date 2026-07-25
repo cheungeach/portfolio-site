@@ -1141,6 +1141,92 @@ html, body {
   background: var(--gold);
 }
 
+/* ── Mobile hamburger toggle (hidden on desktop) ── */
+.topnav__toggle {
+  display: none;
+  width: 34px; height: 34px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.topnav__toggle span {
+  display: block;
+  width: 19px; height: 1.5px;
+  background: var(--ivory);
+  border-radius: 2px;
+}
+
+/* ── Full-screen vertical menu (Apple-style) ── */
+.navmenu {
+  position: fixed;
+  inset: 0;
+  z-index: 1900;
+  background: rgba(16,16,17,0.94);
+  backdrop-filter: saturate(180%) blur(26px);
+  -webkit-backdrop-filter: saturate(180%) blur(26px);
+  display: flex;
+  flex-direction: column;
+  padding: 92px 2rem 3rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
+.navmenu.open { opacity: 1; pointer-events: auto; }
+.navmenu__close {
+  position: absolute;
+  top: 1.5rem; right: 1.4rem;
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--ivory);
+  font-size: 1.6rem; line-height: 1;
+  opacity: .8;
+}
+.navmenu__links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  margin: 0; padding: 0;
+}
+.navmenu__links li {
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+}
+.navmenu__links a {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  letter-spacing: .02em;
+  color: var(--ivory);
+  text-decoration: none;
+  padding: 1.05rem .2rem;
+  opacity: .92;
+  transform: translateY(14px);
+  transition: transform .5s cubic-bezier(.2,.7,.2,1), opacity .5s;
+}
+.navmenu.open .navmenu__links a { transform: translateY(0); }
+.navmenu__links a.active { color: var(--gold); opacity: 1; }
+.navmenu__links li:nth-child(1) a { transition-delay: .05s; }
+.navmenu__links li:nth-child(2) a { transition-delay: .10s; }
+.navmenu__links li:nth-child(3) a { transition-delay: .15s; }
+.navmenu__links li:nth-child(4) a { transition-delay: .20s; }
+.navmenu__links li:nth-child(5) a { transition-delay: .25s; }
+.navmenu__links li:nth-child(6) a { transition-delay: .30s; }
+
+.topnav.compact .topnav__links { display: none !important; }
+.topnav.compact .topnav__toggle { display: flex; }
+@media (max-width: 900px) {
+  .topnav { padding: 1rem 1.3rem; }
+  .topnav__links { display: none !important; }
+  .topnav__toggle { display: flex; }
+}
+
 /* ──────────────────────────────────────────────
    HEADER — legacy (no longer used, replaced by topnav)
 ────────────────────────────────────────────── */
@@ -1622,7 +1708,36 @@ html, body {
     <li><a href="Space.html" data-nav="space">Space</a></li>
     <li><a href="#contact" data-nav="contact">Contact</a></li>
   </ul>
+  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
 </nav>
+
+<div class="navmenu" id="navMenu" aria-hidden="true">
+  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
+  <ul class="navmenu__links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="Projects.html">Projects</a></li>
+    <li><a href="About.html">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</div>
+<script>
+(() => {
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  const close  = document.getElementById('navClose');
+  if (!toggle || !menu) return;
+  const open = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+  const shut = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+  toggle.addEventListener('click', open);
+  close && close.addEventListener('click', shut);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+})();
+</script>
 
 <!-- ═══════════════════════════════════════════
      SCROLL ZONE
@@ -2358,42 +2473,68 @@ html, body {
     if (loaderFill) loaderFill.style.width = (p * 100) + '%';
     if (loaderPct)  loaderPct.textContent = 'Loading ' + Math.round(p * 100) + '%';
   }
+  // ── Lock scrolling until the hero's first frame is actually on screen ──
+  const scrollLock = e => { e.preventDefault(); };
+  function lockScroll(){
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+    window.addEventListener('wheel', scrollLock, { passive: false });
+    window.addEventListener('touchmove', scrollLock, { passive: false });
+  }
+  function unlockScroll(){
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    window.removeEventListener('wheel', scrollLock);
+    window.removeEventListener('touchmove', scrollLock);
+  }
+  lockScroll();
+
   function hideLoader(){
     if (loaderDone || !loader) return;
     loaderDone = true;
     setLoad(1);
+    window.scrollTo(0, 0);
+    unlockScroll();
     loader.classList.add('done');
     setTimeout(() => { if (loader) loader.style.display = 'none'; }, 700);
   }
-  video.addEventListener('canplaythrough', hideLoader, { once: true });
-  // Safety net: never trap the user if the event never fires.
-  setTimeout(hideLoader, 15000);
 
-  // ── Load video as blob URL (so seeking always works) ──
-  (async () => {
-    try {
-      const url = video.dataset.src;
-      const res = await fetch(url);
-      const total = +res.headers.get('Content-Length') || 0;
-      if (res.body && total) {
-        const reader = res.body.getReader();
-        const chunks = []; let received = 0;
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value); received += value.length;
-          setLoad((received / total) * 0.92);
-        }
-        video.src = URL.createObjectURL(new Blob(chunks, { type: res.headers.get('Content-Type') || 'video/mp4' }));
-      } else {
-        const blob = await res.blob();
-        setLoad(0.92);
-        video.src = URL.createObjectURL(blob);
-      }
-      video.load();
-    } catch (e) {
-      video.src = video.dataset.src;
+  // Only finish loading once a real frame has been decoded AND painted, so
+  // the viewer lands on a visible first frame — never on black.
+  function whenFramePainted(){
+    if (typeof video.requestVideoFrameCallback === 'function') {
+      video.requestVideoFrameCallback(() => hideLoader());
+      // nudge the decoder so a frame is produced even while paused
+      try { video.currentTime = Math.max(video.currentTime, 0.001); } catch (e) {}
+    } else {
+      video.addEventListener('seeked', () => requestAnimationFrame(() => requestAnimationFrame(hideLoader)), { once: true });
+      try { video.currentTime = 0.001; } catch (e) { hideLoader(); }
     }
+  }
+  video.addEventListener('loadeddata', whenFramePainted, { once: true });
+  // Bail out ONLY on a genuine media error — never on a timer, so the loader
+  // can't dismiss over a black hero.
+  video.addEventListener('error', hideLoader, { once: true });
+
+  // ── Stream the video natively (range requests keep seeking + quality) ──
+  (() => {
+    const url = video.dataset.src;
+    try { video.src = url; video.load(); } catch (e) { hideLoader(); }
+    // Real progress from what the browser has actually buffered; before
+    // duration is known, creep slowly so the bar never looks stalled.
+    let creep = 0;
+    const tick = setInterval(() => {
+      if (loaderDone) { clearInterval(tick); return; }
+      let p = 0;
+      if (isFinite(video.duration) && video.duration > 0 && video.buffered.length) {
+        p = Math.min(1, video.buffered.end(video.buffered.length - 1) / video.duration);
+        setLoad(Math.max(0.08, p * 0.98));
+      } else {
+        creep = Math.min(0.55, creep + 0.012);
+        setLoad(creep);
+      }
+    }, 120);
   })();
 
   // ── Unlock for scrubbing ────────────────────────────
@@ -2567,6 +2708,33 @@ html, body {
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', onScroll);
   onScroll();
+})();
+</script>
+
+<script>
+/* Show the "=" menu exactly when the header can no longer fit its links. */
+(() => {
+  const nav = document.querySelector('.topnav');
+  if (!nav) return;
+  const links = nav.querySelector('.topnav__links');
+  const brand = nav.querySelector('.topnav__brand');
+  const toggle = nav.querySelector('.topnav__toggle');
+  if (!links || !toggle) return;
+  let need = 0;
+  function measure() {
+    nav.classList.remove('compact');
+    const lw = links.scrollWidth;
+    const bw = brand ? brand.offsetWidth : 0;
+    const cs = getComputedStyle(nav);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    if (lw > 0) need = bw + lw + pad + 48;
+  }
+  function apply() { if (!need) measure(); nav.classList.toggle('compact', window.innerWidth < need); }
+  function refresh() { measure(); apply(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', apply);
+  refresh();
 })();
 </script>
 </body>

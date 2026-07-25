@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>音乐 — Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080808;--fg:#f4f1ea;--dim:#8a857c;--rule:rgba(244,241,234,.16);--gold:#e8c48a;--kai:'Kaiti SC','STKaiti','KaiTi','TW-Kai','楷体',serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:'Cormorant Garamond',serif;font-weight:400;-webkit-font-smoothing:antialiased}
+.zh{font-family:var(--kai);font-weight:400}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--gold)}
+.topnav{position:fixed;top:0;z-index:100;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;background:rgba(8,8,8,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,.08);height:64px}
+.topnav__brand{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:var(--fg);opacity:.9}
+.topnav__brand em{font-style:italic;color:var(--gold)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center}
+.topnav__links a{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.72);transition:color .25s;position:relative;padding:.3rem 0}
+.topnav__links a:hover,.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--gold)}
+@media(max-width:900px){.topnav{padding:1rem 1.5rem}.topnav__links{gap:1.1rem}.topnav__links a{font-size:.5rem}}
+.sub-page{max-width:900px;margin:0 auto;padding:132px 3rem 8rem;min-height:100vh}
+.sub-back{display:inline-flex;align-items:center;gap:.5rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:3rem;transition:color .2s}
+.sub-back:hover{color:var(--gold)}
+.sub-cat{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.sub-cat .zh{font-family:var(--kai);letter-spacing:.1em}
+.sub-title{font-family:var(--kai);font-weight:400;font-size:clamp(2.6rem,6vw,4.2rem);line-height:1.02;margin-bottom:.4rem}
+.sub-title-en{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:4.5rem}
+.sub-body{font-family:var(--kai);font-size:1.2rem;line-height:2.05;color:rgba(244,241,234,.85);max-width:100%}
+.sub-body p{margin-bottom:1.5rem}
+.sub-body p:last-child{margin-bottom:0}
+.sub-sec{padding-top:1.8rem;margin-top:3.2rem;border-top:1px solid var(--rule)}
+.sub-sec:first-child{padding-top:0;margin-top:0;border-top:none}
+.sub-body a{color:var(--gold);border-bottom:1px solid rgba(232,196,138,.4);transition:border-color .2s}
+.sub-body a:hover{border-bottom-color:var(--gold)}
+.sub-body .en{font-family:'Cormorant Garamond',serif;font-style:italic}
+.entry-name{font-family:var(--kai);font-size:1.83rem;line-height:1.2;margin-bottom:.7rem}
+.entry-name a{color:inherit;border-bottom:1px solid currentColor;transition:opacity .2s}
+.entry-name a:hover{opacity:.7}
+.entry-meta{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;color:var(--dim);line-height:2;margin-bottom:1.6rem}
+.entry-meta .zh{font-family:var(--kai);letter-spacing:.06em;font-size:.9rem}
+.entry-fig{margin-top:2rem}
+.entry-fig img{display:block;width:100%;max-width:760px;height:auto;border-radius:2px}
+.entry-fig figcaption{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:.9rem}
+.sub-body__more{color:var(--dim);letter-spacing:.1em;margin-top:4.5rem}
+@media(max-width:900px){.sub-page{padding:100px 7.8vw 5rem}}
+@media(max-width:560px){.sub-page{padding:92px 7.8vw 4rem}.sub-body{font-size:1.08rem;line-height:1.95}.entry-name{font-size:1.43rem}}
+</style>
+
+<style id="navmenu-css">
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:#f4f1ea;border-radius:2px}
+.navmenu{position:fixed;inset:0;z-index:1900;background:rgba(14,14,15,0.95);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);display:flex;flex-direction:column;padding:92px 2rem 3rem;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.navmenu.open{opacity:1;pointer-events:auto}
+.navmenu__close{position:absolute;top:1.5rem;right:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#f4f1ea;font-size:1.7rem;line-height:1;opacity:.85}
+.navmenu__links{list-style:none;display:flex;flex-direction:column;gap:.2rem;margin:0;padding:0}
+.navmenu__links li{border-bottom:1px solid rgba(255,255,255,0.09)}
+.navmenu__links a{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;letter-spacing:.02em;color:#f4f1ea;text-decoration:none;padding:1.05rem .2rem;opacity:.92;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s}
+.navmenu.open .navmenu__links a{transform:translateY(0)}
+.navmenu__links a.active{color:oklch(73% 0.10 76);opacity:1}
+.navmenu__links li:nth-child(1) a{transition-delay:.05s}
+.navmenu__links li:nth-child(2) a{transition-delay:.10s}
+.navmenu__links li:nth-child(3) a{transition-delay:.15s}
+.navmenu__links li:nth-child(4) a{transition-delay:.20s}
+.navmenu__links li:nth-child(5) a{transition-delay:.25s}
+.navmenu__links li:nth-child(6) a{transition-delay:.30s}
+.topnav.compact .topnav__links{display:none!important}.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="global-header-css">
+.topnav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(22,22,23,0.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;box-sizing:border-box}
+.topnav__brand{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:oklch(96% 0.006 78);opacity:.9;line-height:1.4;text-decoration:none}
+.topnav__brand em{font-style:italic;color:oklch(73% 0.10 76)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center;margin:0;padding:0}
+.topnav__links a{font-family:'DM Mono',ui-monospace,monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,0.72);opacity:1;transition:color .25s;position:relative;padding:.3rem 0;text-decoration:none;white-space:nowrap}
+.topnav__links a:hover{color:#fff}
+.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:50%;bottom:-.32rem;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:oklch(73% 0.10 76)}
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:oklch(96% 0.006 78);border-radius:2px}
+.topnav.compact .topnav__links{display:none!important}
+.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="space-figure-css">
+.entry-fig{margin:2rem auto 0;width:50%;max-width:50%}
+.entry-fig img{display:block;width:100%;max-width:100%;height:auto;border-radius:2px;margin:0 auto}
+.entry-fig figcaption{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:.9rem;text-align:center}
+@media(max-width:560px){.entry-fig{width:78%;max-width:78%}}
+</style>
+
+<style id="space-date-css">
+.sub-date{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;letter-spacing:.06em;color:var(--dim);text-align:right;padding-bottom:.4rem;margin-bottom:3.2rem;border-bottom:1px solid var(--rule)}
+.sub-sec.is-date{padding-top:0;margin-top:0;border-top:none}
+.sub-body .sub-date+.sub-sec.is-date{padding-top:0;margin-top:0;border-top:none}
+.sub-body .sub-sec+.sub-date{margin-top:4.5rem}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="../index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="../index.html" data-nav="home">Home</a></li>
+    <li><a href="../Projects.html" data-nav="projects">Projects</a></li>
+    <li><a href="../About.html" data-nav="about">About</a></li>
+    <li><a href="../Photography.html" data-nav="photography">Photography</a></li>
+    <li><a href="../Space.html" data-nav="space" class="active">Space</a></li>
+    <li><a href="../index.html#contact" data-nav="contact">Contact</a></li>
+  </ul>
+  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="navmenu" id="navMenu" aria-hidden="true">
+  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
+  <ul class="navmenu__links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../Projects.html">Projects</a></li>
+    <li><a href="../About.html">About</a></li>
+    <li><a href="../Photography.html">Photography</a></li>
+    <li><a href="../Space.html" class="active">Space</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+  </ul>
+</div>
+<script>
+(() => {
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  const close  = document.getElementById('navClose');
+  if (!toggle || !menu) return;
+  const open = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+  const shut = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+  toggle.addEventListener('click', open);
+  close && close.addEventListener('click', shut);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+})();
+</script>
+<main class="sub-page">
+  <a class="sub-back" href="../Space.html">← Space</a>
+  <div class="sub-cat"><span class="zh">有钱了开博物馆免费请你们参观</span> · Sharing</div>
+  <h1 class="sub-title">音乐</h1>
+  <div class="sub-title-en">Music</div>
+  <div class="sub-body">
+    <div class="sub-sec">
+      <h2 class="entry-name"><a href="https://music.apple.com/cn/artist/lei-zhao/937112027?l=en-GB" target="_blank" rel="noopener">赵雷</a></h2>
+      <div class="entry-meta"><span class="zh">大二的许多写作业的晚上｜2026年7月13日　和周宣宇在西安的路上</span></div>
+      <p>文字内容占位</p>
+      <figure class="entry-fig">
+        <img src="../uploads/%E8%B7%AF%E4%B8%8A%E5%94%B1%E5%AE%89%E6%B2%B3%E6%A1%A5.jpg" alt="路上唱安河桥" loading="lazy">
+        <figcaption>路上唱安河桥</figcaption>
+      </figure>
+    </div>
+    <div class="sub-sec">
+      <h2 class="entry-name">薛之谦</h2>
+      <div class="entry-meta"><span class="zh">2024年8月11日　和潘浩宁在苏州</span></div>
+      <p>潘浩宁请我看的。</p>
+      <figure class="entry-fig">
+        <img src="../uploads/%E8%96%9B%E4%B9%8B%E8%B0%A6%E6%BC%94%E5%94%B1%E4%BC%9A.JPG" alt="薛之谦演唱会" loading="lazy">
+        <figcaption>薛之谦演唱会</figcaption>
+      </figure>
+    </div>
+    <div class="sub-sec">
+      <h2 class="entry-name">五条人</h2>
+      <div class="entry-meta"><span class="zh">2023年1月3日　和妈妈在南京</span></div>
+      <p>文字内容占位</p>
+      <figure class="entry-fig">
+        <img src="../uploads/%E4%BA%94%E6%9D%A1%E4%BA%BA%E7%8E%B0%E5%9C%BA.JPG" alt="五条人现场" loading="lazy">
+        <figcaption>五条人现场</figcaption>
+      </figure>
+    </div>
+    <div class="sub-sec">
+      <h2 class="entry-name">莫文蔚</h2>
+      <div class="entry-meta"><span class="zh">2024年8月31日　和妈妈爸爸在深圳</span></div>
+      <p>文字内容占位</p>
+      <figure class="entry-fig">
+        <img src="../uploads/莫文蔚演唱会.JPG" alt="莫文蔚演唱会" loading="lazy">
+        <figcaption>莫文蔚演唱会</figcaption>
+      </figure>
+    </div>
+    <div class="sub-sec">
+      <h2 class="entry-name">张韶涵</h2>
+      <div class="entry-meta"><span class="zh">2023年6月18日　和谢馨逸在南京</span></div>
+      <p>小时候就非常喜欢《隐形的翅膀》和《看得最远的地方》，这两首歌的意向都很美好。在自己的天空翱翔和山顶眔望的时候有人并肩。有时放学或者外出上课，在电动车的背后我就会放这两首歌唱，听说歌手是一个很漂亮的女生，但是被妈妈坑了，所以就沉寂了。</p>
+      <p>后来看《歌手》，有个主持人叫张韶涵。“？” 于是我了解了一下，原来就是我以为的那个张韶涵啊，依然是我喜欢的声音，如此的有力。然后我听到了“阿刁”。我喜欢渐渐明显的音乐，喜欢她的有感情声音，喜欢散文一般的歌词，喜欢和声里把我带到高原的哼唱，还有编曲的丰富和递进。阿刁的性格让我感到自由，强大，活着（后来才意识到居然是赵雷写的，太 <span class="en">nb</span> 了）。诶，过几天就去西藏了，听说大昭寺门口有一家咖啡店叫阿刁。</p>
+      <p>高一因为什么都想试一试，就参加了南外的校园歌手比赛，也因此幸运的认识了史元。我们把《隐形的翅膀》改成了《隐形的鸡翅》，录歌的时候大概就是唱了几句就一定会笑，看到对方笑就停不下来了。</p>
+      <p>高二了之后，大家都在准备申请学校，我那个时候是几乎毫无压力（除了托福一直考不出来），因为我相信我丰富的人格和聪明的大脑不需要努力学习，慧眼的学校一定会喜欢我的。谢馨逸当时似乎是有些焦虑，我们一起聊天的时候我说，一起去看张韶涵的演唱会吧。她并不知道张韶涵的故事啊，但我和她说了，在南京奥体的演唱会，我们看到了破开天空的光。</p>
+      <figure class="entry-fig">
+        <img src="../uploads/张韶涵演唱会-54736682.jpg" alt="张韶涵演唱会" loading="lazy">
+        <figcaption>张韶涵演唱会</figcaption>
+      </figure>
+    </div>
+    <p class="sub-body__more">传记作者记录速度尚未跟上传奇创造速度</p>
+  </div>
+</main>
+
+<script>
+/* Show the "=" menu exactly when the header can no longer fit its links. */
+(() => {
+  const nav = document.querySelector('.topnav');
+  if (!nav) return;
+  const links = nav.querySelector('.topnav__links');
+  const brand = nav.querySelector('.topnav__brand');
+  const toggle = nav.querySelector('.topnav__toggle');
+  if (!links || !toggle) return;
+  let need = 0;
+  function measure() {
+    nav.classList.remove('compact');
+    const lw = links.scrollWidth;
+    const bw = brand ? brand.offsetWidth : 0;
+    const cs = getComputedStyle(nav);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    if (lw > 0) need = bw + lw + pad + 48;
+  }
+  function apply() { if (!need) measure(); nav.classList.toggle('compact', window.innerWidth < need); }
+  function refresh() { measure(); apply(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', apply);
+  refresh();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>书 — Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#080808;--fg:#f4f1ea;--dim:#8a857c;--rule:rgba(244,241,234,.16);--gold:#e8c48a;--kai:'Kaiti SC','STKaiti','KaiTi','TW-Kai','楷体',serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--fg);font-family:'Cormorant Garamond',serif;font-weight:400;-webkit-font-smoothing:antialiased}
+.zh{font-family:var(--kai);font-weight:400}
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--gold)}
+.topnav{position:fixed;top:0;z-index:100;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;background:rgba(8,8,8,.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,.08);height:64px}
+.topnav__brand{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:var(--fg);opacity:.9}
+.topnav__brand em{font-style:italic;color:var(--gold)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center}
+.topnav__links a{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.72);transition:color .25s;position:relative;padding:.3rem 0}
+.topnav__links a:hover,.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:0;right:0;bottom:-2px;height:1px;background:var(--gold)}
+@media(max-width:900px){.topnav{padding:1rem 1.5rem}.topnav__links{gap:1.1rem}.topnav__links a{font-size:.5rem}}
+.sub-page{max-width:900px;margin:0 auto;padding:132px 3rem 8rem;min-height:100vh}
+.sub-back{display:inline-flex;align-items:center;gap:.5rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-bottom:3rem;transition:color .2s}
+.sub-back:hover{color:var(--gold)}
+.sub-cat{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.sub-cat .zh{font-family:var(--kai);letter-spacing:.1em}
+.sub-title{font-family:var(--kai);font-weight:400;font-size:clamp(2.6rem,6vw,4.2rem);line-height:1.02;margin-bottom:.4rem}
+.sub-title-en{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:4.5rem}
+.sub-body{font-family:var(--kai);font-size:1.2rem;line-height:2.05;color:rgba(244,241,234,.85);max-width:100%}
+.sub-body p{margin-bottom:1.5rem}
+.sub-body p:last-child{margin-bottom:0}
+.sub-sec{padding-top:1.8rem;margin-top:3.2rem;border-top:1px solid var(--rule)}
+.sub-sec:first-child{padding-top:0;margin-top:0;border-top:none}
+.sub-body a{color:var(--gold);border-bottom:1px solid rgba(232,196,138,.4);transition:border-color .2s}
+.sub-body a:hover{border-bottom-color:var(--gold)}
+.sub-body .en{font-family:'Cormorant Garamond',serif;font-style:italic}
+.entry-name{font-family:var(--kai);font-size:1.83rem;line-height:1.2;margin-bottom:.7rem}
+.entry-name a{color:inherit;border-bottom:1px solid currentColor;transition:opacity .2s}
+.entry-name a:hover{opacity:.7}
+.entry-meta{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;color:var(--dim);line-height:2;margin-bottom:1.6rem}
+.entry-meta .zh{font-family:var(--kai);letter-spacing:.06em;font-size:.9rem}
+.sub-note{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.06em;color:var(--dim);line-height:2;border-top:1px solid var(--rule);padding-top:1.6rem}
+.sub-body__more{color:var(--dim);letter-spacing:.1em;margin-top:4.5rem}
+@media(max-width:900px){.sub-page{padding:100px 7.8vw 5rem}}
+@media(max-width:560px){.sub-page{padding:92px 7.8vw 4rem}.sub-body{font-size:1.08rem;line-height:1.95}.entry-name{font-size:1.43rem}}
+</style>
+
+<style id="navmenu-css">
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:#f4f1ea;border-radius:2px}
+.navmenu{position:fixed;inset:0;z-index:1900;background:rgba(14,14,15,0.95);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);display:flex;flex-direction:column;padding:92px 2rem 3rem;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.navmenu.open{opacity:1;pointer-events:auto}
+.navmenu__close{position:absolute;top:1.5rem;right:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#f4f1ea;font-size:1.7rem;line-height:1;opacity:.85}
+.navmenu__links{list-style:none;display:flex;flex-direction:column;gap:.2rem;margin:0;padding:0}
+.navmenu__links li{border-bottom:1px solid rgba(255,255,255,0.09)}
+.navmenu__links a{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;letter-spacing:.02em;color:#f4f1ea;text-decoration:none;padding:1.05rem .2rem;opacity:.92;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s}
+.navmenu.open .navmenu__links a{transform:translateY(0)}
+.navmenu__links a.active{color:oklch(73% 0.10 76);opacity:1}
+.navmenu__links li:nth-child(1) a{transition-delay:.05s}
+.navmenu__links li:nth-child(2) a{transition-delay:.10s}
+.navmenu__links li:nth-child(3) a{transition-delay:.15s}
+.navmenu__links li:nth-child(4) a{transition-delay:.20s}
+.navmenu__links li:nth-child(5) a{transition-delay:.25s}
+.navmenu__links li:nth-child(6) a{transition-delay:.30s}
+.topnav.compact .topnav__links{display:none!important}.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="global-header-css">
+.topnav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(22,22,23,0.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;box-sizing:border-box}
+.topnav__brand{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:oklch(96% 0.006 78);opacity:.9;line-height:1.4;text-decoration:none}
+.topnav__brand em{font-style:italic;color:oklch(73% 0.10 76)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center;margin:0;padding:0}
+.topnav__links a{font-family:'DM Mono',ui-monospace,monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,0.72);opacity:1;transition:color .25s;position:relative;padding:.3rem 0;text-decoration:none;white-space:nowrap}
+.topnav__links a:hover{color:#fff}
+.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:50%;bottom:-.32rem;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:oklch(73% 0.10 76)}
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:oklch(96% 0.006 78);border-radius:2px}
+.topnav.compact .topnav__links{display:none!important}
+.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="space-figure-css">
+.entry-fig{margin:2rem auto 0;width:50%;max-width:50%}
+.sub-sec .entry-fig:first-child{margin-top:0;margin-bottom:2.4rem}
+.entry-fig img{display:block;width:100%;max-width:100%;height:auto;border-radius:2px;margin:0 auto}
+.entry-fig figcaption{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:.9rem;text-align:center}
+@media(max-width:560px){.entry-fig{width:78%;max-width:78%}}
+</style>
+
+<style id="space-date-css">
+.sub-body .bk{font-weight:600;color:rgba(244,241,234,.98)}
+.sub-date{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;letter-spacing:.06em;color:var(--dim);text-align:right;padding-bottom:.4rem;margin-bottom:3.2rem;border-bottom:1px solid var(--rule)}
+.sub-sec.is-date{padding-top:0;margin-top:0;border-top:none}
+.sub-body .sub-date+.sub-sec.is-date{padding-top:0;margin-top:0;border-top:none}
+.sub-body .sub-sec+.sub-date{margin-top:4.5rem}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <a href="../index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="../index.html" data-nav="home">Home</a></li>
+    <li><a href="../Projects.html" data-nav="projects">Projects</a></li>
+    <li><a href="../About.html" data-nav="about">About</a></li>
+    <li><a href="../Photography.html" data-nav="photography">Photography</a></li>
+    <li><a href="../Space.html" data-nav="space" class="active">Space</a></li>
+    <li><a href="../index.html#contact" data-nav="contact">Contact</a></li>
+  </ul>
+  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="navmenu" id="navMenu" aria-hidden="true">
+  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
+  <ul class="navmenu__links">
+    <li><a href="../index.html">Home</a></li>
+    <li><a href="../Projects.html">Projects</a></li>
+    <li><a href="../About.html">About</a></li>
+    <li><a href="../Photography.html">Photography</a></li>
+    <li><a href="../Space.html" class="active">Space</a></li>
+    <li><a href="../index.html#contact">Contact</a></li>
+  </ul>
+</div>
+<script>
+(() => {
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  const close  = document.getElementById('navClose');
+  if (!toggle || !menu) return;
+  const open = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+  const shut = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+  toggle.addEventListener('click', open);
+  close && close.addEventListener('click', shut);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+})();
+</script>
+<main class="sub-page">
+  <a class="sub-back" href="../Space.html">← Space</a>
+  <div class="sub-cat"><span class="zh">有钱了开博物馆免费请你们参观</span> · Sharing</div>
+  <h1 class="sub-title">书</h1>
+  <div class="sub-title-en">Books</div>
+  <div class="sub-body">
+    <div class="sub-date" id="d-2026-7-24">2026.7.24</div>
+    <div class="sub-sec is-date">
+      <figure class="entry-fig">
+        <img src="../uploads/2026.7.24的书.jpg" alt="2026.7.24的书" loading="lazy" onerror="this.closest('.entry-fig').remove()">
+        <figcaption>2026.7.24 的书</figcaption>
+      </figure>
+      <p>因为我去年来西安的时候买了一本叫<strong class="bk">《西安历史述略》</strong>，他是陕西人民出版社出版的，因为我觉得我了解世界，我会很喜欢从一个地方出发（博物馆也是从一个地点出发），同时如果我可以通过他的历史自己去找到我喜欢的景点去看遗迹，尤其在西安这个地方我就觉得很好玩；这本书后面我看了也觉得研究的蛮有意思的，像这本书他是很早很早的时候的时候是在1979年8月出的，我买的这一版是98年10月印刷的，这个作者他好像是在陕西省博物馆做的研究，所以其实是非常有研究逻辑的，包括他研究东西很广泛，他是从西安的这个地方出发，就类似于史记是按照人物来来做历史的研究的和技术的这本书，他就是通过地方来研究，我很喜欢这种地点作为了解历史的方式。我之前还看了一本书，他讲到地理对历史走向的影响，我对地理也很感兴趣，在这本书里，他是以时间为一个技术单位的，包括很多地理有关的问题，他有话很多地图，这也是我很喜欢这种书原因。</p>
+      <p>所以呢，我今天又看到了这样一个二手的书店，我就留意了一下，在路边，挺热的。今天买了有这些：</p>
+      <p><strong class="bk">《普通物理学第三册》</strong>这是人民教育出版社出版的，是1981年5月印刷的版本，当时定价是一块钱，现在我买他需要花八块钱。这本书我购买它的原因是他的曾经的拥有者在上面做很多的勾划，我感觉还挺有感觉，书里学到了电磁波，甚至提到了量子力学的基础，我以为量子力学是一个很新的，但其实那个时代他已经有了；同时也可以看到物理的发展对于教材的一种变化。另外呢，我也听说过有一些教育者认为教材的改版总是改的越来越不好了，所以我想去看看以前的教材是什么样的。</p>
+      <p><strong class="bk">《文字改革文集》</strong>它的封面上有一个印章，应该是来自于某个工厂的图书室，然后在扉页上还有以前的这个人他的签名和印章。我看这本书是因为我觉得如果是从语言学的角度来说，我们的普通话以及拼音等等在众多语言中作出的这种选择和普及方式，我觉得其实是很有了解的意义的。但是这本书他并不是一个研究，他是一个收集了作者发表过的文章报告和讲话的一个文集，是中国人民大学语言文字研究所支持的。在找老书的过程中，我也会比较关注他的出版社，这也可以看出以前那些出版社他确实是有一个专门的出版方向的。可能越到后面的时候他就越来越合并，不再说某一个特定出版社会极大的对某些事情进行关注。</p>
+      <p>这些书他肯定都会有一些时代的局限性了，但是我一个可以在稍微过了一段时间之后回看的人，这些局限性其实也是他有趣的一部分。还有一本书叫<strong class="bk">《中国历代文学作品集》</strong>，他有四册，每册有上中下。但是今天的地方只出现了四本，我就挑选了第一册的中篇，因为他是隋唐五代部分，也是我认为中国文学最发达的时期。选择的一个原因是因为我看到他不仅涵盖了诗还涵盖了散文和传奇，还有词，那其实一般来说唐朝我看的都是诗嘛。这样的一些文体其实也很有意思；还有一点就是这本书里他会有解题，会包含一些背景知识，其实现在的古文观止也有啊，排版也更精致了。不过这本书是繁体，他是上海古籍出版社出版的，定价是¥3.35，印刷的时间是1992年，而且已经是第13次印刷了，他是高等学校文科教材。高等学校是指大学还是高中？我不知道。</p>
+      <p>接下来是买了一个上下套的<strong class="bk">《中国实用文体大全》</strong>，他是刊授大学编，刊授大学是一种业余的高等教育，也是一个很有趣的知识点。我了解了一下刊授大学在九零年前其实都是非常严格的。这本书曾经的拥有者在书的封面和扉页都盖上他的章。这个书涵盖了几乎我能想到的所有实用文体，他讲了。。。。。真的是在那个年代有很多人非常的想要去学习，但是教育资源不足，所以产生了各种模式来帮助学习，比较感动。</p>
+      <p><strong class="bk">《中国随笔年选2004》</strong>千禧年到零八年之间确实是有很多百花齐放的感觉，这是我听说。这本书的扉页上写的是2014年购于淘宝网。我觉得很有意思，我选书的时候大概看去看了几篇，我觉得随笔是个很有意思的东西，自己偶尔也随笔几下，这个感觉很好。所以想看看那个年代的随笔，现在我身边还是有同学在写随笔的，但是文学体裁一定是会发展的，现在更多的是社交媒体上的短篇抒发和片段，还有用AI润色编辑一下的文字，想看一看大概20年前的随笔是什么样的。</p>
+      <p><strong class="bk">《淮河流域经济开发史》</strong>他的出版社是黄山书社，我不是很了解这个出版社，但是就像我去年买的<strong class="bk">《西安历史述略》</strong>一样，我非常喜欢从一个地理的角度去串联历史和经济的研究，而且淮河确实是在初中的地理上就知道的地理意义，所以很想了解一下。这本书的话，他其实已经比较现代了，他是2001年印刷的，定价是¥48。在那个年代我不知道算不算一个比较贵的书，而且这本书比较新，他在开篇列出了很多很多的名称，从各个朝代和各个地点去列举出了周围的各种地名。地名也是一个我很喜欢的东西，例子就是庐州合肥的名字变化。小时候看天气预报，以为合肥是专门卖化肥的地方，所以地名也是有意思的东西。</p>
+      <p>但是我觉得很难啊，这么多书，肯定也不一定说真的都会读，但是先相逢即是缘了，万一哪一天想读或者说就是看一看。</p>
+    </div>
+    <p class="sub-body__more">传记作者记录速度尚未跟上传奇创造速度</p>
+  </div>
+</main>
+
+<script>
+/* Show the "=" menu exactly when the header can no longer fit its links. */
+(() => {
+  const nav = document.querySelector('.topnav');
+  if (!nav) return;
+  const links = nav.querySelector('.topnav__links');
+  const brand = nav.querySelector('.topnav__brand');
+  const toggle = nav.querySelector('.topnav__toggle');
+  if (!links || !toggle) return;
+  let need = 0;
+  function measure() {
+    nav.classList.remove('compact');
+    const lw = links.scrollWidth;
+    const bw = brand ? brand.offsetWidth : 0;
+    const cs = getComputedStyle(nav);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    if (lw > 0) need = bw + lw + pad + 48;
+  }
+  function apply() { if (!need) measure(); nav.classList.toggle('compact', window.innerWidth < need); }
+  function refresh() { measure(); apply(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', apply);
+  refresh();
+})();
+</script>
+</body>
+</html>
