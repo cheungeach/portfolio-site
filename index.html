@@ -1477,16 +1477,17 @@ html, body {
 .about-cta:hover span{transform:translateX(4px)}
 
 /* SPACE section */
-#space{background:radial-gradient(120% 100% at 50% 0%,#0d0f18 0%,#050506 70%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:7rem 6vw;position:relative;overflow:hidden}
-.space__inner{max-width:760px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.4rem;position:relative;z-index:2}
+#space{background:#0a5a72 url('uploads/Untitled_Artwork%202.png') center/cover no-repeat;min-height:100vh;display:flex;align-items:stretch;justify-content:center;padding:7rem 6vw 19vh;position:relative;overflow:hidden}
+#space::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,#050506 0%,rgba(5,5,6,.92) 6%,rgba(5,5,6,.45) 18%,rgba(0,0,0,.25) 42%,rgba(0,0,0,.5) 80%,rgba(5,5,6,.95) 96%,#050506 100%);z-index:1;pointer-events:none}
+.space__inner{max-width:760px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.4rem;position:relative;z-index:2;width:100%}
 .space__eyebrow{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.42em;text-transform:uppercase;color:rgba(255,255,255,.5)}
 .space__title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(4rem,11vw,9rem);color:#fff;line-height:1;letter-spacing:.02em}
 .space__quote{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.1rem,1.9vw,1.55rem);line-height:1.55;color:rgba(255,255,255,.82);max-width:640px}
 .space__quote--2{color:var(--gold,#e8c48a);opacity:.92}
-.space__planet{position:relative;width:246px;height:246px;border-radius:50%;margin-top:2.6rem;display:flex;align-items:center;justify-content:center;text-decoration:none;background:radial-gradient(circle at 33% 28%,#f6e6bd 0%,#e8c48a 26%,#c89a54 58%,#7a5320 100%);box-shadow:0 0 62px rgba(232,196,138,.3),inset -20px -24px 52px rgba(0,0,0,.5);transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s}
-.space__planet:hover{transform:scale(1.05);box-shadow:0 0 98px rgba(232,196,138,.55),inset -20px -24px 52px rgba(0,0,0,.48)}
-.space__planet-ring{position:absolute;inset:-16% -36%;border:1.5px solid rgba(232,196,138,.38);border-radius:50%;transform:rotate(-18deg) rotateX(74deg);pointer-events:none}
-.space__planet-label{position:relative;z-index:2;display:inline-flex;align-items:center;gap:.6rem;font-family:'DM Mono',monospace;font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+.space__planet{position:relative;left:auto;bottom:auto;transform:none;margin-top:auto;padding-top:6vh;display:inline-flex;align-items:center;justify-content:center;gap:.6rem;text-decoration:none;background:none;border:none;z-index:3;transition:transform .45s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:.92}
+.space__planet:hover{transform:translateY(-4px);opacity:1}
+.space__planet-ring{display:none}
+.space__planet-label{position:relative;z-index:2;display:inline-flex;align-items:center;gap:.6rem;font-family:'DM Mono',monospace;font-size:.85rem;letter-spacing:.22em;text-transform:uppercase;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.7)}
 .space__arrow{transition:transform .3s}
 .space__planet:hover .space__arrow{transform:translateX(4px)}
 
@@ -1943,9 +1944,10 @@ html, body {
         <span class="contact__email-addr">zhang.yyyc@gmail.com</span>
       </a>
 
-      <form class="contact__form" id="contactForm" action="https://formsubmit.co/zhang.yyyc@gmail.com" method="POST">
-        <input type="hidden" name="_subject" value="New message from studio site"/>
+      <form class="contact__form" id="contactForm" action="https://formsubmit.co/87db5fea81d6aaec695f5e20e4fcdb79" method="POST">
+        <input type="hidden" name="_subject" value="来自 yichi.studio 的新消息"/>
         <input type="hidden" name="_template" value="table"/>
+        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off"/>
 
         <div class="contact__row">
           <label class="contact__field">
@@ -2475,7 +2477,12 @@ html, body {
   }
   // ── Lock scrolling until the hero's first frame is actually on screen ──
   const scrollLock = e => { e.preventDefault(); };
+  // If arriving with a hash (e.g. Contact from another page), skip the hero
+  // intro entirely and go straight to that section.
+  const deepLink = location.hash && document.querySelector(location.hash);
+
   function lockScroll(){
+    if (deepLink) return;
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
@@ -2494,8 +2501,14 @@ html, body {
     if (loaderDone || !loader) return;
     loaderDone = true;
     setLoad(1);
-    window.scrollTo(0, 0);
-    unlockScroll();
+    if (deepLink) {
+      const y = deepLink.getBoundingClientRect().top + window.pageYOffset;
+      unlockScroll();
+      requestAnimationFrame(() => window.scrollTo(0, y));
+    } else {
+      window.scrollTo(0, 0);
+      unlockScroll();
+    }
     loader.classList.add('done');
     setTimeout(() => { if (loader) loader.style.display = 'none'; }, 700);
   }
@@ -2517,25 +2530,6 @@ html, body {
   // can't dismiss over a black hero.
   video.addEventListener('error', hideLoader, { once: true });
 
-  // ── Stream the video natively (range requests keep seeking + quality) ──
-  (() => {
-    const url = video.dataset.src;
-    try { video.src = url; video.load(); } catch (e) { hideLoader(); }
-    // Real progress from what the browser has actually buffered; before
-    // duration is known, creep slowly so the bar never looks stalled.
-    let creep = 0;
-    const tick = setInterval(() => {
-      if (loaderDone) { clearInterval(tick); return; }
-      let p = 0;
-      if (isFinite(video.duration) && video.duration > 0 && video.buffered.length) {
-        p = Math.min(1, video.buffered.end(video.buffered.length - 1) / video.duration);
-        setLoad(Math.max(0.08, p * 0.98));
-      } else {
-        creep = Math.min(0.55, creep + 0.012);
-        setLoad(creep);
-      }
-    }, 120);
-  })();
 
   // ── Unlock for scrubbing ────────────────────────────
   function unlockVideo() {
@@ -2560,6 +2554,26 @@ html, body {
   ['pointerdown','wheel','touchstart','keydown'].forEach(evt =>
     window.addEventListener(evt, unlockVideo, { once: true, passive: true })
   );
+
+  // ── Stream the video natively (range requests keep seeking + quality) ──
+  // Assigned AFTER the metadata listeners above so dur/videoReady are set.
+  (() => {
+    const url = video.dataset.src;
+    try { video.src = url; video.load(); } catch (e) { hideLoader(); }
+    // Real progress from what the browser has actually buffered; before
+    // duration is known, creep slowly so the bar never looks stalled.
+    let creep = 0;
+    const tick = setInterval(() => {
+      if (loaderDone) { clearInterval(tick); return; }
+      if (isFinite(video.duration) && video.duration > 0 && video.buffered.length) {
+        const p = Math.min(1, video.buffered.end(video.buffered.length - 1) / video.duration);
+        setLoad(Math.max(0.08, p * 0.98));
+      } else {
+        creep = Math.min(0.55, creep + 0.012);
+        setLoad(creep);
+      }
+    }, 120);
+  })();
 
   // ── Cinematic hold-zone remap ──────────────────────
   // Plateaus advance slowly (not flat) so the video keeps drifting —
@@ -2699,8 +2713,8 @@ html, body {
 
   function onScroll() {
     const y = window.scrollY + window.innerHeight * 0.4;
+    // Space is part of the home page, so it keeps "Home" lit.
     let key = 'home';
-    if (spaceEl && y >= spaceEl.offsetTop) key = 'space';
     if (contactEl && y >= contactEl.offsetTop) key = 'contact';
     setActive(key);
   }

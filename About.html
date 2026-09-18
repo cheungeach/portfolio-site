@@ -45,6 +45,7 @@ a:hover { color: var(--gold); }
 .profile__body { font-size: .8rem; line-height: 2; color: var(--mist); max-width: 48ch; margin-bottom: 2.6rem; }
 .resume-btn { display: inline-flex; align-items: center; gap: .7rem; padding: 1rem 2.1rem; border: 1px solid var(--gold); border-radius: 2px; color: var(--gold); font-family: 'DM Mono', monospace; font-size: .62rem; letter-spacing: .28em; text-transform: uppercase; transition: background .3s, color .3s, transform .3s; }
 .resume-btn:hover { background: var(--gold); color: var(--ink); transform: translateY(-1px); }
+.resume-btns { display: flex; flex-wrap: wrap; gap: .9rem; }
 .resume-btn svg { width: 14px; height: 14px; }
 
 /* ── Experience ── */
@@ -206,10 +207,16 @@ a:hover { color: var(--gold); }
       <div class="profile__role">AI Product Researcher &amp; Designer</div>
       <p class="profile__lede">I build AI products that are human-centered, aesthetic, and recognized by the market.</p>
       <p class="profile__body">A Cognitive Science &amp; Art Practice student at UC Berkeley, I work across AI-assisted creation, user research, and design — turning market insight and cross-disciplinary teams into products people genuinely value.</p>
-      <a class="resume-btn" href="uploads/resume.pdf" download="Zhang Yichi - Resume.pdf">
-        Download résumé
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
-      </a>
+      <div class="resume-btns">
+        <a class="resume-btn" href="uploads/resume.pdf" download="Zhang Yichi - Resume.pdf">
+          中文简历
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+        </a>
+        <a class="resume-btn" href="uploads/Yichi Zhang resume.pdf" download="Yichi Zhang - Resume (EN).pdf">
+          Résumé (English)
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+        </a>
+      </div>
     </div>
   </section>
 </div>

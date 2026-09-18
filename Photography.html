@@ -455,39 +455,29 @@ html, body {
   gap: 5vw;
   align-items: end;
 }
+@media (max-width: 860px) {
+  .photo-shelf__inner { grid-template-columns: 1fr; gap: 3rem; max-width: 460px; }
+}
 
 /* Individual book */
 .book {
   position: relative;
   aspect-ratio: 3 / 4;
-  transform-style: preserve-3d;
   cursor: pointer;
-  transform: rotateY(-22deg) translateZ(0);
+  transform: translateZ(0);
   transition: transform 0.6s cubic-bezier(.2,.7,.1,1);
 }
 .book:hover {
-  transform: rotateY(-14deg) translateY(-8px);
+  transform: translateY(-8px);
 }
 
-.book__spine {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: -22px;
-  width: 22px;
-  background: linear-gradient(to right, #1a1a1a 0%, #2d2d2d 50%, #0d0d0d 100%);
-  transform: rotateY(85deg);
-  transform-origin: right center;
-  box-shadow: inset -2px 0 6px rgba(0,0,0,0.6);
-}
+.book__spine { display: none; }
 
 .book__cover {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  box-shadow:
-    18px 30px 60px rgba(0,0,0,0.55),
-    inset 0 0 0 1px rgba(255,255,255,0.05);
   background: #111;
 }
 .book__cover-img {
@@ -2138,8 +2128,11 @@ html, body {
         if (ov) ov.classList.remove('show');
 
         setTimeout(() => {
-          // 5) Strip inline styles → book returns to natural flow
+          // 5) Strip positioning styles, but KEEP --cover so the shelf
+          //    thumbnail doesn't go black.
+          const cover = expanded.style.getPropertyValue('--cover');
           expanded.style.cssText = '';
+          if (cover) expanded.style.setProperty('--cover', cover);
           delete expanded.__shelfRect;
         }, 950);
       } else if (ov) {
@@ -2190,7 +2183,9 @@ html, body {
     function resetBookExpansion() {
       document.querySelectorAll('.book.expanding').forEach(b => {
         b.classList.remove('expanding');
+        const cover = b.style.getPropertyValue('--cover');
         b.style.cssText = '';
+        if (cover) b.style.setProperty('--cover', cover);
       });
       const ov = document.querySelector('.book-overlay');
       if (ov) ov.classList.remove('show');
