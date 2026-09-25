@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="page-loader.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Project Archive — Zhang Yichi</title>
@@ -296,6 +297,9 @@ body { padding-top: 64px; }
 }
 .proj-folder:nth-child(2).in { transition-delay: .12s; }
 .proj-folder:nth-child(3).in { transition-delay: .24s; }
+.proj-folder:nth-child(4).in { transition-delay: .36s; }
+.proj-folder:nth-child(5).in { transition-delay: .48s; }
+.proj-folder:nth-child(6).in { transition-delay: .6s; }
 
 @media (max-width: 920px) {
   .proj-grid { grid-template-columns: 1fr; gap: 4vh 0; }
@@ -317,6 +321,23 @@ body { padding-top: 64px; }
     box-shadow .6s cubic-bezier(.4,0,.2,1);
 }
 
+.cover-phones{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:6%;padding:0 6%;background:radial-gradient(120% 90% at 50% 100%,oklch(22% 0.02 240) 0%,oklch(12% 0.01 240) 70%);pointer-events:none}
+.cover-phone{position:relative;width:34%;aspect-ratio:402/874;border-radius:9% / 4.2%;overflow:hidden;background:#f3f2f2;box-shadow:0 24px 60px oklch(2% 0.005 240 / .6),inset 0 0 0 1px oklch(96% 0.006 78 / .12);transform:translateY(18%);transition:transform .9s cubic-bezier(.2,.7,.1,1)}
+.cover-phone--front{width:38%;transform:translateY(10%)}
+.cover-phone iframe{position:absolute;top:0;left:0;width:402px;height:874px;border:0;transform-origin:0 0;pointer-events:none}
+.proj-folder:hover .cover-phone{transform:translateY(12%)}
+.proj-folder:hover .cover-phone--front{transform:translateY(4%)}
+.cover-arch{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:4%;padding:0 8%;background:radial-gradient(120% 90% at 30% 40%,oklch(24% 0.03 220) 0%,oklch(12% 0.01 240) 70%);pointer-events:none}
+.cover-arch span{font-family:'Cormorant Garamond',serif;font-size:clamp(.9rem,1.6vw,1.3rem);color:oklch(96% 0.006 78);border:1px solid oklch(96% 0.006 78 / .25);padding:.9em .6em;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.08em;transition:border-color .6s}
+.cover-arch i{flex:1;height:1px;background:linear-gradient(90deg,oklch(96% 0.006 78 / .1),oklch(78% 0.1 78 / .6),oklch(96% 0.006 78 / .1))}
+.proj-folder:hover .cover-arch span{border-color:oklch(78% 0.1 78 / .7)}
+.cover-browser{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:9% 7% 0;background:radial-gradient(120% 90% at 50% 100%,oklch(22% 0.02 240) 0%,oklch(12% 0.01 240) 70%);pointer-events:none}
+.cover-browser__frame{position:relative;width:100%;height:100%;border-radius:8px 8px 0 0;overflow:hidden;background:#f3f2f2;box-shadow:0 24px 60px oklch(2% 0.005 240 / .6),inset 0 0 0 1px oklch(96% 0.006 78 / .12);transform:translateY(4%);transition:transform .9s cubic-bezier(.2,.7,.1,1)}
+.cover-browser__bar{height:8%;min-height:18px;display:flex;align-items:center;gap:4px;padding:0 3%;background:#e7e5e3;border-bottom:1px solid #d7d4d1}
+.cover-browser__bar i{width:5px;height:5px;border-radius:50%;background:#c9c5c1;display:block}
+.cover-browser__bar span{flex:1;margin-left:4px;height:60%;border-radius:3px;background:#f6f5f3;font:7px/1 'DM Mono',monospace;color:#7a7672;display:flex;align-items:center;padding:0 5px}
+.cover-browser__frame iframe{position:absolute;left:0;top:8%;width:1280px;border:0;transform-origin:0 0;pointer-events:none}
+.proj-folder:hover .cover-browser__frame{transform:translateY(0)}
 .folder-cover img {
   width: 100%;
   height: 100%;
@@ -335,7 +356,24 @@ body { padding-top: 64px; }
     inset 0 0 0 1px oklch(74% 0.10 78 / .28);
 }
 
-.proj-folder:hover .folder-cover img {
+.proj-folder:hover .cover-phones{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:6%;padding:0 6%;background:radial-gradient(120% 90% at 50% 100%,oklch(22% 0.02 240) 0%,oklch(12% 0.01 240) 70%);pointer-events:none}
+.cover-phone{position:relative;width:34%;aspect-ratio:402/874;border-radius:9% / 4.2%;overflow:hidden;background:#f3f2f2;box-shadow:0 24px 60px oklch(2% 0.005 240 / .6),inset 0 0 0 1px oklch(96% 0.006 78 / .12);transform:translateY(18%);transition:transform .9s cubic-bezier(.2,.7,.1,1)}
+.cover-phone--front{width:38%;transform:translateY(10%)}
+.cover-phone iframe{position:absolute;top:0;left:0;width:402px;height:874px;border:0;transform-origin:0 0;pointer-events:none}
+.proj-folder:hover .cover-phone{transform:translateY(12%)}
+.proj-folder:hover .cover-phone--front{transform:translateY(4%)}
+.cover-arch{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:4%;padding:0 8%;background:radial-gradient(120% 90% at 30% 40%,oklch(24% 0.03 220) 0%,oklch(12% 0.01 240) 70%);pointer-events:none}
+.cover-arch span{font-family:'Cormorant Garamond',serif;font-size:clamp(.9rem,1.6vw,1.3rem);color:oklch(96% 0.006 78);border:1px solid oklch(96% 0.006 78 / .25);padding:.9em .6em;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.08em;transition:border-color .6s}
+.cover-arch i{flex:1;height:1px;background:linear-gradient(90deg,oklch(96% 0.006 78 / .1),oklch(78% 0.1 78 / .6),oklch(96% 0.006 78 / .1))}
+.proj-folder:hover .cover-arch span{border-color:oklch(78% 0.1 78 / .7)}
+.cover-browser{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:9% 7% 0;background:radial-gradient(120% 90% at 50% 100%,oklch(22% 0.02 240) 0%,oklch(12% 0.01 240) 70%);pointer-events:none}
+.cover-browser__frame{position:relative;width:100%;height:100%;border-radius:8px 8px 0 0;overflow:hidden;background:#f3f2f2;box-shadow:0 24px 60px oklch(2% 0.005 240 / .6),inset 0 0 0 1px oklch(96% 0.006 78 / .12);transform:translateY(4%);transition:transform .9s cubic-bezier(.2,.7,.1,1)}
+.cover-browser__bar{height:8%;min-height:18px;display:flex;align-items:center;gap:4px;padding:0 3%;background:#e7e5e3;border-bottom:1px solid #d7d4d1}
+.cover-browser__bar i{width:5px;height:5px;border-radius:50%;background:#c9c5c1;display:block}
+.cover-browser__bar span{flex:1;margin-left:4px;height:60%;border-radius:3px;background:#f6f5f3;font:7px/1 'DM Mono',monospace;color:#7a7672;display:flex;align-items:center;padding:0 5px}
+.cover-browser__frame iframe{position:absolute;left:0;top:8%;width:1280px;border:0;transform-origin:0 0;pointer-events:none}
+.proj-folder:hover .cover-browser__frame{transform:translateY(0)}
+.folder-cover img {
   transform: scale(1.08);
   filter: saturate(1) contrast(1.04);
 }
@@ -495,7 +533,7 @@ body.list-view .proj-list { display: flex; }
   line-height: 1.04;
   color: var(--ivory);
 }
-.list-row__title em { font-style: italic; color: var(--gold); }
+.list-row__title em { font-style: italic; color: inherit; }
 
 .list-row__desc {
   font-size: .68rem;
@@ -758,10 +796,10 @@ body.list-view .proj-list { display: flex; }
     <div class="page-hero__eyebrow">Project Archive · 2022 — 2025</div>
     <div class="page-hero__rule"></div>
     <h1 class="page-hero__title">Selected<br><em>work</em></h1>
-    <p class="page-hero__sub">A small, deliberate body of work — three projects that sit at the threshold of perception, action, and collapse. Each one is a folder you can step into.</p>
+    <p class="page-hero__sub">A small, deliberate body of work — <span id="projCountWord">six</span> projects that sit at the threshold of perception, action, and system. Each one is a folder you can step into.</p>
 
     <div class="page-hero__meta">
-      <div class="page-hero__meta-item">Projects<strong>3</strong></div>
+      <div class="page-hero__meta-item">Projects<strong id="projCount">6</strong></div>
       <div class="page-hero__meta-item">Disciplines<strong>Cognition · Action · System</strong></div>
       <div class="page-hero__meta-item">Status<strong>Open archive</strong></div>
     </div>
@@ -802,13 +840,83 @@ body.list-view .proj-list { display: flex; }
   <div class="proj-grid">
 
     <a class="proj-folder"
+       href="Pathfinder.html"
+       data-cover=""
+       data-title="Pathfinder"
+       data-caption="A weekly job-search agent for students. System design.">
+      <div class="folder-cover">
+        <div class="cover-browser" aria-hidden="true">
+          <div class="cover-browser__frame"><div class="cover-browser__bar"><i></i><i></i><i></i><span>pathfinder.app</span></div><iframe src="pathfinder-app/landing.html" tabindex="-1" loading="lazy"></iframe></div>
+        </div>
+        <span class="folder-number">— 01 —</span>
+        <span class="folder-chip">Open Project</span>
+      </div>
+      <div class="folder-meta">
+        <div class="folder-tag"><span class="folder-tag-dot"></span>System Design · Product</div>
+        <h2 class="folder-title"><em>Pathfinder</em></h2>
+        <p class="folder-desc">A weekly job-search agent for students — fewer, better, you decide. Architecture, data model and pipeline behind one swap line.</p>
+        <div class="folder-bottom">
+          <span>2026 · Next.js · SQLite</span>
+          <span class="arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="proj-folder"
+       href="Sitescape.html"
+       data-cover=""
+       data-title="Sitescape"
+       data-caption="A social feed for personal websites.">
+      <div class="folder-cover">
+        <div class="cover-browser" aria-hidden="true">
+          <div class="cover-browser__frame"><div class="cover-browser__bar"><i></i><i></i><i></i><span>sitescape.app</span></div><iframe src="sitescape-app/app-feed.html" tabindex="-1" loading="lazy"></iframe></div>
+        </div>
+        <span class="folder-number">— 02 —</span>
+        <span class="folder-chip">Open Project</span>
+      </div>
+      <div class="folder-meta">
+        <div class="folder-tag"><span class="folder-tag-dot"></span>Website &amp; iOS App · Product Design</div>
+        <h2 class="folder-title"><em>Sitescape</em></h2>
+        <p class="folder-desc">A social feed for personal websites — claim your domain, post the pages you're proud of, and let people find them.</p>
+        <div class="folder-bottom">
+          <span>2026 · Website + App</span>
+          <span class="arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="proj-folder"
+       href="Footprints.html"
+       data-cover="uploads/footprints-cities-3d.png"
+       data-title="Footprints"
+       data-caption="A shared map of the places friends return to.">
+      <div class="folder-cover">
+        <div class="cover-phones" aria-hidden="true">
+          <div class="cover-phone"><iframe src="footprints-app/app-profile.html" tabindex="-1" loading="lazy"></iframe></div>
+          <div class="cover-phone cover-phone--front"><iframe src="footprints-app/app-map.html" tabindex="-1" loading="lazy"></iframe></div>
+        </div>
+        <span class="folder-number">— 03 —</span>
+        <span class="folder-chip">Open Project</span>
+      </div>
+      <div class="folder-meta">
+        <div class="folder-tag"><span class="folder-tag-dot"></span>iOS App · Product Design</div>
+        <h2 class="folder-title"><em>Footprints</em></h2>
+        <p class="folder-desc">An iOS app that turns a city into lists you can walk — landmarks rise as 3D isles carrying the traces people left there.</p>
+        <div class="folder-bottom">
+          <span>2026 · iOS App</span>
+          <span class="arrow">Enter →</span>
+        </div>
+      </div>
+    </a>
+
+    <a class="proj-folder"
        href="Space-Archaeology.html"
        data-cover="uploads/preview%20Space%20Archaeology.jpg"
        data-title="Space Archaeology"
        data-caption="A reading of the residue left behind by occupied space.">
       <div class="folder-cover">
         <img src="uploads/preview Space Archaeology.jpg" alt="Space Archaeology preview" loading="lazy"/>
-        <span class="folder-number">— 01 —</span>
+        <span class="folder-number">— 04 —</span>
         <span class="folder-chip">Open Project</span>
       </div>
       <div class="folder-meta">
@@ -829,7 +937,7 @@ body.list-view .proj-list { display: flex; }
        data-caption="On the value of acting without a destination.">
       <div class="folder-cover">
         <img src="uploads/preview The Reward of Non-teleological Action.jpg" alt="The Reward of Illogical Action preview" loading="lazy"/>
-        <span class="folder-number">— 02 —</span>
+        <span class="folder-number">— 05 —</span>
         <span class="folder-chip">Open Project</span>
       </div>
       <div class="folder-meta">
@@ -850,7 +958,7 @@ body.list-view .proj-list { display: flex; }
        data-caption="What follows after a system stops failing and starts forgetting.">
       <div class="folder-cover">
         <img src="uploads/preview-the-second-collapse.jpg" alt="The Second Collapse preview" loading="lazy"/>
-        <span class="folder-number">— 03 —</span>
+        <span class="folder-number">— 06 —</span>
         <span class="folder-chip">Open Project</span>
       </div>
       <div class="folder-meta">
@@ -868,22 +976,43 @@ body.list-view .proj-list { display: flex; }
 
   <!-- LIST VIEW (alternative rendering) -->
   <div class="proj-list">
-    <a class="list-row" href="Space-Archaeology.html">
+    <a class="list-row" href="Pathfinder.html">
       <div class="list-row__num">01</div>
+      <div class="list-row__title"><em>Pathfinder</em></div>
+      <div class="list-row__desc">A weekly job-search agent for students — system design.</div>
+      <div class="list-row__year">2026</div>
+      <div class="list-row__arrow">→</div>
+    </a>
+    <a class="list-row" href="Sitescape.html">
+      <div class="list-row__num">02</div>
+      <div class="list-row__title"><em>Sitescape</em></div>
+      <div class="list-row__desc">A social feed for personal websites.</div>
+      <div class="list-row__year">2026</div>
+      <div class="list-row__arrow">→</div>
+    </a>
+    <a class="list-row" href="Footprints.html">
+      <div class="list-row__num">03</div>
+      <div class="list-row__title"><em>Footprints</em></div>
+      <div class="list-row__desc">A shared map of the places friends return to.</div>
+      <div class="list-row__year">2026</div>
+      <div class="list-row__arrow">→</div>
+    </a>
+    <a class="list-row" href="Space-Archaeology.html">
+      <div class="list-row__num">04</div>
       <div class="list-row__title"><em>Space Archaeology</em></div>
       <div class="list-row__desc">A VR archaeology of human activity in orbit.</div>
       <div class="list-row__year">2025</div>
       <div class="list-row__arrow">→</div>
     </a>
     <a class="list-row" href="Illogical-Action.html">
-      <div class="list-row__num">02</div>
+      <div class="list-row__num">05</div>
       <div class="list-row__title">The Reward of <em>Illogical Action</em></div>
       <div class="list-row__desc">An immersive installation on purpose and process.</div>
       <div class="list-row__year">2025</div>
       <div class="list-row__arrow">→</div>
     </a>
     <a class="list-row" href="Second-Collapse.html">
-      <div class="list-row__num">03</div>
+      <div class="list-row__num">06</div>
       <div class="list-row__title">The Second <em>Collapse</em></div>
       <div class="list-row__desc">An inquiry into what follows after a system breaks.</div>
       <div class="list-row__year">2025</div>
@@ -952,6 +1081,8 @@ body.list-view .proj-list { display: flex; }
     });
   });
 
+  // ── Scale cover phone iframes to their frames ───
+
   // ── IntersectionObserver entrance for folders ───
   const folders = document.querySelectorAll('.proj-folder');
   const io = new IntersectionObserver((entries) => {
@@ -1016,5 +1147,7 @@ body.list-view .proj-list { display: flex; }
   refresh();
 })();
 </script>
+<script>(()=>{const n=document.querySelectorAll('.proj-grid .proj-folder').length;const w=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];const c=document.getElementById('projCount'),cw=document.getElementById('projCountWord');if(c)c.textContent=n;if(cw&&w[n])cw.textContent=w[n];})();</script>
+<script>(()=>{const fitOne=el=>{const f=el.querySelector('iframe');if(!f)return;const w=el.clientWidth,hh=el.clientHeight;if(!(w>0))return;if(el.matches('.phone,.cover-phone')){f.style.transform='scale('+(w/402)+')';}else if(el.matches('.opening__bg--ui')){const s=Math.max(w/1440,hh/900);if(s>0)f.style.transform='scale('+s+')';}else{const bar=el.querySelector('.browser__bar,.cover-browser__bar');const bh=bar?bar.offsetHeight:0;const s=w/1280;if(!(s>0))return;f.style.transform='scale('+s+')';f.style.height=Math.max(0,(hh-bh)/s)+'px';}};const all=()=>document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(fitOne);const ro=new ResizeObserver(es=>es.forEach(e=>fitOne(e.target)));document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(el=>ro.observe(el));all();requestAnimationFrame(all);setTimeout(all,300);addEventListener('load',all);addEventListener('resize',all);})();</script>
 </body>
 </html>

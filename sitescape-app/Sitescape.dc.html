@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/styles.css">
+  <script src="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/_ds_bundle.js"></script>
+  <style>
+    html, body { margin: 0; min-height: 100%; }
+    a { color: var(--color-accent); }
+    a:hover { color: var(--color-accent-600); }
+    @keyframes ss-rise { from { transform: translateY(12px); opacity: 0 } to { transform: none; opacity: 1 } }
+    @keyframes ss-spin { to { transform: rotate(360deg) } }
+    .ss-noscroll::-webkit-scrollbar { display: none }
+  </style>
+</helmet>
+<div style="min-height: 100vh; display: flex; justify-content: center; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body)">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ false }}">
+    <nav style="width: 220px; flex: none; position: sticky; top: 0; height: 100vh; padding: 34px 26px; display: flex; flex-direction: column; gap: 6px">
+      <div style="font-family: var(--font-heading); font-weight: 600; font-size: 26px; letter-spacing: -0.02em; margin-bottom: 26px">Sitescape</div>
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+        <button onClick="{{ n.go }}" style="display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 9px 6px; font: inherit; font-size: 16px; cursor: pointer; text-align: left; border-radius: var(--radius-md); color: {{ n.color }}" style-hover="background: var(--color-neutral-200)">
+          <span style="width: 22px; height: 22px; display: grid; place-items: center" dangerouslySetInnerHTML="{{ n.icon }}"></span>
+          <span>{{ n.label }}</span>
+          <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="margin-left: auto; width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-2)"></span></sc-if>
+        </button>
+      </sc-for>
+      <button class="btn btn-primary" onClick="{{ goNew }}" style="margin-top: 14px; justify-content: flex-start">+ New Highlight</button>
+      <button onClick="{{ goMe }}" style="margin-top: auto; display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 8px 6px; font: inherit; cursor: pointer; text-align: left; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)">
+        <span style="width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: {{ me.bg }}">{{ me.initials }}</span>
+        <span style="min-width: 0"><span style="display: block; font-size: 14px; font-weight: 600">{{ me.name }}</span><span class="text-muted" style="display: block; font-size: 12px">{{ me.domain }}</span></span>
+      </button>
+    </nav>
+  </sc-if>
+
+  <main style="flex: 1; min-width: 0; max-width: {{ mainMax }}; padding-bottom: 96px; position: relative">
+
+    <!-- FEED -->
+    <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ true }}">
+      <header style="padding: 22px 16px 0; display: flex; flex-direction: column; gap: 14px">
+        <div style="display: flex; align-items: baseline; gap: 12px">
+          <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ true }}"><span style="font-family: var(--font-heading); font-weight: 600; font-size: 28px; letter-spacing: -0.02em; margin-right: auto">Sitescape</span></sc-if>
+          <sc-for list="{{ feedTabs }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.pick }}" style="background: none; border: 0; padding: 4px 0 6px; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 15px; cursor: pointer; color: {{ t.color }}; border-bottom: 2px solid {{ t.line }}">{{ t.label }}</button>
+          </sc-for>
+        </div>
+        <div class="ss-noscroll" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px 6px">
+          <sc-for list="{{ roleChips }}" as="r" hint-placeholder-count="8">
+            <button onClick="{{ r.pick }}" class="tag {{ r.cls }}" style="border: 0; cursor: pointer; font: inherit; font-size: 12px; padding: 5px 12px; white-space: nowrap; flex: none">{{ r.label }}</button>
+          </sc-for>
+        </div>
+      </header>
+      <sc-if value="{{ feedEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 60px 24px; text-align: center" class="text-muted"><p style="font-style: italic; font-size: 17px">Nothing here yet.</p><p style="font-size: 14px">Follow a few people and their highlights will land here.</p></div>
+      </sc-if>
+      <div style="columns: {{ colWidth }}; column-gap: 16px; padding: 14px 16px 0">
+        <sc-for list="{{ feedItems }}" as="it" hint-placeholder-count="6">
+          <dc-import name="HighlightCard" item="{{ it }}" hint-size="100%,260px"></dc-import>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasMore }}" hint-placeholder-val="{{ false }}">
+        <div class="text-muted" style="text-align: center; padding: 10px; font-size: 13px; font-style: italic; display: flex; justify-content: center; gap: 8px; align-items: center"><span style="width: 12px; height: 12px; border: 2px solid var(--color-neutral-300); border-top-color: var(--color-accent); border-radius: 50%; animation: ss-spin 0.8s linear infinite"></span> Loading more</div>
+      </sc-if>
+    </sc-if>
+
+    <!-- DETAIL -->
+    <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: ss-rise .25s ease-out">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 10px 4px">
+          <button class="btn btn-ghost btn-icon" onClick="{{ back }}" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+          <span class="text-muted" style="font-size: 13px">{{ detail.domain }}</span>
+        </div>
+        <div class="ss-noscroll" onScroll="{{ coverScroll }}" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 10px; padding: 8px 16px; scrollbar-width: none">
+          <sc-for list="{{ detail.covers }}" as="c" hint-placeholder-count="1">
+            <div style="flex: none; width: 100%; scroll-snap-align: center; max-width: 520px; max-height: 380px; overflow: hidden; border-radius: var(--radius-md)"><dc-import name="Cover" cover="{{ c }}" domain="{{ detail.domain }}" tint="{{ detail.author.tint }}" treatment="{{ treatment }}" hint-size="100%,260px"></dc-import></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ detail.multiCover }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; justify-content: center; gap: 6px; padding: 2px 0 6px">
+            <sc-for list="{{ detail.dots }}" as="d" hint-placeholder-count="2"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{ d.color }}"></span></sc-for>
+          </div>
+        </sc-if>
+        <div style="padding: 12px 16px 0; display: flex; flex-direction: column; gap: 16px; max-width: 560px">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <button onClick="{{ detail.openAuthor }}" style="display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-align: left; min-width: 0">
+              <span style="width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: {{ detail.author.bg }}">{{ detail.author.initials }}</span>
+              <span style="min-width: 0"><span style="display: block; font-weight: 600; font-size: 15px">{{ detail.author.name }}</span><span class="text-muted" style="display: block; font-size: 12px">{{ detail.author.roles }} · {{ detail.ago }}</span></span>
+            </button>
+            <sc-if value="{{ detail.notMe }}" hint-placeholder-val="{{ true }}"><button class="btn {{ detail.followCls }}" onClick="{{ detail.toggleFollow }}" style="margin-left: auto">{{ detail.followLabel }}</button></sc-if>
+          </div>
+          <h1 style="font-size: 26px; margin: 0; text-wrap: pretty">{{ detail.title }}</h1>
+          <p style="margin: 0; font-size: 16px; line-height: 1.5; text-wrap: pretty">{{ detail.note }}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <span class="tag tag-accent">{{ detail.section_tag }}</span>
+            <sc-for list="{{ detail.tech_stack }}" as="t" hint-placeholder-count="2"><span class="tag tag-neutral">{{ t }}</span></sc-for>
+          </div>
+          <a class="btn btn-primary btn-block" href="{{ detail.fullUrl }}" target="_blank" rel="noopener" onClick="{{ detail.visit }}" style="font-size: 16px; padding: 14px; margin: 0">Visit site <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M8 7h9v9"></path></svg></a>
+          <div class="text-muted" style="font-size: 12px; text-align: center; margin-top: -6px">{{ detail.fullUrl }}</div>
+          <div style="display: flex; gap: 4px; justify-content: space-around">
+            <button onClick="{{ detail.toggleLike }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; border-radius: var(--radius-md); color: {{ detail.likeColor }}" style-hover="background: var(--color-neutral-200)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" fill-opacity="{{ detail.likeFill }}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg>{{ detail.likeCount }}</button>
+            <button onClick="{{ detail.save }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; border-radius: var(--radius-md); color: {{ detail.saveColor }}" style-hover="background: var(--color-neutral-200)"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" fill-opacity="{{ detail.saveFill }}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4-6 4z"></path></svg>{{ detail.saveLabel }}</button>
+            <button onClick="{{ detail.share }}" style="display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 8px 12px; font: inherit; font-size: 14px; cursor: pointer; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v6h14v-6"></path></svg>Share</button>
+          </div>
+          <div class="text-muted" style="font-size: 12px; display: flex; gap: 14px"><span>{{ detail.views }} views</span><span>{{ detail.clicks }} visits</span></div>
+
+          <h4 style="margin: 12px 0 0">Comments · {{ detail.commentCount }}</h4>
+          <sc-for list="{{ detail.comments }}" as="c" hint-placeholder-count="2">
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; gap: 10px">
+                <button onClick="{{ c.openAuthor }}" style="width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 10px; font-weight: 600; border: 0; cursor: pointer; background: {{ c.author.bg }}">{{ c.author.initials }}</button>
+                <div style="flex: 1; min-width: 0">
+                  <div style="display: flex; gap: 8px; align-items: baseline; font-size: 13px"><strong>{{ c.author.name }}</strong><span class="text-muted" style="font-size: 11px">{{ c.ago }}</span><sc-if value="{{ c.pinned }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent-2" style="font-size: 9px; padding: 1px 6px">Pinned</span></sc-if></div>
+                  <div style="font-size: 14px; line-height: 1.45; text-wrap: pretty">{{ c.body }}</div>
+                  <button onClick="{{ c.reply }}" class="text-muted" style="background: none; border: 0; padding: 4px 0; font: inherit; font-size: 12px; cursor: pointer" style-hover="color: var(--color-accent)">Reply</button>
+                </div>
+              </div>
+              <sc-for list="{{ c.replies }}" as="r" hint-placeholder-count="0">
+                <div style="display: flex; gap: 10px; padding-left: 38px">
+                  <button onClick="{{ r.openAuthor }}" style="width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9px; font-weight: 600; border: 0; cursor: pointer; background: {{ r.author.bg }}">{{ r.author.initials }}</button>
+                  <div style="flex: 1; min-width: 0">
+                    <div style="display: flex; gap: 8px; align-items: baseline; font-size: 13px"><strong>{{ r.author.name }}</strong><sc-if value="{{ r.isAuthor }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent" style="font-size: 9px; padding: 1px 6px">Author</span></sc-if><span class="text-muted" style="font-size: 11px">{{ r.ago }}</span></div>
+                    <div style="font-size: 14px; line-height: 1.45">{{ r.body }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <form onSubmit="{{ submitComment }}" style="display: flex; flex-direction: column; gap: 6px">
+            <sc-if value="{{ replyingTo }}" hint-placeholder-val="{{ false }}"><div class="text-muted" style="font-size: 12px; display: flex; gap: 8px; align-items: center">Replying to {{ replyingTo }} <button type="button" onClick="{{ cancelReply }}" style="background: none; border: 0; font: inherit; font-size: 12px; color: var(--color-accent); cursor: pointer">cancel</button></div></sc-if>
+            <div style="display: flex; gap: 8px">
+              <input class="input" placeholder="Add a comment" value="{{ commentText }}" onChange="{{ setCommentText }}">
+              <button class="btn btn-primary" type="submit">Post</button>
+            </div>
+          </form>
+
+          <sc-if value="{{ detail.hasMore }}" hint-placeholder-val="{{ false }}">
+            <h4 style="margin: 12px 0 0">More from {{ detail.domain }}</h4>
+          </sc-if>
+        </div>
+        <sc-if value="{{ detail.hasMore }}" hint-placeholder-val="{{ false }}">
+          <div class="ss-noscroll" style="display: flex; gap: 14px; overflow-x: auto; padding: 8px 16px 20px; scrollbar-width: none">
+            <sc-for list="{{ detail.more }}" as="m" hint-placeholder-count="2">
+              <div style="width: 160px; flex: none"><dc-import name="HighlightCard" item="{{ m }}" hint-size="160px,240px"></dc-import></div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- PROFILE -->
+    <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: ss-rise .25s ease-out">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 10px 0">
+          <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost btn-icon" onClick="{{ back }}" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button></sc-if>
+          <sc-if value="{{ profile.isMe }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-left: auto; display: flex; gap: 4px">
+              <button class="btn btn-ghost" onClick="{{ goInbox }}">Inbox<sc-if value="{{ inboxCount }}" hint-placeholder-val="{{ false }}"><span style="background: var(--color-accent-2); color: var(--color-bg); font-size: 10px; padding: 1px 6px; border-radius: 10px">{{ inboxCount }}</span></sc-if></button>
+              <button class="btn btn-ghost" onClick="{{ goStats }}">Stats</button>
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 14px; max-width: 560px">
+          <div style="display: flex; gap: 16px; align-items: center">
+            <span style="width: 68px; height: 68px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 22px; font-weight: 600; font-family: var(--font-heading); background: {{ profile.bg }}">{{ profile.initials }}</span>
+            <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0">
+              <h2 style="font-size: 24px; margin: 0">{{ profile.name }}</h2>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap"><sc-for list="{{ profile.role_tags }}" as="r" hint-placeholder-count="1"><span class="tag tag-neutral">{{ r }}</span></sc-for></div>
+            </div>
+          </div>
+          <p style="margin: 0; font-size: 15px; text-wrap: pretty">{{ profile.bio }}</p>
+          <a href="{{ profile.site_url }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 6px; font-size: 14px; text-decoration: none; width: fit-content"><span style="width: 16px; height: 16px; border-radius: 3px; display: grid; place-items: center; font-size: 9px; font-weight: 700; background: {{ profile.bg }}; color: var(--color-text)">{{ profile.favicon }}</span>{{ profile.domain }} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17L17 7M8 7h9v9"></path></svg></a>
+          <div style="display: flex; align-items: center; gap: 18px; font-size: 14px">
+            <span style="white-space: nowrap"><strong>{{ profile.followers }}</strong> <span class="text-muted">followers</span></span>
+            <span style="white-space: nowrap"><strong>{{ profile.following }}</strong> <span class="text-muted">following</span></span>
+            <sc-if value="{{ profile.isMe }}" hint-placeholder-val="{{ false }}"><button class="btn btn-secondary" onClick="{{ editProfile }}" style="margin-left: auto">Edit profile</button></sc-if>
+            <sc-if value="{{ profile.notMe }}" hint-placeholder-val="{{ true }}"><button class="btn {{ profile.followCls }}" onClick="{{ profile.toggleFollow }}" style="margin-left: auto">{{ profile.followLabel }}</button></sc-if>
+          </div>
+          <div style="display: flex; gap: 22px; margin-top: 8px">
+            <sc-for list="{{ profileTabs }}" as="t" hint-placeholder-count="2">
+              <button onClick="{{ t.pick }}" style="background: none; border: 0; padding: 4px 0 6px; font: inherit; font-family: var(--font-heading); font-weight: 600; font-size: 15px; cursor: pointer; color: {{ t.color }}; border-bottom: 2px solid {{ t.line }}">{{ t.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <sc-if value="{{ profileShowGrid }}" hint-placeholder-val="{{ true }}">
+          <div style="columns: {{ colWidth }}; column-gap: 16px; padding: 14px 16px 0">
+            <sc-for list="{{ profile.items }}" as="it" hint-placeholder-count="2">
+              <dc-import name="HighlightCard" item="{{ it }}" hint-size="100%,260px"></dc-import>
+            </sc-for>
+          </div>
+          <sc-if value="{{ profile.isMe }}" hint-placeholder-val="{{ false }}"><div style="padding: 0 16px"><button class="btn btn-secondary btn-block" onClick="{{ goNew }}">+ Add a highlight</button></div></sc-if>
+        </sc-if>
+        <sc-if value="{{ profileShowGuest }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 14px 16px 0; display: flex; flex-direction: column; gap: 16px; max-width: 560px">
+            <p class="text-muted" style="margin: 0; font-size: 13px; font-style: italic">Notes about {{ profile.domain }} as a whole.</p>
+            <sc-for list="{{ profile.guestbook }}" as="c" hint-placeholder-count="1">
+              <div style="display: flex; gap: 10px">
+                <span style="width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 10px; font-weight: 600; background: {{ c.author.bg }}">{{ c.author.initials }}</span>
+                <div><div style="display: flex; gap: 8px; align-items: baseline; font-size: 13px"><strong>{{ c.author.name }}</strong><span class="text-muted" style="font-size: 11px">{{ c.ago }}</span></div><div style="font-size: 14px; line-height: 1.45">{{ c.body }}</div></div>
+              </div>
+            </sc-for>
+            <form onSubmit="{{ submitGuest }}" style="display: flex; gap: 8px">
+              <input class="input" placeholder="Sign the guestbook" value="{{ commentText }}" onChange="{{ setCommentText }}">
+              <button class="btn btn-primary" type="submit">Post</button>
+            </form>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- SEARCH -->
+    <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 22px 16px 0; display: flex; flex-direction: column; gap: 18px; animation: ss-rise .25s ease-out">
+        <h2 style="margin: 0; font-size: 28px">Search</h2>
+        <input class="input" placeholder="People, highlights, tags, tech…" value="{{ query }}" onChange="{{ setQuery }}" autoFocus="{{ true }}" style="font-size: 16px; min-height: 44px">
+        <sc-if value="{{ searchIdle }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <h6 class="text-muted" style="margin: 0">Browse by section</h6>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{ sectionChips }}" as="s" hint-placeholder-count="6"><button onClick="{{ s.pick }}" class="tag tag-accent" style="border: 0; cursor: pointer; font: inherit; font-size: 12px; padding: 5px 12px">{{ s.label }}</button></sc-for></div>
+            <h6 class="text-muted" style="margin: 10px 0 0">Popular tech</h6>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{ techChips }}" as="s" hint-placeholder-count="8"><button onClick="{{ s.pick }}" class="tag tag-neutral" style="border: 0; cursor: pointer; font: inherit; font-size: 12px; padding: 5px 12px">{{ s.label }}</button></sc-for></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ searchActive }}" hint-placeholder-val="{{ false }}">
+          <sc-if value="{{ results.hasUsers }}" hint-placeholder-val="{{ false }}">
+            <h6 class="text-muted" style="margin: 0">People</h6>
+            <div style="display: flex; flex-direction: column; gap: 4px; margin-top: -8px">
+              <sc-for list="{{ results.users }}" as="u" hint-placeholder-count="1">
+                <button onClick="{{ u.open }}" style="display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 8px 4px; font: inherit; cursor: pointer; text-align: left; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)">
+                  <span style="width: 36px; height: 36px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: {{ u.bg }}">{{ u.initials }}</span>
+                  <span style="min-width: 0"><span style="display: block; font-weight: 600; font-size: 15px">{{ u.name }}</span><span class="text-muted" style="display: block; font-size: 12px">{{ u.domain }} · {{ u.roles }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ results.hasTags }}" hint-placeholder-val="{{ false }}">
+            <h6 class="text-muted" style="margin: 0">Tags &amp; tech</h6>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: -8px"><sc-for list="{{ results.tags }}" as="s" hint-placeholder-count="1"><button onClick="{{ s.pick }}" class="tag {{ s.cls }}" style="border: 0; cursor: pointer; font: inherit; font-size: 12px; padding: 5px 12px">{{ s.label }}</button></sc-for></div>
+          </sc-if>
+          <sc-if value="{{ results.hasItems }}" hint-placeholder-val="{{ false }}">
+            <h6 class="text-muted" style="margin: 0">Highlights · {{ results.itemCount }}</h6>
+            <div style="columns: {{ colWidth }}; column-gap: 16px; margin-top: -8px">
+              <sc-for list="{{ results.items }}" as="it" hint-placeholder-count="2"><dc-import name="HighlightCard" item="{{ it }}" hint-size="100%,260px"></dc-import></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ results.empty }}" hint-placeholder-val="{{ false }}"><p class="text-muted" style="font-style: italic">No matches for “{{ query }}”.</p></sc-if>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- SAVED -->
+    <sc-if value="{{ isSaved }}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 22px 16px 0; display: flex; flex-direction: column; gap: 18px; animation: ss-rise .25s ease-out">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <sc-if value="{{ activeCollection }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost btn-icon" onClick="{{ closeCollection }}" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button></sc-if>
+          <h2 style="margin: 0; font-size: 28px">{{ savedTitle }}</h2>
+        </div>
+        <sc-if value="{{ savedShowList }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{ collections }}" as="c" hint-placeholder-count="2">
+              <button onClick="{{ c.open }}" style="display: flex; align-items: center; gap: 14px; background: none; border: 0; padding: 10px 4px; font: inherit; cursor: pointer; text-align: left; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)">
+                <span style="width: 64px; flex: none"><sc-if value="{{ c.first }}" hint-placeholder-val="{{ false }}"><dc-import name="Cover" cover="{{ c.first.cover }}" domain="{{ c.first.domain }}" tint="{{ c.first.author.tint }}" treatment="{{ treatment }}" hint-size="64px,64px"></dc-import></sc-if><sc-if value="{{ c.isEmpty }}" hint-placeholder-val="{{ false }}"><span style="display: block; width: 64px; height: 64px; border-radius: var(--radius-md); background: var(--color-neutral-200)"></span></sc-if></span>
+                <span><span style="display: block; font-family: var(--font-heading); font-weight: 600; font-size: 17px">{{ c.name }}</span><span class="text-muted" style="display: block; font-size: 13px">{{ c.count }} saved</span></span>
+              </button>
+            </sc-for>
+          </div>
+          <form onSubmit="{{ addCollection }}" style="display: flex; gap: 8px; max-width: 420px">
+            <input class="input" placeholder="New collection" value="{{ newCollectionName }}" onChange="{{ setNewCollectionName }}">
+            <button class="btn btn-secondary" type="submit">Create</button>
+          </form>
+        </sc-if>
+        <sc-if value="{{ activeCollection }}" hint-placeholder-val="{{ false }}">
+          <div style="columns: {{ colWidth }}; column-gap: 16px">
+            <sc-for list="{{ collectionItems }}" as="it" hint-placeholder-count="2"><dc-import name="HighlightCard" item="{{ it }}" hint-size="100%,260px"></dc-import></sc-for>
+          </div>
+          <sc-if value="{{ collectionEmpty }}" hint-placeholder-val="{{ false }}"><p class="text-muted" style="font-style: italic">Nothing saved here yet. Tap the bookmark on any highlight.</p></sc-if>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- NOTIFICATIONS -->
+    <sc-if value="{{ isNotifications }}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 22px 16px 0; display: flex; flex-direction: column; gap: 4px; animation: ss-rise .25s ease-out; max-width: 560px">
+        <h2 style="margin: 0 0 14px; font-size: 28px">Notifications</h2>
+        <sc-for list="{{ notifications }}" as="n" hint-placeholder-count="5">
+          <button onClick="{{ n.open }}" style="display: flex; align-items: flex-start; gap: 12px; background: none; border: 0; padding: 10px 4px; font: inherit; cursor: pointer; text-align: left; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)">
+            <span style="position: relative; flex: none"><span style="width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: {{ n.author.bg }}">{{ n.author.initials }}</span><span style="position: absolute; right: -3px; bottom: -3px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; background: {{ n.kindBg }}; color: var(--color-bg)" dangerouslySetInnerHTML="{{ n.icon }}"></span></span>
+            <span style="flex: 1; min-width: 0; font-size: 14px; line-height: 1.4"><strong>{{ n.author.name }}</strong> {{ n.text }} <sc-if value="{{ n.target }}" hint-placeholder-val="{{ false }}"><em class="text-muted">{{ n.target }}</em></sc-if><span class="text-muted" style="display: block; font-size: 12px">{{ n.ago }}</span></span>
+            <sc-if value="{{ n.cover }}" hint-placeholder-val="{{ false }}"><span style="width: 44px; flex: none"><dc-import name="Cover" cover="{{ n.cover }}" domain="{{ me.domain }}" tint="{{ me.tint }}" treatment="{{ treatment }}" hint-size="44px,44px"></dc-import></span></sc-if>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- ONBOARDING -->
+    <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+      <div style="padding: 40px 22px 0; display: flex; flex-direction: column; gap: 22px; animation: ss-rise .25s ease-out; max-width: 480px; margin: 0 auto">
+        <div style="font-family: var(--font-heading); font-weight: 600; font-size: 20px">Sitescape</div>
+        <sc-if value="{{ ob.step1 }}" hint-placeholder-val="{{ true }}">
+          <h1 style="font-size: 34px; margin: 0; text-wrap: pretty">Which site is yours?</h1>
+          <p class="text-muted" style="margin: 0; font-size: 15px">We’ll fetch the title, favicon and a screenshot of the homepage. You’ll post highlights from this domain only.</p>
+          <form onSubmit="{{ ob.fetch }}" style="display: flex; flex-direction: column; gap: 10px">
+            <input class="input" placeholder="https://yourname.com" value="{{ ob.url }}" onChange="{{ ob.setUrl }}" style="font-size: 16px; min-height: 46px">
+            <sc-if value="{{ ob.error }}" hint-placeholder-val="{{ false }}"><div style="font-size: 13px; color: var(--color-accent-2-700)">{{ ob.error }}</div></sc-if>
+            <button class="btn btn-primary" type="submit" style="min-height: 46px; font-size: 16px" disabled="{{ ob.loading }}"><sc-if value="{{ ob.loading }}" hint-placeholder-val="{{ false }}"><span style="width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.4); border-top-color: var(--color-bg); border-radius: 50%; animation: ss-spin .8s linear infinite"></span> Fetching</sc-if><sc-if value="{{ ob.idle }}" hint-placeholder-val="{{ true }}">Fetch my site</sc-if></button>
+          </form>
+        </sc-if>
+        <sc-if value="{{ ob.step2 }}" hint-placeholder-val="{{ false }}">
+          <h1 style="font-size: 34px; margin: 0">Looks right?</h1>
+          <div style="display: flex; gap: 14px; align-items: flex-start">
+            <div style="width: 140px; flex: none"><dc-import name="Cover" cover="{{ ob.cover }}" domain="{{ ob.domain }}" tint="a" treatment="{{ treatment }}" hint-size="140px,110px"></dc-import></div>
+            <div style="display: flex; flex-direction: column; gap: 6px; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 8px"><span style="width: 18px; height: 18px; border-radius: 3px; display: grid; place-items: center; font-size: 10px; font-weight: 700; background: var(--color-accent-100)">{{ ob.favicon }}</span><span class="text-muted" style="font-size: 13px">{{ ob.domain }}</span></div>
+              <div style="font-family: var(--font-heading); font-weight: 600; font-size: 18px; line-height: 1.2">{{ ob.title }}</div>
+              <div class="text-muted" style="font-size: 12px">Homepage screenshot · just now</div>
+            </div>
+          </div>
+          <h4 style="margin: 12px 0 0">What do you do?</h4>
+          <p class="text-muted" style="margin: -8px 0 0; font-size: 13px">Pick as many as apply.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <sc-for list="{{ ob.roleChips }}" as="r" hint-placeholder-count="8"><button onClick="{{ r.pick }}" class="tag {{ r.cls }}" style="border: 0; cursor: pointer; font: inherit; font-size: 14px; padding: 9px 16px">{{ r.label }}</button></sc-for>
+          </div>
+          <div style="display: flex; gap: 8px; margin-top: 8px">
+            <button class="btn btn-secondary" onClick="{{ ob.backStep }}">Back</button>
+            <button class="btn btn-primary" onClick="{{ ob.finish }}" disabled="{{ ob.noRoles }}" style="flex: 1; min-height: 46px; font-size: 16px">Done</button>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- NEW HIGHLIGHT -->
+    <sc-if value="{{ isNew }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: ss-rise .25s ease-out">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 10px 4px">
+          <button class="btn btn-ghost btn-icon" onClick="{{ nh.backStep }}" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+          <span style="font-family: var(--font-heading); font-weight: 600; font-size: 17px">New Highlight</span>
+          <span class="text-muted" style="margin-left: auto; font-size: 13px">{{ nh.stepLabel }}</span>
+        </div>
+        <div style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 18px; max-width: 520px">
+          <sc-if value="{{ nh.step1 }}" hint-placeholder-val="{{ true }}">
+            <h2 style="margin: 0; font-size: 26px; text-wrap: pretty">Which page are you proud of?</h2>
+            <p class="text-muted" style="margin: -6px 0 0; font-size: 14px">Paste a link on <strong>{{ me.domain }}</strong>. We’ll screenshot it for you.</p>
+            <form onSubmit="{{ nh.check }}" style="display: flex; flex-direction: column; gap: 10px">
+              <input class="input" placeholder="https://{{ me.domain }}/…" value="{{ nh.url }}" onChange="{{ nh.setUrl }}" style="font-size: 16px; min-height: 46px">
+              <sc-if value="{{ nh.error }}" hint-placeholder-val="{{ false }}"><div style="font-size: 13px; color: var(--color-accent-2-700)">{{ nh.error }}</div></sc-if>
+              <button class="btn btn-primary" type="submit" style="min-height: 46px; font-size: 16px" disabled="{{ nh.loading }}"><sc-if value="{{ nh.loading }}" hint-placeholder-val="{{ false }}"><span style="width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.4); border-top-color: var(--color-bg); border-radius: 50%; animation: ss-spin .8s linear infinite"></span> Taking screenshot</sc-if><sc-if value="{{ nh.idle }}" hint-placeholder-val="{{ true }}">Continue</sc-if></button>
+            </form>
+            <div class="text-muted" style="font-size: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center">Try: <sc-for list="{{ nh.suggestions }}" as="s" hint-placeholder-count="2"><button onClick="{{ s.pick }}" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12px; color: var(--color-accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px">{{ s.label }}</button></sc-for></div>
+          </sc-if>
+          <sc-if value="{{ nh.step2 }}" hint-placeholder-val="{{ false }}">
+            <div class="field"><label>Covers · drag order with the arrows</label>
+              <div class="ss-noscroll" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none">
+                <sc-for list="{{ nh.covers }}" as="c" hint-placeholder-count="1">
+                  <div style="width: 130px; flex: none; display: flex; flex-direction: column; gap: 4px">
+                    <dc-import name="Cover" cover="{{ c.cover }}" domain="{{ me.domain }}" tint="{{ me.tint }}" treatment="{{ treatment }}" hint-size="130px,100px"></dc-import>
+                    <div style="display: flex; gap: 2px; justify-content: center">
+                      <button class="btn btn-ghost btn-icon" onClick="{{ c.left }}" style="width: 28px; height: 28px" aria-label="Move left">←</button>
+                      <button class="btn btn-ghost btn-icon" onClick="{{ c.right }}" style="width: 28px; height: 28px" aria-label="Move right">→</button>
+                      <button class="btn btn-ghost btn-icon" onClick="{{ c.remove }}" style="width: 28px; height: 28px" aria-label="Remove">×</button>
+                    </div>
+                    <span class="text-muted" style="font-size: 10px; text-align: center">{{ c.label }}</span>
+                  </div>
+                </sc-for>
+                <button onClick="{{ nh.addCover }}" style="width: 130px; flex: none; aspect-ratio: 1.3; border: 1px dashed var(--color-neutral-400); border-radius: var(--radius-md); background: none; font: inherit; font-size: 13px; color: var(--color-accent); cursor: pointer; align-self: flex-start">+ Add image</button>
+              </div>
+            </div>
+            <div class="field"><label>Section</label>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px"><sc-for list="{{ nh.sectionChips }}" as="s" hint-placeholder-count="6"><button onClick="{{ s.pick }}" class="tag {{ s.cls }}" style="border: 0; cursor: pointer; font: inherit; font-size: 13px; padding: 7px 14px">{{ s.label }}</button></sc-for></div>
+            </div>
+            <div class="field"><label>Title</label><input class="input" value="{{ nh.title }}" onChange="{{ nh.setTitle }}"></div>
+            <div class="field"><label style="display: flex; justify-content: space-between">Why are you sharing this? <span>{{ nh.noteLeft }}</span></label><textarea class="input" placeholder="One or two honest sentences." value="{{ nh.note }}" onChange="{{ nh.setNote }}" maxLength="280"></textarea></div>
+            <div class="field"><label>Tech stack (optional, comma separated)</label><input class="input" placeholder="Astro, MDX" value="{{ nh.tech }}" onChange="{{ nh.setTech }}"></div>
+            <button class="btn btn-primary" onClick="{{ nh.toPreview }}" disabled="{{ nh.incomplete }}" style="min-height: 46px; font-size: 16px">Preview card</button>
+          </sc-if>
+          <sc-if value="{{ nh.step3 }}" hint-placeholder-val="{{ false }}">
+            <p class="text-muted" style="margin: 0; font-size: 14px">Exactly as it will appear in the feed.</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 18px; background: var(--color-neutral-100); border-radius: var(--radius-lg)">
+              <dc-import name="HighlightCard" item="{{ nh.previewItem }}" hint-size="100%,260px"></dc-import>
+              <div style="display: flex; flex-direction: column; gap: 8px; opacity: .35"><span style="display: block; aspect-ratio: 1.1; background: var(--color-neutral-300); border-radius: var(--radius-md)"></span><span style="display: block; height: 10px; width: 80%; background: var(--color-neutral-300)"></span><span style="display: block; height: 10px; width: 50%; background: var(--color-neutral-300)"></span></div>
+            </div>
+            <div style="display: flex; gap: 8px">
+              <button class="btn btn-secondary" onClick="{{ nh.backStep }}">Edit</button>
+              <button class="btn btn-primary" onClick="{{ nh.publish }}" style="flex: 1; min-height: 46px; font-size: 16px">Publish</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- INBOX -->
+    <sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: ss-rise .25s ease-out">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 10px 0"><button class="btn btn-ghost btn-icon" onClick="{{ back }}" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button><h2 style="margin: 0; font-size: 26px">Feedback inbox</h2></div>
+        <div style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 20px; max-width: 560px">
+          <p class="text-muted" style="margin: 0; font-size: 14px">Every comment on your highlights and guestbook, newest first.</p>
+          <sc-for list="{{ inbox }}" as="c" hint-placeholder-count="3">
+            <div style="display: flex; flex-direction: column; gap: 8px">
+              <div class="text-muted" style="font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase">{{ c.context }}</div>
+              <div style="display: flex; gap: 10px">
+                <span style="width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 10px; font-weight: 600; background: {{ c.author.bg }}">{{ c.author.initials }}</span>
+                <div style="flex: 1; min-width: 0">
+                  <div style="display: flex; gap: 8px; align-items: baseline; font-size: 13px"><strong>{{ c.author.name }}</strong><span class="text-muted" style="font-size: 11px">{{ c.ago }}</span><sc-if value="{{ c.pinned }}" hint-placeholder-val="{{ false }}"><span class="tag tag-accent-2" style="font-size: 9px; padding: 1px 6px">Pinned</span></sc-if></div>
+                  <div style="font-size: 14px; line-height: 1.45">{{ c.body }}</div>
+                  <sc-if value="{{ c.replied }}" hint-placeholder-val="{{ false }}"><div style="font-size: 13px; margin-top: 6px; padding-left: 10px; border-left: 2px solid var(--color-accent-200)"><span class="text-muted">You replied: </span>{{ c.replyBody }}</div></sc-if>
+                  <div style="display: flex; gap: 12px; margin-top: 4px">
+                    <button onClick="{{ c.startReply }}" style="background: none; border: 0; padding: 4px 0; font: inherit; font-size: 12px; cursor: pointer; color: var(--color-accent)">Reply</button>
+                    <button onClick="{{ c.togglePin }}" style="background: none; border: 0; padding: 4px 0; font: inherit; font-size: 12px; cursor: pointer; color: var(--color-accent)">{{ c.pinLabel }}</button>
+                    <button onClick="{{ c.remove }}" class="text-muted" style="background: none; border: 0; padding: 4px 0; font: inherit; font-size: 12px; cursor: pointer" style-hover="color: var(--color-accent-2-700)">Delete</button>
+                  </div>
+                  <sc-if value="{{ c.replying }}" hint-placeholder-val="{{ false }}">
+                    <form onSubmit="{{ c.submitReply }}" style="display: flex; gap: 8px; margin-top: 8px"><input class="input" placeholder="Write a reply" value="{{ commentText }}" onChange="{{ setCommentText }}" autoFocus="{{ true }}"><button class="btn btn-primary" type="submit">Send</button></form>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ inboxEmpty }}" hint-placeholder-val="{{ false }}"><p class="text-muted" style="font-style: italic">Inbox zero.</p></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- STATS -->
+    <sc-if value="{{ isStats }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: ss-rise .25s ease-out">
+        <div style="display: flex; align-items: center; gap: 8px; padding: 14px 10px 0"><button class="btn btn-ghost btn-icon" onClick="{{ back }}" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button><h2 style="margin: 0; font-size: 26px">Stats</h2></div>
+        <div style="padding: 10px 16px 0; display: flex; flex-direction: column; gap: 22px; max-width: 640px">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px">
+            <sc-for list="{{ stats.totals }}" as="t" hint-placeholder-count="4">
+              <div><div style="font-family: var(--font-heading); font-weight: 600; font-size: 30px; line-height: 1; letter-spacing: -0.02em">{{ t.value }}</div><div class="text-muted" style="font-size: 12px; margin-top: 4px">{{ t.label }}</div></div>
+            </sc-for>
+          </div>
+          <div style="overflow-x: auto">
+            <table class="table">
+              <thead><tr><th>Highlight</th><th style="text-align: right">Views</th><th style="text-align: right">Visits</th><th style="text-align: right">Likes</th><th style="text-align: right">Saves</th></tr></thead>
+              <tbody>
+                <sc-for list="{{ stats.rows }}" as="r" hint-placeholder-count="2">
+                  <tr onClick="{{ r.open }}" style="cursor: pointer"><td style="max-width: 220px"><div style="font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.title }}</div><div class="text-muted" style="font-size: 11px">{{ r.section_tag }} · CTR {{ r.ctr }}</div></td><td style="text-align: right">{{ r.views }}</td><td style="text-align: right">{{ r.clicks }}</td><td style="text-align: right">{{ r.likes }}</td><td style="text-align: right">{{ r.saves }}</td></tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 10px">New followers this week · {{ stats.newFollowerCount }}</h4>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{ stats.newFollowers }}" as="u" hint-placeholder-count="3">
+                <button onClick="{{ u.open }}" style="display: flex; align-items: center; gap: 12px; background: none; border: 0; padding: 8px 4px; font: inherit; cursor: pointer; text-align: left; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)">
+                  <span style="width: 32px; height: 32px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 11px; font-weight: 600; background: {{ u.bg }}">{{ u.initials }}</span>
+                  <span style="min-width: 0"><span style="display: block; font-weight: 600; font-size: 14px">{{ u.name }}</span><span class="text-muted" style="display: block; font-size: 12px">{{ u.domain }} · {{ u.roles }}</span></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- FAB (mobile) -->
+    <sc-if value="{{ showFab }}" hint-placeholder-val="{{ true }}">
+      <button onClick="{{ goNew }}" aria-label="New highlight" style="position: fixed; right: 18px; bottom: 84px; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--color-accent); color: var(--color-bg); box-shadow: var(--shadow-md); cursor: pointer; display: grid; place-items: center" style-hover="background: var(--color-accent-600)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></button>
+    </sc-if>
+  </main>
+
+  <!-- SAVE SHEET -->
+  <sc-if value="{{ saveSheet }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" onClick="{{ closeSaveSheet }}" style="z-index: 40; align-items: end">
+      <div class="dialog" onClick="{{ stop }}" style="animation: ss-rise .2s ease-out">
+        <div class="dialog-title">Save to</div>
+        <div style="display: flex; flex-direction: column; gap: 2px">
+          <sc-for list="{{ saveOptions }}" as="o" hint-placeholder-count="2">
+            <button onClick="{{ o.pick }}" style="display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 10px 6px; font: inherit; font-size: 15px; cursor: pointer; text-align: left; border-radius: var(--radius-md)" style-hover="background: var(--color-neutral-200)"><span style="width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid {{ o.ring }}; background: {{ o.fill }}; flex: none"></span>{{ o.name }}<span class="text-muted" style="margin-left: auto; font-size: 12px">{{ o.count }}</span></button>
+          </sc-for>
+        </div>
+        <form onSubmit="{{ addCollectionAndSave }}" style="display: flex; gap: 8px"><input class="input" placeholder="New collection" value="{{ newCollectionName }}" onChange="{{ setNewCollectionName }}"><button class="btn btn-secondary" type="submit">Create</button></form>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 50; background: var(--color-neutral-900); color: var(--color-bg); padding: 10px 16px; border-radius: var(--radius-md); font-size: 14px; box-shadow: var(--shadow-lg); animation: ss-rise .2s ease-out; white-space: nowrap">{{ toast }}</div>
+  </sc-if>
+
+  <!-- BOTTOM TABS (mobile) -->
+  <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ true }}">
+    <nav style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; padding: 6px 8px calc(8px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--color-bg) 92%, transparent); backdrop-filter: blur(10px)">
+      <sc-for list="{{ tabItems }}" as="n" hint-placeholder-count="5">
+        <button onClick="{{ n.go }}" aria-label="{{ n.label }}" style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: 0; padding: 6px 0; min-height: 48px; font: inherit; font-size: 10px; cursor: pointer; color: {{ n.color }}">
+          <sc-if value="{{ n.isPlus }}" hint-placeholder-val="{{ false }}"><span style="width: 40px; height: 32px; border-radius: var(--radius-lg); background: var(--color-accent); color: var(--color-bg); display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span></sc-if>
+          <sc-if value="{{ n.notPlus }}" hint-placeholder-val="{{ true }}"><span style="width: 24px; height: 24px; display: grid; place-items: center" dangerouslySetInnerHTML="{{ n.icon }}"></span><span>{{ n.label }}</span></sc-if>
+          <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}"><span style="position: absolute; top: 6px; right: calc(50% - 14px); width: 8px; height: 8px; border-radius: 50%; background: var(--color-accent-2); box-shadow: 0 0 0 2px var(--color-bg)"></span></sc-if>
+        </button>
+      </sc-for>
+    </nav>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;feed&quot;,&quot;onboarding&quot;,&quot;new&quot;,&quot;inbox&quot;,&quot;stats&quot;,&quot;notifications&quot;,&quot;saved&quot;,&quot;search&quot;],&quot;default&quot;:&quot;feed&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;},&quot;coverTreatment&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;halftone&quot;,&quot;plain&quot;],&quot;default&quot;:&quot;halftone&quot;,&quot;tsType&quot;:&quot;'halftone'|'plain'&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;feedColumns&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;two&quot;,&quot;three&quot;],&quot;default&quot;:&quot;two&quot;,&quot;tsType&quot;:&quot;'two'|'three'&quot;,&quot;section&quot;:&quot;Look&quot;}}">
+const ME = 'u1';
+const NOW = new Date('2026-09-22T12:00:00');
+const ICON = (p, extra = '') => `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}${extra}</svg>`;
+const ICONS = {
+  home: ICON('<path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/>'),
+  search: ICON('<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L20 20" fill="none"/>'),
+  bell: ICON('<path d="M6 17v-6a6 6 0 0 1 12 0v6l1.5 2h-15z"/><path d="M10 21h4" fill="none"/>'),
+  user: ICON('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0z"/>'),
+  bookmark: ICON('<path d="M6 3h12v18l-6-4-6 4z"/>'),
+  heart: '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>',
+  chat: '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+  plus: '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+};
+const TINT_BG = { a: 'var(--color-accent-200)', b: 'var(--color-accent-2-200)', c: 'var(--color-neutral-300)' };
+const initials = n => n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+const ago = d => { const days = Math.max(0, Math.round((NOW - new Date(d)) / 864e5)); return days === 0 ? 'today' : days === 1 ? '1d' : days < 7 ? days + 'd' : Math.round(days / 7) + 'w'; };
+const hash = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+const fmt = n => n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n);
+const ALT_KIND = { article: 'gallery', gallery: 'app', app: 'article', grid: 'app', chart: 'article', map: 'article', code: 'article', resume: 'gallery', about: 'gallery', table: 'app' };
+
+class Component extends DCLogic {
+  state = {
+    data: null, route: { name: 'feed' }, stack: [], feedTab: 'foryou', roleFilter: null, visibleCount: 12,
+    likes: new Set(['h3', 'h17', 'h29']), follows: new Set(['u2', 'u5', 'u9', 'u13', 'u17']),
+    collections: [{ name: 'Inspiration', ids: ['h17', 'h25', 'h32'] }, { name: 'Resumes to steal', ids: ['h6', 'h20'] }],
+    saveSheet: null, newCollectionName: '', activeCollection: null,
+    profileTab: 'highlights', query: '', commentText: '', replyTo: null, inboxReply: null, comments: [], added: [], clicks: {}, visits: {},
+    isDesktop: false, coverIndex: 0, toast: null, seenNotifs: false,
+    ob: { step: 1, url: '', loading: false, error: '', roles: new Set(), title: '', domain: '' },
+    nh: { step: 1, url: '', loading: false, error: '', section: null, title: '', note: '', tech: '', covers: [] },
+  };
+  componentDidMount() {
+    import('./sitescape-data.js').then(d => {
+      const start = this.props.startScreen && this.props.startScreen !== 'feed' ? { name: this.props.startScreen, ...(this.props.startScreen === 'profile' ? { id: ME } : {}) } : { name: 'feed' };
+      this.setState({ data: d, comments: d.comments.map(c => ({ ...c })), route: start, isDesktop: window.innerWidth >= 900 });
+      [50, 500, 1500].forEach(t => setTimeout(() => this.forceUpdate(), t));
+    });
+    this.mq = window.matchMedia('(min-width: 900px)');
+    const upd = () => this.setState({ isDesktop: this.mq.matches });
+    upd(); this.mq.addEventListener('change', upd); window.addEventListener('resize', upd);
+    this.ro = new ResizeObserver(() => this.forceUpdate());
+    this.ro.observe(document.documentElement);
+    requestAnimationFrame(() => this.forceUpdate()); [300, 800, 1500].forEach(t => setTimeout(() => this.forceUpdate(), t));
+    this.onScroll = () => {
+      if (this.state.route.name !== 'feed') return;
+      if (window.innerHeight + window.scrollY > document.body.offsetHeight - 500) this.setState(s => ({ visibleCount: s.visibleCount + 8 }));
+    };
+    window.addEventListener('scroll', this.onScroll);
+  }
+  componentWillUnmount() { window.removeEventListener('scroll', this.onScroll); this.ro && this.ro.disconnect(); }
+  toast(msg) { clearTimeout(this.tt); this.setState({ toast: msg }); this.tt = setTimeout(() => this.setState({ toast: null }), 2200); }
+  go(route, push = true) {
+    this.setState(s => ({ route, stack: push ? [...s.stack, s.route] : s.stack, coverIndex: 0, commentText: '', replyTo: null, inboxReply: null, activeCollection: route.name === 'saved' ? null : s.activeCollection, seenNotifs: s.seenNotifs || route.name === 'notifications' }));
+    window.scrollTo(0, 0);
+  }
+  back() { this.setState(s => { const st = [...s.stack]; const prev = st.pop() || { name: 'feed' }; return { route: prev, stack: st, commentText: '', replyTo: null }; }); window.scrollTo(0, 0); }
+  user(id) { const d = this.state.data; const u = d.users.find(x => x.id === id); return { ...u, initials: initials(u.name), bg: TINT_BG[u.tint], role1: u.role_tags[0], roles: u.role_tags.join(' · '), favicon: u.name[0], open: () => this.go({ name: 'profile', id: u.id }) }; }
+  allHighlights() { return [...this.state.added, ...this.state.data.highlights]; }
+  item(h) {
+    const s = this.state, liked = s.likes.has(h.id), author = this.user(h.user_id);
+    const savedIn = s.collections.filter(c => c.ids.includes(h.id));
+    return { ...h, author, domain: author.domain, fullUrl: /^https?:/.test(h.url) ? h.url : author.site_url + h.url, liked, likeCount: fmt(h.like_count + (liked ? 1 : 0)),
+      likeColor: liked ? 'var(--color-accent-2)' : 'inherit', likeFill: liked ? 1 : 0.15, treatment: this.props.coverTreatment ?? 'halftone',
+      saved: savedIn.length > 0, saveLabel: savedIn.length ? 'Saved' : 'Save', saveColor: savedIn.length ? 'var(--color-accent)' : 'inherit', saveFill: savedIn.length ? 1 : 0.15,
+      open: () => this.go({ name: 'detail', id: h.id }),
+      toggleLike: e => { e && e.stopPropagation(); this.setState(st => { const l = new Set(st.likes); l.has(h.id) ? l.delete(h.id) : l.add(h.id); return { likes: l }; }); },
+      save: e => { e && e.stopPropagation(); this.setState({ saveSheet: h.id, newCollectionName: '' }); },
+      share: () => { navigator.clipboard && navigator.clipboard.writeText(location.origin + '/h/' + h.id).catch(() => {}); this.toast('Link copied'); },
+      visit: () => this.setState(st => ({ visits: { ...st.visits, [h.id]: (st.visits[h.id] || 0) + 1 } })),
+      views: fmt(h.view_count), clicks: fmt(h.outbound_click_count + (s.visits[h.id] || 0)), ago: ago(h.created_at) };
+  }
+  chips(list, active, pick, activeCls = 'tag-accent', idleCls = 'tag-neutral') { return list.map(label => ({ label, cls: (Array.isArray(active) ? active.includes(label) : active === label) ? activeCls : idleCls, pick: () => pick(label) })); }
+  tabs(list, active, pick) { return list.map(([key, label]) => ({ label, color: active === key ? 'var(--color-text)' : 'var(--color-neutral-600)', line: active === key ? 'var(--color-accent)' : 'transparent', pick: () => pick(key) })); }
+  comment(c) { const a = this.user(c.author_id); return { ...c, author: a, ago: ago(c.created_at), openAuthor: a.open, isAuthor: false }; }
+  addComment(fields) { this.setState(s => ({ comments: [...s.comments, { id: 'c' + Date.now(), body: s.commentText.trim(), author_id: ME, parent_id: null, pinned: false, created_at: NOW.toISOString(), ...fields }], commentText: '', replyTo: null, inboxReply: null })); }
+  renderVals() {
+    const s = this.state, d = s.data, r = s.route, isDesktop = window.innerWidth >= 900, isMobile = !isDesktop;
+    const treatment = this.props.coverTreatment ?? 'halftone';
+    const colWidth = isDesktop ? '200px' : (this.props.feedColumns === 'three' ? '110px' : '150px');
+    const base = { isDesktop, isMobile, treatment, colWidth, mainMax: isDesktop ? '1160px' : '100%', stop: e => e.stopPropagation(),
+      isFeed: r.name === 'feed', isDetail: r.name === 'detail', isProfile: r.name === 'profile', isSearch: r.name === 'search', isSaved: r.name === 'saved', isNotifications: r.name === 'notifications', isOnboarding: r.name === 'onboarding', isNew: r.name === 'new', isInbox: r.name === 'inbox', isStats: r.name === 'stats',
+      showFab: isMobile && r.name === 'feed', back: () => this.back(), canBack: s.stack.length > 0, toast: s.toast, saveSheet: s.saveSheet,
+      goNew: () => this.go({ name: 'new' }), goMe: () => this.go({ name: 'profile', id: ME }), goInbox: () => this.go({ name: 'inbox' }), goStats: () => this.go({ name: 'stats' }),
+      commentText: s.commentText, setCommentText: e => this.setState({ commentText: e.target.value }), replyingTo: null, cancelReply: () => this.setState({ replyTo: null }),
+      query: s.query, setQuery: e => this.setState({ query: e.target.value }), newCollectionName: s.newCollectionName, setNewCollectionName: e => this.setState({ newCollectionName: e.target.value }),
+      editProfile: () => this.toast('Profile editing — coming in the next pass'), closeSaveSheet: () => this.setState({ saveSheet: null }) };
+    if (!d) return { ...base, feedTabs: [], roleChips: [], feedItems: [], navItems: [], tabItems: [] };
+    const me = this.user(ME);
+    const all = this.allHighlights();
+    const items = all.map(h => this.item(h));
+    const byId = Object.fromEntries(items.map(i => [i.id, i]));
+    const myIds = new Set(all.filter(h => h.user_id === ME).map(h => h.id));
+    const inboxAll = s.comments.filter(c => c.author_id !== ME && ((c.highlight_id && myIds.has(c.highlight_id)) || c.profile_user_id === ME));
+    const unread = !s.seenNotifs;
+
+    // nav
+    const mk = (key, label, icon, route, badge) => ({ key, label, icon: { __html: icon }, badge: !!badge, isPlus: key === 'new', notPlus: key !== 'new', go: () => this.go(route, key !== 'feed'), color: (r.name === key || (key === 'me' && r.name === 'profile' && r.id === ME)) ? 'var(--color-accent)' : 'var(--color-text)' });
+    const navItems = [mk('feed', 'Home', ICONS.home, { name: 'feed' }), mk('search', 'Search', ICONS.search, { name: 'search' }), mk('notifications', 'Notifications', ICONS.bell, { name: 'notifications' }, unread), mk('saved', 'Saved', ICONS.bookmark, { name: 'saved' }), mk('me', 'Me', ICONS.user, { name: 'profile', id: ME })];
+    const tabItems = [navItems[0], navItems[1], mk('new', 'New', '', { name: 'new' }), navItems[2], navItems[4]];
+
+    // feed
+    let feed = items.filter(i => s.feedTab === 'foryou' || s.follows.has(i.user_id));
+    if (s.roleFilter) feed = feed.filter(i => i.author.role_tags.includes(s.roleFilter));
+    feed.sort((a, b) => b.created_at < a.created_at ? -1 : 1);
+    const feedItems = feed.slice(0, s.visibleCount);
+
+    // detail
+    let detail = null;
+    if (r.name === 'detail' && byId[r.id]) {
+      const it = byId[r.id];
+      const covers = it.covers || (['gallery', 'app', 'grid', 'chart', 'map'].includes(it.cover.kind) ? [it.cover, { ratio: it.cover.ratio, kind: ALT_KIND[it.cover.kind] }] : [it.cover]);
+      const top = s.comments.filter(c => c.highlight_id === it.id && !c.parent_id).sort((a, b) => (b.pinned - a.pinned) || (a.created_at < b.created_at ? -1 : 1));
+      const comments = top.map(c => ({ ...this.comment(c), reply: () => this.setState({ replyTo: c.id }), replies: s.comments.filter(x => x.parent_id === c.id).map(x => ({ ...this.comment(x), isAuthor: x.author_id === it.user_id })) }));
+      const following = s.follows.has(it.user_id);
+      detail = { ...it, covers, multiCover: covers.length > 1, dots: covers.map((_, i) => ({ color: i === s.coverIndex ? 'var(--color-accent)' : 'var(--color-neutral-300)' })),
+        openAuthor: it.author.open, notMe: it.user_id !== ME, followLabel: following ? 'Following' : 'Follow', followCls: following ? 'btn-secondary' : 'btn-primary',
+        toggleFollow: () => this.setState(st => { const f = new Set(st.follows); f.has(it.user_id) ? f.delete(it.user_id) : f.add(it.user_id); return { follows: f }; }),
+        comments, commentCount: s.comments.filter(c => c.highlight_id === it.id).length,
+        more: items.filter(x => x.user_id === it.user_id && x.id !== it.id), hasMore: items.some(x => x.user_id === it.user_id && x.id !== it.id) };
+      const rt = s.replyTo && s.comments.find(c => c.id === s.replyTo);
+      base.replyingTo = rt ? this.user(rt.author_id).name : null;
+    }
+
+    // profile
+    let profile = null, profileTabs = [];
+    if (r.name === 'profile') {
+      const u = this.user(r.id), following = s.follows.has(u.id), isMe = u.id === ME;
+      const own = items.filter(i => i.user_id === u.id);
+      profile = { ...u, isMe, notMe: !isMe, items: own, followers: fmt(120 + hash(u.id) % 2400 + (following ? 1 : 0) + (isMe ? 4 : 0)), following: 12 + hash(u.name) % 140,
+        followLabel: following ? 'Following' : 'Follow', followCls: following ? 'btn-secondary' : 'btn-primary',
+        toggleFollow: () => this.setState(st => { const f = new Set(st.follows); f.has(u.id) ? f.delete(u.id) : f.add(u.id); return { follows: f }; }),
+        guestbook: s.comments.filter(c => c.profile_user_id === u.id).map(c => this.comment(c)) };
+      profileTabs = this.tabs([['highlights', 'Highlights · ' + own.length], ['guestbook', 'Guestbook · ' + profile.guestbook.length]], s.profileTab, k => this.setState({ profileTab: k }));
+    }
+
+    // search
+    const q = s.query.trim().toLowerCase();
+    const techAll = [...new Set(all.flatMap(h => h.tech_stack))];
+    const pickQ = label => this.setState({ query: label });
+    let results = null;
+    if (q) {
+      const users = d.users.filter(u => (u.name + ' ' + u.bio + ' ' + u.domain + ' ' + u.role_tags.join(' ')).toLowerCase().includes(q)).map(u => this.user(u.id));
+      const tagHits = [...d.roleTags.filter(t => t.toLowerCase().includes(q)).map(t => ({ label: t, cls: 'tag-neutral', pick: () => this.setState({ route: { name: 'feed' }, roleFilter: t, query: '' }) })), ...d.sectionTags.filter(t => t.toLowerCase().includes(q)).map(t => ({ label: t, cls: 'tag-accent', pick: () => pickQ(t) })), ...techAll.filter(t => t.toLowerCase().includes(q) && t.toLowerCase() !== q).map(t => ({ label: t, cls: 'tag-neutral', pick: () => pickQ(t) }))];
+      const hits = items.filter(i => (i.title + ' ' + i.note + ' ' + i.section_tag + ' ' + i.tech_stack.join(' ') + ' ' + i.author.name).toLowerCase().includes(q));
+      results = { users, hasUsers: users.length > 0, tags: tagHits, hasTags: tagHits.length > 0, items: hits, itemCount: hits.length, hasItems: hits.length > 0, empty: !users.length && !tagHits.length && !hits.length };
+    }
+
+    // saved
+    const collections = s.collections.map((c, idx) => ({ ...c, count: c.ids.length, first: c.ids.length ? byId[c.ids[0]] : null, isEmpty: !c.ids.length, open: () => this.setState({ activeCollection: idx }) }));
+    const ac = s.activeCollection != null ? s.collections[s.activeCollection] : null;
+    const collectionItems = ac ? ac.ids.map(id => byId[id]).filter(Boolean) : [];
+    const saveOptions = s.saveSheet ? s.collections.map((c, idx) => { const inC = c.ids.includes(s.saveSheet); return { name: c.name, count: c.ids.length, ring: inC ? 'var(--color-accent)' : 'var(--color-neutral-400)', fill: inC ? 'var(--color-accent)' : 'transparent', pick: () => { this.setState(st => { const cols = st.collections.map((x, i) => i === idx ? { ...x, ids: inC ? x.ids.filter(z => z !== st.saveSheet) : [...x.ids, st.saveSheet] } : x); return { collections: cols, saveSheet: null }; }); this.toast(inC ? 'Removed from ' + c.name : 'Saved to ' + c.name); } }; }) : [];
+    const addCollection = (e, andSave) => { e.preventDefault(); const name = s.newCollectionName.trim(); if (!name) return; this.setState(st => ({ collections: [...st.collections, { name, ids: andSave && st.saveSheet ? [st.saveSheet] : [] }], newCollectionName: '', saveSheet: null })); if (andSave) this.toast('Saved to ' + name); };
+
+    // notifications
+    const notifs = [];
+    inboxAll.forEach(c => { const h = c.highlight_id && byId[c.highlight_id]; const isReply = !!c.parent_id; notifs.push({ id: c.id, author: this.user(c.author_id), kind: isReply ? 'reply' : 'comment', text: c.profile_user_id ? 'signed your guestbook:' : isReply ? 'replied:' : 'commented on', target: c.profile_user_id ? '“' + c.body + '”' : h ? h.title : '', created_at: c.created_at, cover: h ? h.cover : null, open: () => this.go(h ? { name: 'detail', id: h.id } : { name: 'profile', id: ME }) }); });
+    ['u3', 'u7', 'u12', 'u16', 'u19', 'u28'].forEach((uid, i) => { const h = all.filter(x => x.user_id === ME)[i % 2]; notifs.push({ id: 'l' + uid, author: this.user(uid), kind: 'like', text: 'liked', target: h.title, created_at: '2026-09-' + (21 - i), cover: h.cover, open: () => this.go({ name: 'detail', id: h.id }) }); });
+    ['u4', 'u14', 'u20', 'u8'].forEach((uid, i) => notifs.push({ id: 'f' + uid, author: this.user(uid), kind: 'follow', text: 'started following you', target: '', created_at: '2026-09-' + (22 - i * 2), cover: null, open: () => this.go({ name: 'profile', id: uid }) }));
+    notifs.sort((a, b) => a.created_at < b.created_at ? 1 : -1);
+    const notifications = notifs.map(n => ({ ...n, ago: ago(n.created_at), icon: { __html: n.kind === 'like' ? ICONS.heart : n.kind === 'follow' ? ICONS.plus : ICONS.chat }, kindBg: n.kind === 'like' ? 'var(--color-accent-2)' : n.kind === 'follow' ? 'var(--color-neutral-800)' : 'var(--color-accent)' }));
+
+    // onboarding
+    const ob = s.ob; const obSet = patch => this.setState(st => ({ ob: { ...st.ob, ...patch } }));
+    const obVals = { ...ob, step1: ob.step === 1, step2: ob.step === 2, idle: !ob.loading, noRoles: ob.roles.size === 0, cover: { ratio: 1.3, kind: 'article' }, favicon: (ob.domain[0] || 'y').toUpperCase(),
+      setUrl: e => obSet({ url: e.target.value, error: '' }), backStep: () => obSet({ step: 1 }),
+      fetch: e => { e.preventDefault(); let url = ob.url.trim(); if (!/^https?:\/\//.test(url)) url = 'https://' + url; let host; try { host = new URL(url).hostname.replace(/^www\./, ''); } catch { return obSet({ error: 'That doesn’t look like a URL.' }); } if (!host.includes('.')) return obSet({ error: 'Enter a full domain, like yourname.com.' }); obSet({ loading: true, url }); setTimeout(() => obSet({ loading: false, step: 2, domain: host, title: host.split('.')[0].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) + ' — personal site' }), 1100); },
+      roleChips: this.chips(d.roleTags, [...ob.roles], label => { const rs = new Set(ob.roles); rs.has(label) ? rs.delete(label) : rs.add(label); obSet({ roles: rs }); }),
+      finish: () => { this.toast('Welcome to Sitescape'); obSet({ step: 1, url: '', roles: new Set() }); this.go({ name: 'feed' }, false); } };
+
+    // new highlight
+    const nh = s.nh; const nhSet = patch => this.setState(st => ({ nh: { ...st.nh, ...patch } }));
+    const nhCovers = nh.covers.map((c, i) => ({ cover: c, label: i === 0 ? 'Auto screenshot' : 'Upload ' + i, left: () => { if (!i) return; const cs = [...nh.covers]; [cs[i - 1], cs[i]] = [cs[i], cs[i - 1]]; nhSet({ covers: cs }); }, right: () => { if (i === nh.covers.length - 1) return; const cs = [...nh.covers]; [cs[i + 1], cs[i]] = [cs[i], cs[i + 1]]; nhSet({ covers: cs }); }, remove: () => { if (nh.covers.length === 1) return this.toast('Keep at least one cover'); nhSet({ covers: nh.covers.filter((_, k) => k !== i) }); } }));
+    const draft = { id: 'draft', user_id: ME, url: nh.path || '', title: nh.title || 'Untitled', note: nh.note, section_tag: nh.section || 'Blog', tech_stack: nh.tech.split(',').map(t => t.trim()).filter(Boolean), cover: nh.covers[0] || { ratio: 1, kind: 'article' }, covers: nh.covers, like_count: 0, view_count: 0, outbound_click_count: 0, created_at: NOW.toISOString().slice(0, 10) };
+    const nhVals = { ...nh, step1: nh.step === 1, step2: nh.step === 2, step3: nh.step === 3, idle: !nh.loading, stepLabel: 'Step ' + nh.step + ' of 3', noteLeft: (280 - nh.note.length) + ' left', covers: nhCovers,
+      incomplete: !nh.section || !nh.title.trim() || !nh.note.trim(), previewItem: { ...this.item(draft), open: () => {}, toggleLike: e => e.stopPropagation() },
+      setUrl: e => nhSet({ url: e.target.value, error: '' }), setTitle: e => nhSet({ title: e.target.value }), setNote: e => nhSet({ note: e.target.value.slice(0, 280) }), setTech: e => nhSet({ tech: e.target.value }),
+      suggestions: ['/writing/on-margins', '/work/timetable'].map(p => ({ label: me.domain + p, pick: () => nhSet({ url: 'https://' + me.domain + p, error: '' }) })),
+      sectionChips: this.chips(d.sectionTags, nh.section, label => nhSet({ section: label })),
+      check: e => { e.preventDefault(); let url = nh.url.trim(); if (!/^https?:\/\//.test(url)) url = 'https://' + url; let u; try { u = new URL(url); } catch { return nhSet({ error: 'That doesn’t look like a URL.' }); } const host = u.hostname.replace(/^www\./, ''); if (host !== me.domain) return nhSet({ error: 'That’s on ' + host + '. Highlights must live on your own site, ' + me.domain + '.' }); nhSet({ loading: true }); setTimeout(() => { const seg = u.pathname.split('/').filter(Boolean); const guess = seg.length ? seg[seg.length - 1].replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Home'; const kind = /work|portfolio|poster/.test(u.pathname) ? 'gallery' : /play|lab|app|tool/.test(u.pathname) ? 'app' : 'article'; nhSet({ loading: false, step: 2, path: u.pathname, title: guess, covers: [{ ratio: kind === 'article' ? 0.8 : 1.3, kind }], section: nh.section || (/work|portfolio/.test(u.pathname) ? 'Portfolio' : /play|lab/.test(u.pathname) ? 'Playground' : /resume|cv/.test(u.pathname) ? 'Resume' : /about/.test(u.pathname) ? 'About' : 'Blog') }); }, 1200); },
+      addCover: () => { if (nh.covers.length >= 4) return this.toast('Up to four covers'); const last = nh.covers[nh.covers.length - 1]; nhSet({ covers: [...nh.covers, { ratio: 1.25, kind: ALT_KIND[last.kind] }] }); this.toast('Image added'); },
+      backStep: () => nh.step === 1 ? this.back() : nhSet({ step: nh.step - 1 }),
+      toPreview: () => nhSet({ step: 3 }),
+      publish: () => { const h = { ...draft, id: 'h' + Date.now(), created_at: '2026-09-22' }; this.setState(st => ({ added: [h, ...st.added], nh: { step: 1, url: '', loading: false, error: '', section: null, title: '', note: '', tech: '', covers: [] } })); this.toast('Published'); this.go({ name: 'detail', id: h.id }, false); } };
+
+    // inbox
+    const inbox = inboxAll.slice().sort((a, b) => a.created_at < b.created_at ? 1 : -1).map(c => { const h = c.highlight_id && byId[c.highlight_id]; const myReply = s.comments.find(x => x.parent_id === c.id && x.author_id === ME); return { ...this.comment(c), context: c.profile_user_id ? 'Guestbook' : (h ? h.title : ''), replied: !!myReply, replyBody: myReply ? myReply.body : '', replying: s.inboxReply === c.id, pinLabel: c.pinned ? 'Unpin' : 'Pin',
+      startReply: () => this.setState({ inboxReply: c.id, commentText: '' }), togglePin: () => this.setState(st => ({ comments: st.comments.map(x => x.id === c.id ? { ...x, pinned: !x.pinned } : x) })),
+      remove: () => { this.setState(st => ({ comments: st.comments.filter(x => x.id !== c.id && x.parent_id !== c.id) })); this.toast('Comment deleted'); },
+      submitReply: e => { e.preventDefault(); if (!s.commentText.trim()) return; this.addComment({ parent_id: c.id, highlight_id: c.highlight_id || undefined, profile_user_id: c.profile_user_id || undefined }); this.toast('Reply sent'); } }; });
+
+    // stats
+    const mine = items.filter(i => i.user_id === ME);
+    const savesOf = id => s.collections.reduce((n, c) => n + (c.ids.includes(id) ? 1 : 0), 0) + (hash(id) % 40);
+    const rows = mine.map(i => { const clicks = i.outbound_click_count + (s.visits[i.id] || 0); return { ...i, likes: fmt(i.like_count + (i.liked ? 1 : 0)), saves: savesOf(i.id), ctr: Math.round(100 * clicks / Math.max(1, i.view_count)) + '%', open: () => this.go({ name: 'detail', id: i.id }) }; });
+    const sum = f => mine.reduce((n, i) => n + f(i), 0);
+    const newFollowers = ['u4', 'u14', 'u20', 'u8'].map(id => this.user(id));
+    const stats = { rows, totals: [{ label: 'Views', value: fmt(sum(i => i.view_count)) }, { label: 'Site visits', value: fmt(sum(i => i.outbound_click_count + (s.visits[i.id] || 0))) }, { label: 'Likes', value: fmt(sum(i => i.like_count)) }, { label: 'New followers', value: newFollowers.length }], newFollowers, newFollowerCount: newFollowers.length };
+
+    return { ...base, me, navItems, tabItems,
+      feedTabs: this.tabs([['foryou', 'For You'], ['following', 'Following']], s.feedTab, k => this.setState({ feedTab: k, visibleCount: 12 })),
+      roleChips: this.chips(['All', ...d.roleTags], s.roleFilter || 'All', label => this.setState({ roleFilter: label === 'All' ? null : label, visibleCount: 12 })),
+      feedItems, feedEmpty: feed.length === 0, hasMore: feed.length > feedItems.length,
+      detail, coverScroll: e => { const el = e.target; const i = Math.round(el.scrollLeft / (el.firstChild ? el.firstChild.offsetWidth + 10 : 1)); if (i !== s.coverIndex) this.setState({ coverIndex: i }); },
+      submitComment: e => { e.preventDefault(); if (!s.commentText.trim()) return; this.addComment({ highlight_id: r.id, parent_id: s.replyTo || null }); },
+      profile, profileTabs, profileShowGrid: s.profileTab === 'highlights', profileShowGuest: s.profileTab === 'guestbook', inboxCount: inboxAll.length,
+      submitGuest: e => { e.preventDefault(); if (!s.commentText.trim()) return; this.addComment({ profile_user_id: r.id }); this.toast('Signed'); },
+      searchIdle: !q, searchActive: !!q, results, sectionChips: d.sectionTags.map(t => ({ label: t, pick: () => pickQ(t) })), techChips: techAll.slice(0, 12).map(t => ({ label: t, pick: () => pickQ(t) })),
+      collections, activeCollection: !!ac, savedShowList: !ac, savedTitle: ac ? ac.name : 'Saved', collectionItems, collectionEmpty: ac && !collectionItems.length, closeCollection: () => this.setState({ activeCollection: null }),
+      addCollection: e => addCollection(e, false), addCollectionAndSave: e => addCollection(e, true), saveOptions,
+      notifications, ob: obVals, nh: nhVals, inbox, inboxEmpty: inbox.length === 0, stats };
+  }
+}
+</script>
+</body>
+</html>

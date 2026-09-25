@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="../page-loader.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>风景 — Space</title>
@@ -100,6 +101,28 @@ a:hover{color:var(--gold)}
 .sub-body .sub-sec+.sub-date{margin-top:4.5rem}
 </style>
 
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+<style id="scenery-map-css">
+.scmap{position:relative;width:100%;aspect-ratio:2/1;margin:0 0 .8rem;overflow:hidden}
+.scmap svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.scmap .land{fill:rgba(244,241,234,.045);stroke:rgba(244,241,234,.28);stroke-width:.7;vector-effect:non-scaling-stroke}
+.scmap .grat{fill:none;stroke:rgba(244,241,234,.06);stroke-width:.6;vector-effect:non-scaling-stroke}
+.scmap .pin{cursor:pointer}
+.scmap .pin .dot{fill:var(--fg)}
+.scmap .pin .halo{fill:none;stroke:rgba(244,241,234,.35);stroke-width:1;transition:r .3s,stroke .3s}
+.scmap .pin:hover .halo{stroke:var(--gold)}
+.scmap .pin text{fill:var(--fg);font-family:var(--kai);font-size:13px;letter-spacing:.06em;transition:fill .2s}
+.scmap .pin .top{font-family:'Cormorant Garamond',serif;font-style:italic;letter-spacing:.04em}
+.scmap .pin .sub{font-family:var(--kai);fill:var(--dim);font-size:11px}
+.scmap{cursor:grab;touch-action:none}.scmap:active{cursor:grabbing}
+.scmap .pin:hover text{fill:var(--gold)}
+.scmap-cap{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);text-align:right;margin-bottom:4rem}
+.sub-place{font-family:var(--kai);font-weight:400;font-size:1.83rem;line-height:1.2;margin-bottom:1.6rem;scroll-margin-top:96px;display:flex;align-items:baseline;gap:1rem}
+.sub-place a{color:inherit;transition:color .2s}
+.sub-place .when{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;color:var(--dim);letter-spacing:.04em}
+.sub-body .entry-fig+.entry-fig{margin-top:1.4rem}
+</style>
 </head>
 <body>
 <nav class="topnav">
@@ -147,11 +170,43 @@ a:hover{color:var(--gold)}
   <div class="sub-cat"><span class="zh">有钱了开博物馆免费请你们参观</span> · Sharing</div>
   <h1 class="sub-title">风景</h1>
   <div class="sub-title-en">Scenery</div>
+  <div class="scmap" id="scmap"><svg viewBox="0 0 1000 500" role="img" aria-label="地图 · 去过的地方"></svg></div>
+  <p class="scmap-cap">拖动 · 缩放 · 点地点 &nbsp;·&nbsp; drag · zoom · click a place</p>
   <div class="sub-body">
+    <div class="sub-sec" id="seattle">
+      <h2 class="sub-place"><a href="#scmap">西雅图</a><span class="when">2026 春</span></h2>
+      <figure class="entry-fig"><img src="img/seattle-kerry-park.jpeg" alt="Kerry Park at dusk — Space Needle and Mount Rainier"></figure>
+      <figure class="entry-fig"><img src="img/seattle-alki.jpeg" alt="Alki Beach at sunset, a gull over the skyline"></figure>
+      <figure class="entry-fig"><img src="img/seattle-ferry.jpeg" alt="On the ferry, the skyline receding"></figure>
+      <figure class="entry-fig"><img src="img/seattle-window.jpeg" alt="From the plane window, snow mountains below the wing"></figure>
+    </div>
     <p class="sub-body__more">传记作者记录速度尚未跟上传奇创造速度</p>
   </div>
 </main>
 
+<script>
+(async()=>{
+  const svg=d3.select('#scmap svg');const W=1000,H=500;
+  // zh:true → Chinese on top (China); otherwise English on top (US)
+  const PLACES=[{id:'seattle',top:'Seattle',sub:'西雅图 · 2026 春',lon:-122.33,lat:47.61,dx:14,dy:4}];
+  try{
+    const topo=await (await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json')).json();
+    const land=topojson.feature(topo,topo.objects.countries);
+    // frame: US west coast + Pacific NW, Seattle sits upper-left of centre
+    const proj=d3.geoMercator().fitExtent([[40,30],[W-40,H-30]],{type:'Polygon',coordinates:[[[-135,30],[-135,55],[-100,55],[-100,30],[-135,30]]]}).clipExtent([[0,0],[W,H]]);
+    const path=d3.geoPath(proj);
+    const root=svg.append('g').attr('class','zoomroot');
+    root.append('path').attr('class','grat').attr('d',path(d3.geoGraticule().step([5,5])()));
+    root.append('path').attr('class','land').attr('d',path(land));
+    svg.call(d3.zoom().scaleExtent([1,12]).translateExtent([[0,0],[W,H]]).on('zoom',ev=>{root.attr('transform',ev.transform);root.selectAll('.pin text').attr('transform',function(){return null}).style('font-size',null);root.selectAll('.pin .halo').attr('r',9/ev.transform.k);root.selectAll('.pin .dot').attr('r',3.2/ev.transform.k);root.selectAll('.pin text').attr('font-size',13/ev.transform.k).attr('x',d=>proj([d.lon,d.lat])[0]+d.dx/ev.transform.k);root.selectAll('.pin .top').attr('y',d=>proj([d.lon,d.lat])[1]+d.dy/ev.transform.k);root.selectAll('.pin .sub').attr('font-size',11/ev.transform.k).attr('y',d=>proj([d.lon,d.lat])[1]+(d.dy+15)/ev.transform.k);}));
+    const g=root.selectAll('a.pin').data(PLACES).join('a').attr('class','pin').attr('href',d=>'#'+d.id).attr('aria-label',d=>d.top);
+    g.append('circle').attr('class','halo').attr('r',9).attr('cx',d=>proj([d.lon,d.lat])[0]).attr('cy',d=>proj([d.lon,d.lat])[1]);
+    g.append('circle').attr('class','dot').attr('r',3.2).attr('cx',d=>proj([d.lon,d.lat])[0]).attr('cy',d=>proj([d.lon,d.lat])[1]);
+    g.append('text').attr('class','top').attr('x',d=>proj([d.lon,d.lat])[0]+d.dx).attr('y',d=>proj([d.lon,d.lat])[1]+d.dy).text(d=>d.top);
+    g.append('text').attr('class','sub').attr('x',d=>proj([d.lon,d.lat])[0]+d.dx).attr('y',d=>proj([d.lon,d.lat])[1]+d.dy+15).text(d=>d.sub);
+  }catch(e){document.getElementById('scmap').style.display='none';}
+})();
+</script>
 <script>
 /* Show the "=" menu exactly when the header can no longer fit its links. */
 (() => {

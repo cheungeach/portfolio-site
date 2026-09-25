@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/styles.css">
+<script src="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/_ds_bundle.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<style>body{margin:0;background:#f3f2f2}a{color:#0088b0}a:hover{color:#006786}@keyframes cc-pulse{0%,100%{box-shadow:0 0 14px 5px #38a6cf,0 0 40px 14px rgba(56,166,207,.35)}50%{box-shadow:0 0 22px 8px #38a6cf,0 0 60px 22px rgba(56,166,207,.45)}}</style>
+</helmet>
+<div style="min-height:100vh;font-family:'Source Serif 4',Georgia,serif;color:#201e1d;background:radial-gradient(circle at 100% 0%, rgba(56,166,207,.22), transparent 420px), radial-gradient(circle at 1px 1px, rgba(32,30,29,.12) 1px, transparent 1.6px) 0 0/18px 18px, #f3f2f2;padding:72px 6vw 96px;box-sizing:border-box">
+<div style="max-width:1080px">
+
+  <div style="display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:48px;align-items:center">
+    <div>
+      <div style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:#605d5d">Product brief · 2026</div>
+      <h1 style="margin:14px 0 18px;font-size:clamp(48px,7vw,84px);line-height:.95;font-weight:400;font-style:italic;letter-spacing:-.02em">Footprints</h1>
+      <p style="margin:0;max-width:30ch;font-size:clamp(22px,2.4vw,28px);line-height:1.3;text-wrap:pretty">A map of the small things people did in a place — made into lists you can walk, with a guide who remembers them.</p>
+    </div>
+    <div style="position:relative;border-radius:28px;border:2.5px solid #201e1d;box-shadow:6px 6px 0 #201e1d;background:radial-gradient(circle at 100% 0%, rgba(56,166,207,.35), transparent 180px), radial-gradient(circle at 1px 1px, rgba(32,30,29,.14) 1px, transparent 1.6px) 0 0/14px 14px, #fbf9f8;aspect-ratio:1.45;display:flex;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;overflow:hidden">
+      <div style="width:100%"><x-import component-from-global-scope="zj-walker" from="./zj-walker.js" ink="#201e1d" speed=".85" style="width:100%;height:200px" hint-size="100%,200px"></x-import></div>
+      <div style="position:absolute;right:30px;top:26px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#38a6cf 60%,transparent 100%);animation:cc-pulse 3s ease-in-out infinite"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:120px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:48px">
+    <h2 style="margin:0;font-size:36px;line-height:1.05;font-weight:600">Concept</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:36px 40px">
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">The problem</div><p style="margin:0;font-size:18px;line-height:1.5;text-wrap:pretty">Maps tell you what is somewhere. They don’t tell you what people did there — the 5:50 carillon, the $4 bánh mì on the steps, the quiet hour in the reading room. That knowledge lives in group chats and graduates with the people who had it.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">The product</div><p style="margin:0;font-size:18px;line-height:1.5;text-wrap:pretty">Anyone can make a list — “100 things before I graduate” — and pin each thing to a place. Every landmark on the map holds the traces people left there, and every trace leads back to the person and the lists behind it.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">The Guide</div><p style="margin:0;font-size:18px;line-height:1.5;text-wrap:pretty">A small wordless light that knows what happened here. It plans a route through other people’s traces, recognises your photo when you check in, and turns the day into a postcard.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Who it’s for</div><p style="margin:0;font-size:18px;line-height:1.5;text-wrap:pretty">Students with a clock running on a place — then visitors, new arrivals and locals who want the version of a city that insiders know. Campus first, because campuses have rituals, density and a built-in reason to finish a list.</p></div>
+    </div>
+  </div>
+
+  <div style="margin-top:120px">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:48px;align-items:end;margin-bottom:40px">
+      <h2 style="margin:0;font-size:36px;line-height:1.05;font-weight:600">User logic</h2>
+      <p style="margin:0;font-size:18px;line-height:1.5;color:#605d5d;max-width:52ch;text-wrap:pretty">One loop. Every finished thing becomes a trace, every trace makes the map richer for the next person — which is what brings them in.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px">
+      <sc-for list="{{ steps }}" as="st" hint-placeholder-count="6">
+        <div style="position:relative;padding:20px 18px 22px;border-radius:20px;background:#fbf9f8;border:2px solid #201e1d;box-shadow:4px 4px 0 #201e1d;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="width:34px;height:34px;border-radius:50%;background:#201e1d;color:#fbf9f8;display:flex;align-items:center;justify-content:center;font-style:italic;font-size:16px">{{ st.n }}</div>
+            <span style="font-size:22px;color:#201e1d;line-height:1">{{ st.arrow }}</span>
+          </div>
+          <div style="font-size:20px;font-weight:600;line-height:1.15">{{ st.title }}</div>
+          <div style="font-size:15px;line-height:1.45;color:#605d5d;text-wrap:pretty">{{ st.body }}</div>
+          <div style="font-size:13px;font-style:italic;color:#006786">{{ st.screen }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:18px;display:flex;align-items:center;gap:12px;font-size:16px;font-style:italic;color:#201e1d"><svg width="46" height="22" viewBox="0 0 46 22" fill="none" stroke="#201e1d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M42 4 C 42 18, 6 18, 6 6"></path><path d="M2 10 L6 5 L11 9"></path></svg>Step 6 feeds step 1 — the loop closes when someone else discovers your trace.</div>
+
+    <div style="margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:36px 40px">
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Three objects</div><p style="margin:0;font-size:17px;line-height:1.5;text-wrap:pretty"><strong>Place</strong> — a landmark on the map. <strong>List</strong> — things to do, each pinned to a place. <strong>Trace</strong> — one person doing one thing at one place, with a photo and a line.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Your page</div><p style="margin:0;font-size:17px;line-height:1.5;text-wrap:pretty">Cities you’ve collected, your stories on a map, lists you made, lists you saved — in that order. You choose which of those a visitor sees.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Trust</div><p style="margin:0;font-size:17px;line-height:1.5;text-wrap:pretty">A check-in needs a photo the Guide recognises at that place. Ratings come only from people who finished the thing. No trace, no review.</p></div>
+    </div>
+  </div>
+
+  <div style="margin-top:120px">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:48px;align-items:end;margin-bottom:40px">
+      <h2 style="margin:0;font-size:36px;line-height:1.05;font-weight:600">Business model</h2>
+      <p style="margin:0;font-size:18px;line-height:1.5;color:#605d5d;max-width:52ch;text-wrap:pretty">Free to make, walk and share. Revenue comes from people who want more of the Guide, from places that want to be on a good list, and from the souvenirs a day leaves behind.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px">
+      <sc-for list="{{ revenue }}" as="r" hint-placeholder-count="4">
+        <div style="padding:24px 22px;border-radius:20px;background:#fbf9f8;border:2px solid #201e1d;box-shadow:4px 4px 0 #201e1d;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px"><div style="font-size:22px;font-weight:600;line-height:1.1">{{ r.title }}</div><div style="font-size:13px;font-style:italic;color:#605d5d;white-space:nowrap">{{ r.share }}</div></div>
+          <div style="font-size:15px;line-height:1.45;text-wrap:pretty">{{ r.body }}</div>
+          <div style="margin-top:auto;padding-top:8px;font-size:14px;color:#006786;font-style:italic">{{ r.price }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:48px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:36px 40px">
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Rollout</div><p style="margin:0;font-size:17px;line-height:1.5;text-wrap:pretty">Berkeley first, seeded with 20 lists from student ambassadors before launch. Then the next five campuses in the Bay Area, then the cities students travel to — San Francisco, Tahoe, LA.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">What we watch</div><p style="margin:0;font-size:17px;line-height:1.5;text-wrap:pretty">Traces per active user per week, and the share of new users who arrived through someone else’s trace or postcard link. That second number is the loop working.</p></div>
+      <div><div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;margin-bottom:8px">Line we won’t cross</div><p style="margin:0;font-size:17px;line-height:1.5;text-wrap:pretty">Sponsored lists are always labelled, and a business can never buy a place on someone else’s list or pay to hide a trace.</p></div>
+    </div>
+  </div>
+
+  <div style="margin-top:96px;display:flex;gap:16px;flex-wrap:wrap">
+    <a href="Isles App.dc.html" style="display:inline-flex;align-items:center;height:52px;padding:0 22px;border-radius:14px;background:#201e1d;color:#fbf9f8;border:2px solid #201e1d;box-shadow:3px 3px 0 #0088b0;text-decoration:none;font-size:17px">Open the app →</a>
+    <a href="Isles Directions.dc.html" style="display:inline-flex;align-items:center;height:52px;padding:0 22px;border-radius:14px;background:#fbf9f8;color:#201e1d;border:2px solid #201e1d;box-shadow:3px 3px 0 #201e1d;text-decoration:none;font-size:17px">See every screen</a>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const steps = [
+      ['Discover','Open the map. Landmarks show how many people left traces there. Tap one to read them.','Map · place sheet'],
+      ['Collect','Save someone’s list, or make your own and pin each thing to a place.','Lists · new list'],
+      ['Walk','Ask the Guide. It plans a route through your list using what others did.','Guide'],
+      ['Check in','Take a photo at the place. The Guide recognises it and ticks the thing off.','Check-in'],
+      ['Leave a trace','Add a line and a rating. It appears on the landmark for the next person.','Place · your page'],
+      ['Share','At the end of the day the Guide draws a postcard. Save it, or send the link.','Postcard'],
+    ];
+    const revenue = [
+      { title:'Footprints+', share:'core', body:'The Guide without limits: unlimited routes and photo check-ins, offline city packs, private lists for friends, and the full archive of your postcards.', price:'$4.99 / month · student $2.99' },
+      { title:'Sponsored lists', share:'growth', body:'Cafés, museums and venues publish their own lists, clearly labelled, and pay per verified check-in — not per view.', price:'$0.50–$2 per verified visit' },
+      { title:'Campus & city partners', share:'B2B', body:'Universities use lists for orientation and alumni weekends; tourism boards commission city lists. Includes a dashboard of anonymised traces.', price:'annual licence' },
+      { title:'Printed postcards', share:'long tail', body:'Order the day’s postcard as a real card, a print or a framed map of every city on your page — mailed from the city you were in.', price:'$3 card · $24 print' },
+    ];
+    return {
+      steps: steps.map(([title, body, screen], i) => ({ n: i + 1, title, body, screen, arrow: i < steps.length - 1 ? '→' : '↺' })),
+      revenue,
+    };
+  }
+}
+</script>
+</body>
+</html>

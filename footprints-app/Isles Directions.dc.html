@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/styles.css">
+<script src="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/_ds_bundle.js"></script>
+<style>body{margin:0;background:#f3f2f2;font-family:'Source Serif 4',Georgia,serif;color:#201e1d}a{color:#0088b0}a:hover{color:#006786}.dv-turn{padding:40px 44px 32px;scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#201e1d;color:#fff;border-radius:2px;text-decoration:none}.dv-tname{font:600 15px/1.2 'Source Serif 4',serif;color:#201e1d}.dv-opts{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(32,30,29,.08);color:#201e1d;border-radius:2px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 13px/1.3 'Source Serif 4',serif;color:#605d5d}.dv-opt:target .dv-oid{background:#0088b0;color:#fff}.dv-next{margin:26px 0 0;font:italic 13px/1.5 'Source Serif 4',serif;color:#605d5d}.dv-row{display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start}.dv-note{font-size:12px;line-height:1.4;color:#605d5d;max-width:402px;text-wrap:pretty}</style></helmet>
+
+<section class="dv-turn" id="t1">
+<div style="max-width:760px;margin-bottom:40px">
+  <h1 style="margin:0 0 10px;font-size:40px;line-height:1;font-weight:600;font-style:italic">Footprints</h1>
+  <p style="margin:0 0 30px;font-size:17px;line-height:1.5;color:#605d5d;text-wrap:pretty">A map where every place is a small floating isle carrying the traces of what people did there. Lists (“100 things before I graduate”) pin things to isles; Lumen, a wordless light, guides you through what others left behind, recognises your photos when you check in, and turns the day into a postcard.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 32px;font-size:14px;line-height:1.5">
+    <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#605d5d;margin-bottom:4px">Assumptions</div>UC Berkeley, English copy. You are signed in as Mia, author of the 100-things list. The map is real geography (drag to pan) with a hand-drawn ink treatment over it — street and place labels stay readable. Landmarks stand on the map as inked isometric buildings at true coordinates (tower, colonnaded library, awninged shopfronts, a mound for the Big C), count flag above, name below; they scale with zoom and labels yield when crowded. Apple/Google 3D tiles need a billing key, so Esri street tiles stand in and building shapes are per-place types rather than derived from real 3D footprints. Photo recognition is simulated with per-place tags.</div>
+    <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#605d5d;margin-bottom:4px">Design system</div>Broadsheet: Source Serif 4 as the chrome, cyan for interaction, magenta as the rare stamp color, 2px radii, whitespace instead of dividers. The hand-drawn softness lives only in the isles, the sprite and the postcard.</div>
+    <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#605d5d;margin-bottom:4px">Clickable flow</div>Sign in → map → tap Sather Tower → a person → their lists → check in (take photo → Lumen recognises → leave a trace) → “Make postcard”. Tabs, guide chips, list checkboxes and “New list” all work.</div>
+    <div><div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#605d5d;margin-bottom:4px">Three directions</div>Same prototype, three skins — <a class="dv-oid" href="#1a">1a</a> newsprint paper, <a class="dv-oid" href="#1b">1b</a> dawn sky (closest to Sky’s palette), <a class="dv-oid" href="#1c">1c</a> ink-and-wash outlines. Pick one and I’ll deepen it.</div>
+  </div>
+</div>
+
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Three looks · the live prototype (start at sign-in)</span></div>
+<div class="dv-opts">
+  <div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Paper — halftone isles on newsprint, cyan sprite</div><dc-import name="Isles" theme="paper" hint-size="402px,874px"></dc-import><div class="dv-note">Pure Broadsheet. Isles print as dot-screened paper cut-outs. Quietest, most editorial.</div></div>
+  <div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Dawn — lavender-to-peach sky, gold sprite</div><dc-import name="Isles" theme="dusk" hint-size="402px,874px"></dc-import><div class="dv-note">Closest to the Sky reference: soft gradient air, cream isles, a warm light. Bends the system’s “paper stays paper” rule slightly.</div></div>
+  <div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Wash — ink outlines over watercolor blooms, magenta sprite</div><dc-import name="Isles" theme="wash" hint-size="402px,874px"></dc-import><div class="dv-note">Sketchbook feel: inked isle outlines, cyan/magenta/yellow washes bleeding under the page. Most “hand-drawn”.</div></div>
+</div>
+
+<div class="dv-thd" style="margin-top:56px"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Key screens, opened directly (in <a class="dv-oid" href="#1a">1a</a> paper)</span></div>
+<div class="dv-opts">
+  <div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>Map with Sather Tower open</div><dc-import name="Isles" theme="paper" start-screen="place" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Check-in — photo recognised, matched to #03</div><dc-import name="Isles" theme="paper" start-screen="checkin" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Postcard — the day on a hand-drawn map</div><dc-import name="Isles" theme="paper" start-screen="postcard" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1g"><div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Lumen, the guide</div><dc-import name="Isles" theme="paper" start-screen="guide" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1i"><div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Me — Mia’s page: 4 cities as 3D slabs, stories, made, saved</div><dc-import name="Isles" theme="paper" start-screen="profile" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1j"><div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Jun’s page, as Mia sees it (saved lists hidden by Jun)</div><dc-import name="Isles" theme="paper" start-screen="other" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1k"><div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Settings — what others see</div><dc-import name="Isles" theme="paper" start-screen="settings" hint-size="402px,874px"></dc-import></div>
+  <div class="dv-opt" id="1h"><div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>A list, with progress</div><dc-import name="Isles" theme="paper" start-screen="group" hint-size="402px,874px"></dc-import></div>
+</div>
+<p class="dv-next">Try next: “go with <a class="dv-oid" href="#1b">1b</a> and make the postcard shareable as a story” · “real Berkeley geography under the isles” · “Lumen reads the photo aloud in the postcard”</p>
+</section>
+</x-dc>
+</body>
+</html>

@@ -909,3 +909,6 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 760px) {
   .figure-pair { grid-template-columns: 1fr; gap: 2rem; }
 }
+
+/* statements keep one color; italics only */
+.opening__title em,.section-title em,.big-quote em,.closing-title em,.closing-body em,.next-title em,.collapse-stage h3 em,.section-lede em,.opening__concept em{color:inherit}

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+html,body{margin:0;height:100%;background:#f3f2f2;font-family:'Source Serif 4',Georgia,serif;overflow:hidden}
+#map{position:absolute;inset:0;background:var(--ground,#f3f2f2)}
+.leaflet-tile-pane{filter:var(--tilef)}
+.art{position:absolute;inset:0;pointer-events:none;z-index:400}
+.art-paper{background:var(--paper-ov);mix-blend-mode:multiply;opacity:var(--paper-op,.55)}
+.art-dots{background-image:radial-gradient(circle,rgba(32,30,29,.30) 30%,transparent 32%);background-size:3px 3px;mix-blend-mode:multiply;opacity:var(--dots-op,.35)}
+.art-bloom{background:var(--bloom);mix-blend-mode:var(--bloom-mode,multiply);opacity:var(--bloom-op,.8)}
+.art-vig{background:radial-gradient(ellipse 70% 60% at 50% 45%,transparent 55%,rgba(60,40,20,.22) 100%);mix-blend-mode:multiply}
+.art-grain{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 1px,transparent 1px 2px);opacity:.7}
+.leaflet-control-attribution{font:9px 'Source Serif 4',serif;background:rgba(251,249,248,.85)!important;color:#605d5d!important;border-radius:2px 0 0 0}
+.leaflet-control-attribution a{color:#0088b0}
+.leaflet-control-zoom{display:none}
+.bld{position:relative;cursor:pointer}
+.bld-in{position:absolute;left:0;top:0;width:120px;height:120px;transform-origin:top left}
+.bld-name.hide{opacity:0}
+.bld:hover .scene{transform:translateY(-4px)}
+.scene{position:absolute;inset:0;overflow:visible;transition:transform .25s}
+.gshadow{position:absolute;left:22px;top:70px;width:76px;height:24px;border-radius:50%;background:var(--ink);opacity:.14;filter:blur(5px)}
+.bx{position:absolute;transform-style:preserve-3d}
+.f{position:absolute;left:0;top:0;box-sizing:border-box;border:1px solid var(--ink);background:var(--paperc)}
+.f.top{width:100%;height:100%}
+.f.front{transform-origin:top;background-image:repeating-linear-gradient(90deg,transparent 0 3px,color-mix(in srgb,var(--ink) 26%,transparent) 3px 4px)}
+.f.side{transform-origin:left;background-image:repeating-linear-gradient(0deg,transparent 0 3px,color-mix(in srgb,var(--ink) 40%,transparent) 3px 4px)}
+.f.cols{background-image:repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 6px)}
+.f.awn{background-image:repeating-linear-gradient(90deg,#d6006c 0 4px,var(--paperc) 4px 8px)}
+.f.lawn{background-image:radial-gradient(circle,color-mix(in srgb,var(--ink) 35%,transparent) 30%,transparent 32%);background-size:4px 4px}
+.f.mark{display:flex;align-items:center;justify-content:center;font:italic 600 22px 'Source Serif 4',serif;color:var(--ink)}
+.flag{position:absolute;left:50%;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
+.flag-n{min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;border-radius:11px;background:var(--ink);color:var(--paperc);border:1.5px solid var(--ink);font:italic 13px/22px 'Source Serif 4',serif;text-align:center;box-shadow:0 1px 2px rgba(45,43,43,.2)}
+.flag-p{width:2px;height:12px;background:var(--ink)}
+.bld-here{position:absolute;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:pulse 3s ease-in-out infinite}
+.bld-name{position:absolute;left:0;right:0;bottom:0;transition:opacity .2s;text-align:center;font:italic 11px/1.15 'Source Serif 4',serif;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);white-space:nowrap;text-shadow:0 0 3px var(--paperc),0 0 6px var(--paperc),0 0 10px var(--paperc)}
+.isle{position:relative;cursor:pointer;transition:transform .2s;animation:flt var(--dur,5s) ease-in-out infinite;animation-delay:var(--dly,0s)}
+.isle:hover{transform:scale(1.06)}
+.isle-shadow{position:absolute;left:-3px;right:-3px;top:9px;bottom:-9px;border-radius:var(--blob);background:var(--shadow);filter:blur(2px)}
+.isle-top{position:relative;width:100%;aspect-ratio:1.28;border-radius:var(--blob);background:var(--paperc);border:var(--border);box-shadow:0 1px 2px rgba(45,43,43,.14)}
+.isle-top::after{content:"";position:absolute;inset:0;border-radius:inherit;background-image:radial-gradient(circle,rgba(32,30,29,.28) 30%,transparent 32%);background-size:3px 3px;opacity:var(--tex);pointer-events:none}
+.lm{position:absolute;left:50%;bottom:38%;transform:translateX(-50%);overflow:visible;pointer-events:none}
+.lm path,.lm ellipse,.lm rect,.lm circle{stroke:var(--ink);stroke-width:1.1;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.isle-n{position:absolute;right:-4px;top:-8px;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:10px;background:var(--ink);color:#fff;font-style:italic;font-size:12px;line-height:20px;text-align:center}
+.isle-here{position:absolute;left:-6px;top:-8px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:pulse 3s ease-in-out infinite}
+.isle-name{margin-top:5px;text-align:center;font-size:11px;line-height:1.15;white-space:nowrap;color:var(--ink);font-style:italic;text-shadow:0 0 3px var(--paperc),0 0 6px var(--paperc),0 0 10px var(--paperc)}
+@keyframes flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 14px 4px var(--glow)}50%{box-shadow:0 0 22px 8px var(--glow)}}
+@keyframes dash{to{stroke-dashoffset:-40}}
+.route{animation:dash 2.4s linear infinite}
+</style></head>
+<body>
+<div id="map"></div>
+<div class="art art-bloom"></div>
+<div class="art art-paper"></div>
+<div class="art art-dots"></div>
+<div class="art art-grain"></div>
+<div class="art art-vig"></div>
+<script>
+const THEMES={
+  paper:{tilef:'grayscale(1) sepia(.35) contrast(1.25) brightness(1.1)',paperOv:'#f3f2f2',paperOp:.7,dotsOp:.4,bloom:'none',bloomOp:0,ground:'#f3f2f2',paperc:'#fbf9f8',ink:'#201e1d',shadow:'#cfc9c9',border:'none',glow:'#38a6cf',tex:.55,blob:'58% 42% 55% 45% / 52% 60% 40% 48%',route:'#0088b0',faceA:'#fbf9f8',faceB:'#e6e2e2',faceC:'#d2cdcd'},
+  dusk:{tilef:'grayscale(.85) sepia(.55) hue-rotate(-14deg) contrast(1.08) brightness(1.1)',paperOv:'#fbeee2',paperOp:.5,dotsOp:.12,bloom:'linear-gradient(180deg,#cfc4ea 0%,#f3d3c2 55%,#fbe6d4 100%)',bloomMode:'soft-light',bloomOp:.95,ground:'#f3dcd0',paperc:'#fffaf3',ink:'#2d2b2b',shadow:'rgba(122,96,150,.35)',border:'none',glow:'#edbb00',tex:0,blob:'62% 38% 50% 50% / 55% 55% 45% 45%',route:'#0088b0',faceA:'#fffaf3',faceB:'#ecdcd8',faceC:'#d7c3c9'},
+  wash:{tilef:'grayscale(.9) sepia(.5) contrast(1.15) brightness(1.06)',paperOv:'#f7f3ea',paperOp:.6,dotsOp:.15,bloom:'radial-gradient(ellipse 55% 35% at 15% 20%, #9fdcf5 0%, transparent 70%), radial-gradient(ellipse 45% 35% at 90% 70%, #ffc9d6 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 60% 45%, #fbe8a6 0%, transparent 70%)',bloomMode:'multiply',bloomOp:.75,ground:'#f7f3ea',paperc:'#fffdf8',ink:'#201e1d',shadow:'rgba(32,30,29,.22)',border:'1.5px solid #201e1d',glow:'#ff458e',tex:0,blob:'55% 45% 48% 52% / 48% 55% 45% 52%',route:'#d6006c',faceA:'#fffdf8',faceB:'#cfe9f4',faceC:'#f9d3df'}
+};
+const params=new URLSearchParams(location.search);
+let theme=THEMES[params.get('theme')]||THEMES.paper;
+function applyTheme(){const r=document.documentElement.style;r.setProperty('--tilef',theme.tilef);r.setProperty('--paper-ov',theme.paperOv);r.setProperty('--paper-op',theme.paperOp);r.setProperty('--dots-op',theme.dotsOp);r.setProperty('--bloom',theme.bloom);r.setProperty('--bloom-mode',theme.bloomMode||'multiply');r.setProperty('--bloom-op',theme.bloomOp);r.setProperty('--ground',theme.ground);r.setProperty('--paperc',theme.paperc);r.setProperty('--ink',theme.ink);r.setProperty('--shadow',theme.shadow);r.setProperty('--border',theme.border);r.setProperty('--glow',theme.glow);r.setProperty('--tex',theme.tex);r.setProperty('--blob',theme.blob);}
+applyTheme();
+let map=null; const queue=[];
+function bootMap(){
+  const el=document.getElementById('map'); if(map||el.clientWidth<50||el.clientHeight<50) return;
+  map=L.map('map',{zoomControl:false,zoomSnap:.25,zoomAnimation:false,fadeAnimation:false,attributionControl:true}).setView([37.8725,-122.2595],15.5);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri, © OpenStreetMap contributors',maxZoom:19}).addTo(map);
+  map.on('zoomend', refresh); map.on('moveend', ()=>setTimeout(declutter,0));
+  queue.splice(0).forEach(handle);
+}
+
+let markers={},route=null,lastPlaces=[];
+// 2D isometric projection (ground units px). x right-back, y left-back, z up.
+const CX=60, CY=78, C30=Math.cos(Math.PI/6), S30=Math.sin(Math.PI/6);
+const P=(x,y,z)=>[(CX+(x-y)*C30).toFixed(1),(CY+(x+y)*S30-z).toFixed(1)].join(',');
+function box(x,y,w,d,h,o={}){
+  const top=[P(x,y,h),P(x+w,y,h),P(x+w,y+d,h),P(x,y+d,h)].join(' ');
+  const right=[P(x+w,y,0),P(x+w,y+d,0),P(x+w,y+d,h),P(x+w,y,h)].join(' ');
+  const front=[P(x,y+d,0),P(x+w,y+d,0),P(x+w,y+d,h),P(x,y+d,h)].join(' ');
+  const c=P(x+w/2,y+d/2,h).split(',');
+  return { order:x+y+w+d, svg:`<polygon points="${right}" fill="url(#hs)" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/><polygon points="${front}" fill="${o.front==='awn'?'url(#awn)':o.front==='cols'?'url(#cols)':'url(#hf)'}" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/><polygon points="${top}" fill="${o.top==='lawn'?'url(#lawn)':'var(--paperc)'}" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round"/>${o.label?`<text x="${c[0]}" y="${+c[1]+6}" text-anchor="middle" font-family="Source Serif 4,serif" font-style="italic" font-weight="600" font-size="16" fill="var(--ink)">${o.label}</text>`:''}` };
+}
+function mound(x,y,r,h){ const c=P(x,y,0).split(',').map(Number), t=P(x,y,h).split(',').map(Number); const rx=+(r*C30*2).toFixed(1), ry=+(r*S30*2).toFixed(1); return { order:x+y-r*2, svg:`<ellipse cx="${c[0]}" cy="${c[1]}" rx="${rx}" ry="${ry}" fill="url(#lawn)" stroke="var(--ink)" stroke-width="1"/><path d="M ${c[0]-rx} ${c[1]} Q ${t[0]} ${t[1]-h*.6} ${c[0]+rx} ${c[1]} Z" fill="url(#hf)" stroke="var(--ink)" stroke-width="1"/><path d="M ${c[0]-rx*.55} ${c[1]-h*.25} Q ${t[0]} ${t[1]-h*.1} ${c[0]+rx*.55} ${c[1]-h*.25}" fill="none" stroke="var(--ink)" stroke-width=".8" stroke-dasharray="2 2"/><text x="${t[0]}" y="${t[1]+4}" text-anchor="middle" font-family="Source Serif 4,serif" font-style="italic" font-weight="600" font-size="18" fill="#d6006c">C</text>` }; }
+function tree(x,y,h){ const b=P(x,y,0).split(','), t=P(x,y,h).split(','); return { order:x+y+40, svg:`<line x1="${b[0]}" y1="${b[1]}" x2="${t[0]}" y2="${t[1]}" stroke="var(--ink)" stroke-width="1"/><circle cx="${t[0]}" cy="${t[1]}" r="${h*.45}" fill="url(#lawn)" stroke="var(--ink)" stroke-width="1"/>` }; }
+function scene(parts){ return parts.sort((a,b)=>a.order-b.order).map(p=>p.svg).join(''); }
+const B=(...a)=>box(...a);
+const BUILD={
+  landmark:()=>[B(-14,-14,28,28,4),B(-8,-8,16,16,62),B(-6,-6,12,12,72),B(-3,-3,6,6,82),tree(14,14,9),tree(-16,12,8)],
+  library:()=>[B(-22,-15,44,30,16,{front:'cols'}),B(-16,-10,32,20,24),B(-8,-5,16,10,28)],
+  hill:()=>[mound(0,0,26,26)],
+  street:()=>[B(-26,-10,15,22,14,{front:'awn'}),B(-9,-12,16,26,22),B(9,-10,17,22,18,{front:'awn'}),tree(-22,16,8),tree(20,16,8)],
+  park:()=>[B(-22,-22,44,44,4,{top:'lawn'}),B(-15,-15,30,30,4,{top:'lawn'}),B(-8,-8,16,16,4,{top:'lawn'}),B(-3,-3,6,6,9),tree(16,-16,10),tree(-16,16,10),tree(16,14,8)],
+  bakery:()=>[B(-20,-13,40,26,15,{front:'awn'}),B(-14,-9,28,18,7),B(9,-11,7,7,25),tree(-26,12,9)],
+  lawn:()=>[B(-22,-22,44,44,3,{top:'lawn'}),tree(-16,2,16),tree(-10,10,20),tree(8,-14,17),tree(16,-8,12),tree(4,14,14),tree(-4,-6,10)],
+};
+const DEFS=`<defs><pattern id="hs" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="var(--paperc)"/><line x1="0" y1="0" x2="0" y2="4" stroke="var(--ink)" stroke-opacity=".45" stroke-width="1"/></pattern><pattern id="hf" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="var(--paperc)"/><line x1="0" y1="0" x2="4" y2="0" stroke="var(--ink)" stroke-opacity=".25" stroke-width="1"/></pattern><pattern id="cols" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="var(--paperc)"/><line x1="1" y1="0" x2="1" y2="6" stroke="var(--ink)" stroke-width="1.2"/></pattern><pattern id="awn" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="var(--paperc)"/><rect width="4" height="8" fill="#d6006c" fill-opacity=".85"/></pattern><pattern id="lawn" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="var(--paperc)"/><circle cx="2" cy="2" r=".8" fill="var(--ink)" fill-opacity=".45"/></pattern></defs>`;
+const TALL={landmark:92,library:44,street:46,bakery:46,hill:44,park:34,lawn:44};
+function zScale(){ const z=map?map.getZoom():15.5; return Math.max(.55, Math.min(1, .55 + (z-15)*.3)); }
+function isleIcon(p){ if(p.kind){ const html=scene((BUILD[p.kind]||BUILD.landmark)()); const tall=TALL[p.kind]||40; const s=zScale(); const S=Math.round(120*s); return L.divIcon({className:'',iconSize:[S,S+16],iconAnchor:[S/2,Math.round(78*s)],html:`<div class="bld" style="width:${S}px;height:${S+16}px"><div class="bld-in" style="transform:scale(${s})"><div class="gshadow"></div><svg class="scene" viewBox="0 0 120 120" width="120" height="120">${DEFS}${html}</svg><div class="flag" style="top:${Math.max(0,78-tall-38)}px"><div class="flag-n">${p.count}</div><div class="flag-p"></div></div>${p.isHere?`<div class="bld-here" style="left:74px;top:${Math.max(0,78-tall-12)}px"></div>`:''}</div><div class="bld-name" data-id="${p.id}">${p.name}</div></div>`}); }
+const size=p.size||60;return L.divIcon({className:'',iconSize:[size,size/1.28+22],iconAnchor:[size/2,size/1.28/2],html:`<div class="isle" style="width:${size}px;--dur:${5+(p.i||0)*.7}s;--dly:${-(p.i||0)*1.3}s"><div class="isle-shadow"></div><div class="isle-top">${landmarkHTML(p)}<div class="isle-n">${p.count}</div>${p.isHere?'<div class="isle-here"></div>':''}</div><div class="isle-name">${p.name}</div></div>`});}
+function setPlaces(places){lastPlaces=places;Object.values(markers).forEach(m=>map.removeLayer(m));markers={};places.forEach((p,i)=>{const m=L.marker([p.lat,p.lng],{icon:isleIcon({...p,i}),riseOnHover:true}).addTo(map);m.on('click',()=>parent.postMessage({type:'isle',id:p.id},'*'));markers[p.id]=m;});setTimeout(declutter,0);}
+function declutter(){ const els=[...document.querySelectorAll('.bld-name')]; const rects=[]; els.sort((a,b)=>{ const pa=lastPlaces.find(p=>p.id===a.dataset.id)||{}, pb=lastPlaces.find(p=>p.id===b.dataset.id)||{}; return (pb.count||0)-(pa.count||0); }); els.forEach(el=>{ el.classList.remove('hide'); const r0=el.getBoundingClientRect(); const r={left:r0.left-4,right:r0.right+4,top:r0.top-2,bottom:r0.bottom+2}; const hit=rects.some(q=>!(r.right<q.left||r.left>q.right||r.bottom<q.top||r.top>q.bottom)); if(hit) el.classList.add('hide'); else rects.push(r); }); }
+function refresh(){ lastPlaces.forEach((p,i)=>{ if(markers[p.id]) markers[p.id].setIcon(isleIcon({...p,i})); }); setTimeout(declutter,0); setTimeout(declutter,120); }
+function fitAll(pts){ const el=document.getElementById('map'); const small=el.clientHeight<500; map.fitBounds(pts,{paddingTopLeft:small?[24,40]:[24,140],paddingBottomRight:small?[24,40]:[24,200],animate:false}); refresh(); }
+new ResizeObserver(()=>{ setTimeout(()=>{ if(!map) bootMap(); else map.invalidateSize(false); },0); }).observe(document.getElementById('map'));
+(function tick(){ if(!map){ bootMap(); if(!map) setTimeout(tick,100); } })();
+function setRoute(ids,places){if(route){map.removeLayer(route);route=null;}if(!ids||!ids.length)return;const pts=ids.map(id=>places.find(p=>p.id===id)).filter(Boolean).map(p=>[p.lat,p.lng]);route=L.polyline(pts,{color:theme.route,weight:2.5,dashArray:'6 9',lineCap:'round',className:'route'}).addTo(map);}
+function handle(d){ if(d.type==='init'||d.type==='update'){ if(d.theme&&THEMES[d.theme]){theme=THEMES[d.theme];applyTheme();} if(d.places)setPlaces(d.places); setRoute(d.route,d.places||[]); if(d.type==='init'&&d.fit&&d.places&&d.places.length) fitAll(d.places.map(p=>[p.lat,p.lng])); } if(d.type==='focus'){ map.panTo([d.lat,d.lng],{animate:false}); } }
+window.addEventListener('message',e=>{ const d=e.data||{}; if(!d.type) return; if(!map){ if(d.type==='init') queue.length=0; queue.push(d); bootMap(); return; } handle(d); });
+parent.postMessage({type:'ready'},'*');
+</script>
+</body></html>

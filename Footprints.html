@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="page-loader.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Footprints — Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="project-detail.css">
+<style>
+.map-frame{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35)}
+.map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.opening__bg--map{overflow:hidden;filter:none}
+.opening__bg--map iframe{position:absolute;inset:-4%;width:108%;height:108%;border:0;pointer-events:none;filter:grayscale(.3) brightness(.9)}
+.stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;margin-top:1rem}
+.stat{border-top:1px solid var(--line);padding-top:1.6rem}
+.stat-num{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2.2rem,4vw,3.4rem);line-height:1;color:var(--ivory);margin-bottom:.9rem}
+.stat-num em{font-style:italic;color:var(--gold)}
+.stat p{font-size:.7rem;line-height:1.85;color:var(--mist);opacity:.7}
+.stat-src{display:block;margin-top:.8rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.comp-table{width:100%;border-collapse:collapse;margin-top:1rem}
+.comp-table th{font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:400;text-align:left;padding:0 1.2rem 1.2rem 0;border-bottom:1px solid var(--line-strong)}
+.comp-table td{font-size:.74rem;line-height:1.85;color:var(--mist);padding:1.4rem 1.2rem 1.4rem 0;border-bottom:1px solid var(--line);vertical-align:top}
+.comp-table td:first-child{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--ivory);white-space:nowrap}
+.comp-table tr.is-us td{color:var(--ivory)}
+.comp-table tr.is-us td:first-child{color:var(--gold);font-style:italic}
+@media(max-width:920px){.stat-row{grid-template-columns:1fr 1fr}.comp-table,.comp-table tbody,.comp-table tr,.comp-table td{display:block}.comp-table thead{display:none}.comp-table td{padding:.4rem 0;border:none}.comp-table tr{padding:1.4rem 0;border-bottom:1px solid var(--line)}}
+@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
+.phone-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.4rem;margin-top:1rem}
+.phone{position:relative;width:100%;aspect-ratio:402/874;border-radius:36px;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35),inset 0 0 0 1px oklch(96% 0.006 78 / .1)}
+.phone iframe{position:absolute;top:0;left:0;width:402px;height:874px;border:0;transform-origin:0 0}
+.phone-cap{margin-top:1rem;font-size:.54rem;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+.phone-cap strong{display:block;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.15rem;letter-spacing:0;text-transform:none;color:var(--ivory);margin-bottom:.35rem}
+.loop{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1.4rem;margin-top:1rem}
+.loop-step{border-top:1px solid var(--line);padding-top:1.6rem}
+.loop-n{font-size:.56rem;letter-spacing:.3em;color:var(--gold);margin-bottom:1rem}
+.loop-step h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.3rem;margin-bottom:.6rem}
+.loop-step p{font-size:.68rem;line-height:1.8;color:var(--mist);opacity:.7}
+.loop-step .scr{display:block;margin-top:.8rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.obj-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;margin-top:4rem}
+.obj{background:oklch(96% 0.006 78 / .02);border:1px solid var(--line);padding:2.2rem 2rem}
+.obj h3{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.7rem;margin-bottom:.7rem}
+.obj h3 em{font-style:italic;color:var(--gold)}
+.obj p{font-size:.72rem;line-height:1.95;color:var(--mist);opacity:.7}
+@media(max-width:920px){.loop{grid-template-columns:repeat(3,1fr)}.phone-row{grid-template-columns:1fr;max-width:402px;margin-left:auto;margin-right:auto}.obj-row{grid-template-columns:1fr}}
+@media(max-width:560px){.loop{grid-template-columns:1fr 1fr}}
+.hero-phones{position:absolute;right:3rem;top:50%;transform:translateY(-50%);z-index:3;display:flex;gap:1.6rem;align-items:flex-end;pointer-events:none}
+.hero-phones .phone{width:200px;pointer-events:auto}
+.hero-phones .phone:nth-child(2){width:236px;margin-bottom:3rem}
+@media(min-width:1100px){.opening__inner{max-width:calc(100% - 520px)}.opening__meta{gap:2.4rem}}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5rem;align-items:center;margin-top:1rem}
+.split.rev>.split__media{order:-1}
+.split__media img{display:block;width:100%;height:auto;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35)}
+.split__media .phone{max-width:340px;margin:0 auto}
+.split__media .map-frame{aspect-ratio:4/3}
+.split .section-lede{margin-bottom:2rem}
+.kv{display:flex;flex-direction:column;gap:1.4rem;margin-top:2rem}
+.kv div{border-top:1px solid var(--line);padding-top:1.2rem}
+.kv span{display:block;font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+.kv p{font-size:.76rem;line-height:1.95;color:var(--mist);opacity:.75}
+.try{display:grid;grid-template-columns:minmax(0,1fr) 402px;gap:5rem;align-items:center}
+.try .phone{width:402px;max-width:100%;margin:0 auto}
+.try-cta{display:inline-flex;align-items:center;gap:1rem;margin-top:2.4rem;padding:1.1rem 2.2rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ink);background:var(--gold);border:1px solid var(--gold);border-radius:999px;text-decoration:none;transition:background .35s,transform .35s;box-shadow:0 12px 32px oklch(74% 0.10 78 / .25)}
+.try-cta:hover{background:oklch(82% 0.11 78);transform:translateY(-1px)}
+.algo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;margin-top:1rem}
+.algo div{border-top:1px solid var(--line);padding-top:1.6rem}
+.algo .n{font-size:.56rem;letter-spacing:.3em;color:var(--gold);margin-bottom:1rem}
+.algo h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.35rem;margin-bottom:.6rem}
+.algo p{font-size:.7rem;line-height:1.85;color:var(--mist);opacity:.7}
+.algo code{font-size:.62rem;color:var(--ivory);opacity:.85}
+@media(max-width:920px){.try{grid-template-columns:1fr}.algo{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.algo{grid-template-columns:1fr}}
+@media(max-width:1100px){.hero-phones{display:none}}
+@media(max-width:920px){.split{grid-template-columns:1fr;gap:3rem}.split.rev>.split__media{order:0}}
+</style>
+
+<style id="navmenu-css">
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:#f4f1ea;border-radius:2px}
+.navmenu{position:fixed;inset:0;z-index:1900;background:rgba(14,14,15,0.95);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);display:flex;flex-direction:column;padding:92px 2rem 3rem;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.navmenu.open{opacity:1;pointer-events:auto}
+.navmenu__close{position:absolute;top:1.5rem;right:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#f4f1ea;font-size:1.7rem;line-height:1;opacity:.85}
+.navmenu__links{list-style:none;display:flex;flex-direction:column;gap:.2rem;margin:0;padding:0}
+.navmenu__links li{border-bottom:1px solid rgba(255,255,255,0.09)}
+.navmenu__links a{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;letter-spacing:.02em;color:#f4f1ea;text-decoration:none;padding:1.05rem .2rem;opacity:.92;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s}
+.navmenu.open .navmenu__links a{transform:translateY(0)}
+.navmenu__links a.active{color:oklch(73% 0.10 76);opacity:1}
+.navmenu__links li:nth-child(1) a{transition-delay:.05s}
+.navmenu__links li:nth-child(2) a{transition-delay:.10s}
+.navmenu__links li:nth-child(3) a{transition-delay:.15s}
+.navmenu__links li:nth-child(4) a{transition-delay:.20s}
+.navmenu__links li:nth-child(5) a{transition-delay:.25s}
+.navmenu__links li:nth-child(6) a{transition-delay:.30s}
+.topnav.compact .topnav__links{display:none!important}.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="global-header-css">
+.topnav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(22,22,23,0.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;box-sizing:border-box}
+.topnav__brand{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:oklch(96% 0.006 78);opacity:.9;line-height:1.4;text-decoration:none}
+.topnav__brand em{font-style:italic;color:oklch(73% 0.10 76)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center;margin:0;padding:0}
+.topnav__links a{font-family:'DM Mono',ui-monospace,monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,0.72);opacity:1;transition:color .25s;position:relative;padding:.3rem 0;text-decoration:none;white-space:nowrap}
+.topnav__links a:hover{color:#fff}
+.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:50%;bottom:-.32rem;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:oklch(73% 0.10 76)}
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:oklch(96% 0.006 78);border-radius:2px}
+.topnav.compact .topnav__links{display:none!important}
+.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html" data-nav="home">Home</a></li>
+    <li><a href="Projects.html" data-nav="projects" class="active">Projects</a></li>
+    <li><a href="About.html" data-nav="about">About</a></li>
+    <li><a href="Photography.html" data-nav="photography">Photography</a></li>
+    <li><a href="Space.html" data-nav="space">Space</a></li>
+    <li><a href="index.html#contact" data-nav="contact">Contact</a></li>
+  </ul>
+  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="navmenu" id="navMenu" aria-hidden="true">
+  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
+  <ul class="navmenu__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="Projects.html" class="active">Projects</a></li>
+    <li><a href="About.html">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</div>
+<script>
+(() => {
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  const close  = document.getElementById('navClose');
+  if (!toggle || !menu) return;
+  const open = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+  const shut = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+  toggle.addEventListener('click', open);
+  close && close.addEventListener('click', shut);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+})();
+</script>
+
+<div class="read-progress" id="readProgress"></div>
+
+<section class="opening">
+  <div class="opening__bg" style="background-image:url('uploads/footprints-cities-3d.png');background-size:cover;background-position:center right;filter:none"></div>
+  <div class="opening__overlay"></div>
+  <div class="opening__inner">
+    <a href="Projects.html" class="back-link">← Back to Archive</a>
+    <div class="opening__eyebrow">Project · 03 · iOS App</div>
+    <h1 class="opening__title"><em>Footprints</em></h1>
+    <p class="opening__concept">An app that turns a city into a map of the small things people did there. Write a list — "100 things before I graduate" — pin each thing to a landmark, walk it with a guide, and leave a trace. Every city you finish becomes a small 3D slab on your page.</p>
+    <div class="opening__meta">
+      <div class="meta-item"><span class="meta-label">Year</span><span class="meta-value">2026</span></div>
+      <div class="meta-item"><span class="meta-label">Medium</span><span class="meta-value">iOS App · Clickable Prototype</span></div>
+      <div class="meta-item"><span class="meta-label">Discipline</span><span class="meta-value">Product · Interaction · UI/UX</span></div>
+      <div class="meta-item"><span class="meta-label">Site</span><span class="meta-value">UC Berkeley</span></div>
+    </div>
+    <a class="try-cta" href="#try">Try the app <span>↓</span></a>
+  </div>
+  <div class="hero-phones">
+    <div class="phone"><iframe src="footprints-app/app-profile.html" title="Footprints — your page" loading="lazy"></iframe></div>
+    <div class="phone"><iframe src="footprints-app/app-map.html" title="Footprints — map" loading="lazy"></iframe></div>
+  </div>
+</section>
+
+<section class="section section--quote">
+  <div class="section__inner narrow">
+    <div class="section-eyebrow">Concept</div>
+    <p class="big-quote">Maps tell you what is somewhere. <em>They don't tell you what people did there.</em></p>
+  </div>
+</section>
+
+<!-- ═══ 01 MARKET RESEARCH ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">01 · Market Research · Landscape</div>
+    <h2 class="section-title">The map has become <em>social</em> — and mostly real-time</h2>
+    <p class="section-lede">The largest players have turned maps into a social layer, but almost all of them are built around the present moment: where a friend is right now, what is happening nearby. Personal history — the 5:50 carillon, the $4 bánh mì on the steps — still lives in group chats and graduates with the people who had it.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num">400M<em>+</em></div><p>Monthly active users on Snap Map as of May 2025 — including "Footsteps", a view of how much of the world you've explored.</p><span class="stat-src">Snap Newsroom · 2025</span></div>
+      <div class="stat"><div class="stat-num">Aug <em>2025</em></div><p>Instagram launches its own Map, letting users share their last active location with chosen friends — opt-in, inside DMs.</p><span class="stat-src">Meta Newsroom · 2025</span></div>
+      <div class="stat"><div class="stat-num">20M<em>+</em></div><p>Travelers on Polarsteps, which records routes automatically and turns them into keepsake travel books — proof people pay to relive movement.</p><span class="stat-src">Polarsteps · 2026</span></div>
+      <div class="stat"><div class="stat-num">3 <em>mo.</em></div><p>New default auto-delete for Google Maps Timeline after it moved on-device; the web version ended June 9, 2025.</p><span class="stat-src">Android Police · Daftei · 2025</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">01 · Market Research · Competitors</div>
+    <h2 class="section-title">Where each map <em>stops</em></h2>
+    <table class="comp-table">
+      <thead><tr><th>Product</th><th>Core job</th><th>Time frame</th><th>Gap</th></tr></thead>
+      <tbody>
+        <tr><td>Snap Map</td><td>See friends nearby, discover local hotspots</td><td>Now</td><td>Discovery is ambient; nothing to finish, no reason to return</td></tr>
+        <tr><td>Instagram Map</td><td>Share last active location, browse tagged content</td><td>Now · 24h</td><td>Privacy anxiety on launch; content expires rather than accumulates</td></tr>
+        <tr><td>Polarsteps</td><td>Track and relive trips</td><td>Past · per trip</td><td>Built for travel, not the everyday places you return to</td></tr>
+        <tr><td>Google Timeline</td><td>Private log of every visit</td><td>Past · 3 mo. default</td><td>Solitary, utilitarian, and increasingly short-lived</td></tr>
+        <tr class="is-us"><td>Footprints</td><td>Lists you walk; traces that stay on the place</td><td>Past · cumulative</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">01 · Market Research · Positioning &amp; Model</div>
+    <div class="split rev">
+      <div class="split__media"><img src="uploads/footprints-cities-3d.png" alt="Cities collected as 3D map slabs — Berkeley, San Francisco, Oakland, Lake Tahoe"/></div>
+      <div>
+        <h2 class="section-title">Campus first — because campuses have <em>rituals</em> and a clock</h2>
+        <p class="section-lede">Students with a clock running on a place; then visitors, new arrivals and locals who want the version of a city insiders know. Free to make, walk and share; revenue comes from people who want more of the Guide, from places that want to be on a good list, and from the souvenirs a day leaves behind.</p>
+        <div class="kv">
+          <div><span>Footprints+ · core</span><p>The Guide without limits — unlimited routes and photo check-ins, offline city packs, private lists, the full postcard archive. $4.99 / month · student $2.99.</p></div>
+          <div><span>Sponsored lists · growth</span><p>Venues publish their own lists, clearly labelled, and pay $0.50–$2 per verified check-in — never per view.</p></div>
+          <div><span>Partners &amp; print · long tail</span><p>Universities and tourism boards commission lists on an annual licence; the day's postcard mails as a real card ($3) or a print ($24).</p></div>
+          <div><span>Line we won't cross</span><p>A business can never buy a place on someone else's list, or pay to hide a trace.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 INTERACTION MODEL ═══ -->
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Interaction Model · The Loop</div>
+    <h2 class="section-title">One loop. Every finished thing becomes a <em>trace</em></h2>
+    <p class="section-lede">Every trace makes the map richer for the next person — which is what brings them in. Step 6 feeds step 1: the loop closes when someone else discovers what you left.</p>
+    <div class="loop">
+      <div class="loop-step"><div class="loop-n">01</div><h4>Discover</h4><p>Open the map. Landmarks show how many people left traces there. Tap one to read them.</p><span class="scr">Map · place sheet</span></div>
+      <div class="loop-step"><div class="loop-n">02</div><h4>Collect</h4><p>Save someone's list, or make your own and pin each thing to a place.</p><span class="scr">Lists · new list</span></div>
+      <div class="loop-step"><div class="loop-n">03</div><h4>Walk</h4><p>Ask the Guide. It plans a route through your list using what others did.</p><span class="scr">Guide</span></div>
+      <div class="loop-step"><div class="loop-n">04</div><h4>Check in</h4><p>Take a photo at the place. The Guide recognises it and ticks the thing off.</p><span class="scr">Check-in</span></div>
+      <div class="loop-step"><div class="loop-n">05</div><h4>Leave a trace</h4><p>Add a line and a rating. It appears on the landmark for the next person.</p><span class="scr">Place · your page</span></div>
+      <div class="loop-step"><div class="loop-n">06 ↺</div><h4>Share</h4><p>At the end of the day the Guide draws a postcard. Save it, or send the link.</p><span class="scr">Postcard</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Interaction Model · Three Objects</div>
+    <div class="split">
+      <div>
+        <h2 class="section-title">Place, list, <em>trace</em></h2>
+        <p class="section-lede">Three objects hold the whole product. A landmark stands on real geography as an inked isometric building — tower, colonnaded library, awninged shopfront, a mound for the Big C — with a flag above counting the traces left there.</p>
+        <div class="kv">
+          <div><span>Place</span><p>A landmark on the map at true coordinates. Tap it to read what people did there.</p></div>
+          <div><span>List</span><p>Things worth doing, each pinned to a place. Progress is counted in isles, not checkboxes.</p></div>
+          <div><span>Trace</span><p>One person doing one thing at one place, with a photo and a line. A check-in needs a photo the Guide recognises there. Ratings come only from people who finished the thing — no trace, no review.</p></div>
+        </div>
+      </div>
+      <div class="split__media"><div class="phone"><iframe src="footprints-app/app-group.html" title="Footprints — a list with progress" loading="lazy"></iframe></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Interaction Model · The Map Algorithm</div>
+    <h2 class="section-title">A 2D paper map — where only <em>landmarks</em> stand up</h2>
+    <p class="section-lede">Nothing on the map is decorative. The base is real geography (Esri street tiles), desaturated and washed to paper so streets read as faint 2D lines. A place rises into 3D only when people have left traces there; its shape, height and label are all derived from data.</p>
+    <div class="map-frame"><iframe src="footprints-app/map.html?theme=clean" title="Footprints — Berkeley, 2D base with 3D landmarks" loading="lazy"></iframe></div>
+    <div class="algo">
+      <div><div class="n">Rule 01</div><h4>Flat by default</h4><p>Every tile passes through <code>grayscale → contrast → paper overlay</code>. Roads, water and blocks stay two-dimensional; nothing competes with a landmark.</p></div>
+      <div><div class="n">Rule 02</div><h4>Traces raise a place</h4><p>A place gets a 3D isle only if <code>count &gt; 0</code>. The flag above it shows the count; the building type is chosen from the place's kind — tower, library, street, park, bakery, hill, lawn.</p></div>
+      <div><div class="n">Rule 03</div><h4>Scale with zoom</h4><p>Isle size follows <code>0.55 + (zoom − 15) × 0.3</code>, clamped to 0.55–1, so buildings shrink as you pull out and never bury the streets.</p></div>
+      <div><div class="n">Rule 04</div><h4>Labels yield</h4><p>Names are placed by trace count, highest first; any label that would overlap a busier one hides. A route is drawn only for the list you are walking today.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Interaction Model · The Guide</div>
+    <div class="split rev">
+      <div class="split__media"><div class="phone"><iframe src="footprints-app/app-guide.html" title="Footprints — Lumen the guide" loading="lazy"></iframe></div></div>
+      <div>
+        <h2 class="section-title">A small wordless light that <em>remembers</em></h2>
+        <p class="section-lede">Lumen never speaks. It plans a route through other people's traces, recognises your photo when you check in, and turns the day into a postcard. On the map it is the only thing that glows — cyan on paper, the one colour reserved for interaction.</p>
+        <div class="kv">
+          <div><span>Trust</span><p>A check-in requires a photo the Guide recognises at that place. Photo recognition is simulated in the prototype with per-place tags.</p></div>
+          <div><span>Privacy</span><p>Nothing is live. The app only knows where you chose to leave a trace, and you decide which parts of your page a visitor sees.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRY IT ═══ -->
+<section class="section section--installation" id="try">
+  <div class="section__inner">
+    <div class="try">
+      <div>
+        <div class="section-eyebrow">Try it · Clickable Prototype</div>
+        <h2 class="section-title">Sign in as Mia and <em>walk</em> her list</h2>
+        <p class="section-lede">Tap Sather Tower, open a person, follow their list, check in with a photo and let Lumen draw the postcard. Tabs, guide chips, checkboxes and "New list" all work. Best on the phone to the right; on a small screen it fills the width.</p>
+        <a class="try-cta" href="footprints-app/app-map.html" target="_blank" rel="noopener">Open full screen <span>→</span></a>
+      </div>
+      <div class="phone"><iframe src="footprints-app/app-map.html" title="Footprints — try the prototype" loading="lazy"></iframe></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 UI / UX ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">03 · UI / UX Design · Clickable Flow</div>
+    <h2 class="section-title">Sign in → map → a person → their list → check in → <em>postcard</em></h2>
+    <p class="section-lede">Three moments from the flow, each opened directly. Tabs, guide chips, list checkboxes and "New list" all work — click through any phone.</p>
+    <div class="phone-row">
+      <div><div class="phone"><iframe src="footprints-app/app-place.html" title="Footprints — Sather Tower open" loading="lazy"></iframe></div><div class="phone-cap"><strong>Map · Sather Tower open</strong>Traces left at the landmark, and the people behind them</div></div>
+      <div><div class="phone"><iframe src="footprints-app/app-checkin.html" title="Footprints — check-in" loading="lazy"></iframe></div><div class="phone-cap"><strong>Check-in</strong>Photo recognised at the place · matched to #03 on the list</div></div>
+      <div><div class="phone"><iframe src="footprints-app/app-postcard.html" title="Footprints — postcard" loading="lazy"></iframe></div><div class="phone-cap"><strong>Postcard</strong>The day, drawn by the Guide on a hand-drawn map</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">03 · UI / UX Design · Your Page</div>
+    <div class="split">
+      <div>
+        <h2 class="section-title">Every city you finish becomes a <em>3D slab</em></h2>
+        <p class="section-lede">Your page opens on the cities you've collected — each a small isometric block of real map tiles carrying the landmarks you left traces on: Berkeley's tower, San Francisco's downtown, Oakland, the trees of Tahoe. Below: your stories on a map, lists you made, lists you saved. A settings screen shows the page exactly as a visitor would see it.</p>
+        <div class="kv">
+          <div><span>Design system</span><p>Source Serif as the chrome, cyan for interaction, magenta as the rare stamp colour, 2px radii, whitespace instead of dividers. The hand-drawn softness lives only in the isles, the sprite and the postcard.</p></div>
+          <div><span>Three skins explored</span><p>Newsprint paper, dawn sky, ink-and-wash. Paper was chosen — quietest, most editorial.</p></div>
+        </div>
+      </div>
+      <div class="split__media"><div class="phone"><iframe src="footprints-app/app-profile.html" title="Footprints — your page" loading="lazy"></iframe></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--closing">
+  <div class="section__inner narrow center">
+    <div class="section-eyebrow">Reflection</div>
+    <h2 class="closing-title">The map doesn't need to know<br>where anyone is.<br>It only needs to remember.</h2>
+    <p class="closing-body">Berkeley first, seeded with twenty lists before launch. Then the next five campuses, then the cities students travel to. <em>The loop is the product.</em></p>
+    <div class="closing-rule"></div>
+    <p class="closing-sig">— 2026 · Zhang Yichi</p>
+  </div>
+</section>
+
+<section class="next-project">
+  <a href="Space-Archaeology.html" class="next-link">
+    <span class="next-label">Next Project</span>
+    <h3 class="next-title">Space <em>Archaeology</em></h3>
+    <span class="next-arrow">→</span>
+  </a>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="site-footer">
+  <div>
+    <div class="footer-brand">Zhang <em>Yichi</em></div>
+    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
+  </div>
+  <div>
+    <h4>Sitemap</h4>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Projects.html" class="active">Projects</a></li>
+      <li><a href="Photography.html">Photography</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="index.html#contact">Email</a></li>
+      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+  <div class="copyright">
+    <span>© 2026 Zhang Yichi</span>
+    <span>All works belong to Yichi</span>
+  </div>
+</footer>
+
+<script src="project-detail.js"></script>
+<script>
+
+</script>
+
+<script>
+/* Show the "=" menu exactly when the header can no longer fit its links. */
+(() => {
+  const nav = document.querySelector('.topnav');
+  if (!nav) return;
+  const links = nav.querySelector('.topnav__links');
+  const brand = nav.querySelector('.topnav__brand');
+  const toggle = nav.querySelector('.topnav__toggle');
+  if (!links || !toggle) return;
+  let need = 0;
+  function measure() {
+    nav.classList.remove('compact');
+    const lw = links.scrollWidth;
+    const bw = brand ? brand.offsetWidth : 0;
+    const cs = getComputedStyle(nav);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    if (lw > 0) need = bw + lw + pad + 48;
+  }
+  function apply() { if (!need) measure(); nav.classList.toggle('compact', window.innerWidth < need); }
+  function refresh() { measure(); apply(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', apply);
+  refresh();
+})();
+</script>
+<script>(()=>{const fitOne=el=>{const f=el.querySelector('iframe');if(!f)return;const w=el.clientWidth,hh=el.clientHeight;if(!(w>0))return;if(el.matches('.phone,.cover-phone')){f.style.transform='scale('+(w/402)+')';}else if(el.matches('.opening__bg--ui')){const s=Math.max(w/1440,hh/900);if(s>0)f.style.transform='scale('+s+')';}else{const bar=el.querySelector('.browser__bar,.cover-browser__bar');const bh=bar?bar.offsetHeight:0;const s=w/1280;if(!(s>0))return;f.style.transform='scale('+s+')';f.style.height=Math.max(0,(hh-bh)/s)+'px';}};const all=()=>document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(fitOne);const ro=new ResizeObserver(es=>es.forEach(e=>fitOne(e.target)));document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(el=>ro.observe(el));all();requestAnimationFrame(all);setTimeout(all,300);addEventListener('load',all);addEventListener('resize',all);})();</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="page-loader.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sitescape — Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="project-detail.css">
+<style>
+.map-frame{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35)}
+.map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.opening__bg--map{overflow:hidden;filter:none}
+.opening__bg--map iframe{position:absolute;inset:-4%;width:108%;height:108%;border:0;pointer-events:none;filter:grayscale(.3) brightness(.9)}
+.stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;margin-top:1rem}
+.stat{border-top:1px solid var(--line);padding-top:1.6rem}
+.stat-num{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2.2rem,4vw,3.4rem);line-height:1;color:var(--ivory);margin-bottom:.9rem}
+.stat-num em{font-style:italic;color:var(--gold)}
+.stat p{font-size:.7rem;line-height:1.85;color:var(--mist);opacity:.7}
+.stat-src{display:block;margin-top:.8rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.comp-table{width:100%;border-collapse:collapse;margin-top:1rem}
+.comp-table th{font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:400;text-align:left;padding:0 1.2rem 1.2rem 0;border-bottom:1px solid var(--line-strong)}
+.comp-table td{font-size:.74rem;line-height:1.85;color:var(--mist);padding:1.4rem 1.2rem 1.4rem 0;border-bottom:1px solid var(--line);vertical-align:top}
+.comp-table td:first-child{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--ivory);white-space:nowrap}
+.comp-table tr.is-us td{color:var(--ivory)}
+.comp-table tr.is-us td:first-child{color:var(--gold);font-style:italic}
+@media(max-width:920px){.stat-row{grid-template-columns:1fr 1fr}.comp-table,.comp-table tbody,.comp-table tr,.comp-table td{display:block}.comp-table thead{display:none}.comp-table td{padding:.4rem 0;border:none}.comp-table tr{padding:1.4rem 0;border-bottom:1px solid var(--line)}}
+@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
+.phone-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.4rem;margin-top:1rem}
+.phone{position:relative;width:100%;aspect-ratio:402/874;border-radius:36px;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35),inset 0 0 0 1px oklch(96% 0.006 78 / .1)}
+.phone iframe{position:absolute;top:0;left:0;width:402px;height:874px;border:0;transform-origin:0 0}
+.phone-cap{margin-top:1rem;font-size:.54rem;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+.phone-cap strong{display:block;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.15rem;letter-spacing:0;text-transform:none;color:var(--ivory);margin-bottom:.35rem}
+.loop{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1.4rem;margin-top:1rem}
+.loop-step{border-top:1px solid var(--line);padding-top:1.6rem}
+.loop-n{font-size:.56rem;letter-spacing:.3em;color:var(--gold);margin-bottom:1rem}
+.loop-step h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.3rem;margin-bottom:.6rem}
+.loop-step p{font-size:.68rem;line-height:1.8;color:var(--mist);opacity:.7}
+.loop-step .scr{display:block;margin-top:.8rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.obj-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;margin-top:4rem}
+.obj{background:oklch(96% 0.006 78 / .02);border:1px solid var(--line);padding:2.2rem 2rem}
+.obj h3{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.7rem;margin-bottom:.7rem}
+.obj h3 em{font-style:italic;color:var(--gold)}
+.obj p{font-size:.72rem;line-height:1.95;color:var(--mist);opacity:.7}
+@media(max-width:920px){.loop{grid-template-columns:repeat(3,1fr)}.phone-row{grid-template-columns:1fr;max-width:402px;margin-left:auto;margin-right:auto}.obj-row{grid-template-columns:1fr}}
+@media(max-width:560px){.loop{grid-template-columns:1fr 1fr}}
+.hero-phones{position:absolute;right:3rem;top:50%;transform:translateY(-50%);z-index:3;display:flex;gap:1.6rem;align-items:flex-end;pointer-events:none}
+.hero-phones .phone{width:200px;pointer-events:auto}
+.hero-phones .phone:nth-child(2){width:236px;margin-bottom:3rem}
+.opening{min-height:78vh;padding-bottom:10vh}
+.browser--cover{aspect-ratio:16/9}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5rem;align-items:center;margin-top:1rem}
+.split.rev>.split__media{order:-1}
+.split__media img{display:block;width:100%;height:auto;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35)}
+.split__media .phone{max-width:340px;margin:0 auto}
+.split__media .map-frame{aspect-ratio:4/3}
+.split .section-lede{margin-bottom:2rem}
+.kv{display:flex;flex-direction:column;gap:1.4rem;margin-top:2rem}
+.kv div{border-top:1px solid var(--line);padding-top:1.2rem}
+.kv span{display:block;font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+.kv p{font-size:.76rem;line-height:1.95;color:var(--mist);opacity:.75}
+.browser{position:relative;width:100%;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35),inset 0 0 0 1px oklch(96% 0.006 78 / .1)}
+.browser__bar{height:34px;display:flex;align-items:center;gap:.5rem;padding:0 .9rem;background:#e7e5e3;border-bottom:1px solid #d7d4d1}
+.browser__bar i{width:10px;height:10px;border-radius:50%;background:#c9c5c1;display:block}
+.browser__bar span{flex:1;margin-left:.6rem;height:18px;border-radius:5px;background:#f6f5f3;font:11px/18px 'DM Mono',monospace;color:#7a7672;padding:0 .6rem}
+.browser iframe{position:absolute;top:34px;left:0;width:1280px;height:calc((100% - 34px) * (1280 / var(--bw,1280)));border:0;transform-origin:0 0}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:3rem;align-items:end;margin-top:1rem}
+@media(max-width:920px){.duo{grid-template-columns:1fr}.duo .phone{max-width:260px;margin:0 auto}}
+.try{display:grid;grid-template-columns:minmax(0,1fr) 402px;gap:5rem;align-items:center}
+.try .phone{width:402px;max-width:100%;margin:0 auto}
+.try-cta{display:inline-flex;align-items:center;gap:1rem;margin-top:2.4rem;padding:1.1rem 2.2rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ink);background:var(--gold);border:1px solid var(--gold);border-radius:999px;text-decoration:none;transition:background .35s,transform .35s;box-shadow:0 12px 32px oklch(74% 0.10 78 / .25)}
+.try-cta:hover{background:oklch(82% 0.11 78);transform:translateY(-1px)}
+.algo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;margin-top:1rem}
+.algo div{border-top:1px solid var(--line);padding-top:1.6rem}
+.algo .n{font-size:.56rem;letter-spacing:.3em;color:var(--gold);margin-bottom:1rem}
+.algo h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.35rem;margin-bottom:.6rem}
+.algo p{font-size:.7rem;line-height:1.85;color:var(--mist);opacity:.7}
+.algo code{font-size:.62rem;color:var(--ivory);opacity:.85}
+@media(max-width:920px){.try{grid-template-columns:1fr}.algo{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.algo{grid-template-columns:1fr}}
+@media(max-width:1100px){.hero-phones{display:none}}
+@media(max-width:920px){.split{grid-template-columns:1fr;gap:3rem}.split.rev>.split__media{order:0}}
+</style>
+
+<style id="navmenu-css">
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:#f4f1ea;border-radius:2px}
+.navmenu{position:fixed;inset:0;z-index:1900;background:rgba(14,14,15,0.95);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);display:flex;flex-direction:column;padding:92px 2rem 3rem;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.navmenu.open{opacity:1;pointer-events:auto}
+.navmenu__close{position:absolute;top:1.5rem;right:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#f4f1ea;font-size:1.7rem;line-height:1;opacity:.85}
+.navmenu__links{list-style:none;display:flex;flex-direction:column;gap:.2rem;margin:0;padding:0}
+.navmenu__links li{border-bottom:1px solid rgba(255,255,255,0.09)}
+.navmenu__links a{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;letter-spacing:.02em;color:#f4f1ea;text-decoration:none;padding:1.05rem .2rem;opacity:.92;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s}
+.navmenu.open .navmenu__links a{transform:translateY(0)}
+.navmenu__links a.active{color:oklch(73% 0.10 76);opacity:1}
+.navmenu__links li:nth-child(1) a{transition-delay:.05s}
+.navmenu__links li:nth-child(2) a{transition-delay:.10s}
+.navmenu__links li:nth-child(3) a{transition-delay:.15s}
+.navmenu__links li:nth-child(4) a{transition-delay:.20s}
+.navmenu__links li:nth-child(5) a{transition-delay:.25s}
+.navmenu__links li:nth-child(6) a{transition-delay:.30s}
+.topnav.compact .topnav__links{display:none!important}.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="global-header-css">
+.topnav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(22,22,23,0.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;box-sizing:border-box}
+.topnav__brand{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:oklch(96% 0.006 78);opacity:.9;line-height:1.4;text-decoration:none}
+.topnav__brand em{font-style:italic;color:oklch(73% 0.10 76)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center;margin:0;padding:0}
+.topnav__links a{font-family:'DM Mono',ui-monospace,monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,0.72);opacity:1;transition:color .25s;position:relative;padding:.3rem 0;text-decoration:none;white-space:nowrap}
+.topnav__links a:hover{color:#fff}
+.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:50%;bottom:-.32rem;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:oklch(73% 0.10 76)}
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:oklch(96% 0.006 78);border-radius:2px}
+.topnav.compact .topnav__links{display:none!important}
+.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html" data-nav="home">Home</a></li>
+    <li><a href="Projects.html" data-nav="projects" class="active">Projects</a></li>
+    <li><a href="About.html" data-nav="about">About</a></li>
+    <li><a href="Photography.html" data-nav="photography">Photography</a></li>
+    <li><a href="Space.html" data-nav="space">Space</a></li>
+    <li><a href="index.html#contact" data-nav="contact">Contact</a></li>
+  </ul>
+  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="navmenu" id="navMenu" aria-hidden="true">
+  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
+  <ul class="navmenu__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="Projects.html" class="active">Projects</a></li>
+    <li><a href="About.html">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</div>
+<script>
+(() => {
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  const close  = document.getElementById('navClose');
+  if (!toggle || !menu) return;
+  const open = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+  const shut = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+  toggle.addEventListener('click', open);
+  close && close.addEventListener('click', shut);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+})();
+</script>
+
+<div class="read-progress" id="readProgress"></div>
+
+<section class="opening">
+  <div class="opening__bg" style="background:radial-gradient(90% 70% at 70% 40%,oklch(30% 0.03 250) 0%,oklch(8% 0.005 50) 70%);filter:none"></div>
+  <div class="opening__overlay"></div>
+  <div class="opening__inner">
+    <a href="Projects.html" class="back-link">← Back to Archive</a>
+    <div class="opening__eyebrow">Project · 02 · Website &amp; iOS App</div>
+    <h1 class="opening__title"><em>Sitescape</em></h1>
+    <p class="opening__concept">A social feed for personal websites. Claim your domain, post the pages you're proud of as "highlights", and let people like, save and talk about them. Every card links out to the real site — the app is the layer of attention that personal sites never had.</p>
+    <div class="opening__meta">
+      <div class="meta-item"><span class="meta-label">Year</span><span class="meta-value">2026</span></div>
+      <div class="meta-item"><span class="meta-label">Medium</span><span class="meta-value">Website + iOS App · One Prototype</span></div>
+      <div class="meta-item"><span class="meta-label">Discipline</span><span class="meta-value">Product · Interaction · UI/UX</span></div>
+      <div class="meta-item"><span class="meta-label">Seed</span><span class="meta-value">30 real personal sites</span></div>
+    </div>
+    <a class="try-cta" href="#try">Try the app <span>↓</span></a>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;position:relative;z-index:4">
+  <div class="section__inner">
+    <div class="browser browser--cover"><div class="browser__bar"><i></i><i></i><i></i><span>sitescape.app / feed</span></div><iframe src="sitescape-app/app-feed.html" title="Sitescape — website cover" loading="lazy"></iframe></div>
+    <div class="phone-cap" style="margin-top:1rem">Cover · the website, live · Mara's For You feed</div>
+  </div>
+</section>
+
+<section class="section section--quote">
+  <div class="section__inner narrow">
+    <div class="section-eyebrow">Concept</div>
+    <p class="big-quote">Everyone has a personal site. <em>Almost no one visits them.</em></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">Two Versions · Website &amp; App</div>
+    <h2 class="section-title">One product, two surfaces — a <em>website</em> for browsing, an <em>app</em> for the pocket</h2>
+    <p class="section-lede">The same prototype renders both. On the web, a left sidebar and wide two-column cards make Sitescape a place to read and discover — where you land from a shared link. On the phone, bottom tabs and a single column make it the place you check comments, post a highlight and sign a guestbook. Resize the full-screen prototype across 900px to watch it switch.</p>
+    <div class="duo">
+      <div><div class="browser"><div class="browser__bar"><i></i><i></i><i></i><span>sitescape.app / feed</span></div><iframe src="sitescape-app/app-feed.html" title="Sitescape — website" loading="lazy"></iframe></div><div class="phone-cap" style="margin-top:1rem"><strong>Website</strong>Sidebar navigation · two-column feed · wide highlight detail</div></div>
+      <div><div class="phone"><iframe src="sitescape-app/app-feed.html" title="Sitescape — app" loading="lazy"></iframe></div><div class="phone-cap"><strong>iOS App</strong>Bottom tabs · one column · same data, same account</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 01 MARKET RESEARCH ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">01 · Market Research · The Gap</div>
+    <h2 class="section-title">Portfolios are built to be seen once — <em>by a recruiter</em></h2>
+    <p class="section-lede">Thirty real personal sites were collected as seed data: PMs, engineers, designers, students. Their pages range from a Notion workspace with a custom domain to a portfolio that opens as a chat window. The pattern: enormous care, almost no audience. Traffic arrives from one link in a bio, and leaves.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num">30</div><p>Real personal sites seeded into the prototype — Webflow, Framer, Squarespace, Notion, GitHub Pages, Astro, vanilla HTML.</p><span class="stat-src">Sitescape seed set · 2026</span></div>
+      <div class="stat"><div class="stat-num">6 <em>kinds</em></div><p>Every page fits one of six sections — Blog, Project, Portfolio, Resume, About, Playground. That taxonomy became the feed's filter.</p><span class="stat-src">Card sort of the seed set</span></div>
+      <div class="stat"><div class="stat-num">1 <em>link</em></div><p>Most sites are reached from a single bio link. There is no place where personal sites are browsed the way products are on Product Hunt or shots on Dribbble.</p><span class="stat-src">Observation</span></div>
+      <div class="stat"><div class="stat-num">0</div><p>Comments, likes or guestbooks on the typical personal site. Feedback happens — but in DMs, where it disappears.</p><span class="stat-src">Observation</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">01 · Market Research · Adjacent Products</div>
+    <h2 class="section-title">Where the neighbours <em>stop</em></h2>
+    <table class="comp-table">
+      <thead><tr><th>Product</th><th>Object</th><th>Who posts</th><th>Gap</th></tr></thead>
+      <tbody>
+        <tr><td>Dribbble</td><td>A shot</td><td>Designers</td><td>Images, not pages; the site behind the shot is invisible</td></tr>
+        <tr><td>Product Hunt</td><td>A launch</td><td>Makers</td><td>One day of attention, then the archive; not for people</td></tr>
+        <tr><td>Read.cv / Bento</td><td>A profile</td><td>Everyone</td><td>Replaces your site with theirs — you don't get to keep your domain</td></tr>
+        <tr><td>Are.na / Pinterest</td><td>A saved link</td><td>Curators</td><td>Collecting others' work; no identity for the maker</td></tr>
+        <tr class="is-us"><td>Sitescape</td><td>A page on your own domain</td><td>Site owners</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="two-col" style="margin-top:4rem">
+      <p><strong style="color:var(--ivory)">Positioning.</strong> Not a website builder and not a portfolio host. Sitescape sits on top of the site you already have: you can only post pages from a domain you've verified, and every card is an outbound link.</p>
+      <p><strong style="color:var(--ivory)">What we watch.</strong> Outbound clicks per highlight, and the share of highlights that receive a comment within a week. Both are shown to the owner on a stats page — the app's value is measurable by the traffic it sends away.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 INTERACTION MODEL ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Interaction Model · The Loop</div>
+    <h2 class="section-title">Claim a domain, post a <em>highlight</em>, get visited</h2>
+    <p class="section-lede">A highlight is one page on your site with a screenshot cover, a section tag, a tech stack and a one-line note in your voice. The feed shows highlights; tapping one opens the real page. Attention flows out, comments flow back.</p>
+    <div class="loop">
+      <div class="loop-step"><div class="loop-n">01</div><h4>Claim</h4><p>Paste your URL. The app fetches title, favicon and a homepage screenshot; you pick role tags.</p><span class="scr">Onboarding</span></div>
+      <div class="loop-step"><div class="loop-n">02</div><h4>Post</h4><p>Paste a page on your domain. Choose the section, write the note, tag the stack.</p><span class="scr">New highlight</span></div>
+      <div class="loop-step"><div class="loop-n">03</div><h4>Browse</h4><p>For You / Following feed, filterable by role. Every card links out.</p><span class="scr">Feed</span></div>
+      <div class="loop-step"><div class="loop-n">04</div><h4>React</h4><p>Like, save to a collection, comment. Owners can pin a comment.</p><span class="scr">Highlight detail</span></div>
+      <div class="loop-step"><div class="loop-n">05</div><h4>Visit</h4><p>A profile shows highlights, a guestbook, and the domain itself as the header.</p><span class="scr">Profile</span></div>
+      <div class="loop-step"><div class="loop-n">06 ↺</div><h4>Measure</h4><p>Owners see views, likes and outbound clicks per highlight — and reply from one inbox.</p><span class="scr">Stats · Inbox</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Interaction Model · Three Objects</div>
+    <div class="split">
+      <div>
+        <h2 class="section-title">Site, highlight, <em>comment</em></h2>
+        <p class="section-lede">Three objects carry the product. Identity is the domain, not a username; content is a page you already made; conversation lives on the page and in the owner's guestbook.</p>
+        <div class="kv">
+          <div><span>Site</span><p>One verified domain per person. Role tags (PM, SWE, Designer, Student…) make the feed filterable without a follow graph.</p></div>
+          <div><span>Highlight</span><p>URL + section tag + note + tech stack + cover. The cover is generated from the page kind — article, gallery, app — so the feed stays typographic even before screenshots load.</p></div>
+          <div><span>Comment</span><p>Threaded, pinnable, and mirrored into one inbox for the owner. Guestbook comments live on the profile, highlight comments on the page.</p></div>
+        </div>
+      </div>
+      <div class="split__media"><div class="phone"><iframe src="sitescape-app/app-new.html" title="Sitescape — new highlight" loading="lazy"></iframe></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRY IT ═══ -->
+<section class="section section--installation" id="try">
+  <div class="section__inner">
+    <div class="try">
+      <div>
+        <div class="section-eyebrow">Try it · Clickable Prototype</div>
+        <h2 class="section-title">Sign in as Mara and <em>browse</em> thirty real sites</h2>
+        <p class="section-lede">Scroll the feed, filter by role, open a highlight, like it, save it to a collection, leave a comment. Visit a profile and sign the guestbook. Open "New highlight" to post a page. This phone runs the app version; the website version is in the browser frame above and full screen via the button.</p>
+        <a class="try-cta" href="sitescape-app/app-feed.html" target="_blank" rel="noopener">Open full screen <span>→</span></a>
+      </div>
+      <div class="phone"><iframe src="sitescape-app/app-feed.html" title="Sitescape — try the prototype" loading="lazy"></iframe></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 UI / UX ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">03 · UI / UX Design · Key Screens</div>
+    <h2 class="section-title">Feed → highlight → profile → <em>inbox</em></h2>
+    <p class="section-lede">Broadsheet design system: a serif for headings, halftone covers tinted per person, whitespace instead of dividers. Cards are deliberately quiet so the sites themselves are the colour.</p>
+    <div class="phone-row">
+      <div><div class="phone"><iframe src="sitescape-app/app-search.html" title="Sitescape — search" loading="lazy"></iframe></div><div class="phone-cap"><strong>Search</strong>People, highlights, tags and tech in one field</div></div>
+      <div><div class="phone"><iframe src="sitescape-app/app-saved.html" title="Sitescape — saved" loading="lazy"></iframe></div><div class="phone-cap"><strong>Saved</strong>Collections — "Inspiration", "Resumes to steal"</div></div>
+      <div><div class="phone"><iframe src="sitescape-app/app-inbox.html" title="Sitescape — inbox" loading="lazy"></iframe></div><div class="phone-cap"><strong>Inbox</strong>Every comment on your pages and guestbook, newest first</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">03 · UI / UX Design · Owner Tools</div>
+    <div class="split rev">
+      <div class="split__media"><div class="phone"><iframe src="sitescape-app/app-stats.html" title="Sitescape — stats" loading="lazy"></iframe></div></div>
+      <div>
+        <h2 class="section-title">The number that matters is the one that <em>leaves</em></h2>
+        <p class="section-lede">Stats show views, likes and outbound clicks per highlight. Outbound clicks come first: the app succeeds when it sends people to your site. Onboarding is two steps — paste a URL, confirm the fetched title and screenshot — because the site already exists.</p>
+        <div class="kv">
+          <div><span>Covers</span><p>Generated placeholder covers keyed to page kind (article / gallery / app) with three tints, so a feed of thirty strangers still reads as one publication.</p></div>
+          <div><span>Responsive</span><p>One prototype, two layouts: bottom tabs on the phone, a left sidebar and wider cards on desktop.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--closing">
+  <div class="section__inner narrow center">
+    <div class="section-eyebrow">Reflection</div>
+    <h2 class="closing-title">Your site stays yours.<br>Sitescape is just<br>where people find it.</h2>
+    <p class="closing-body">Thirty seeded sites, one verified domain each, every card an exit. <em>The product is measured by the traffic it gives away.</em></p>
+    <div class="closing-rule"></div>
+    <p class="closing-sig">— 2026 · Zhang Yichi</p>
+  </div>
+</section>
+
+<section class="next-project">
+  <a href="Footprints.html" class="next-link">
+    <span class="next-label">Next Project</span>
+    <h3 class="next-title"><em>Footprints</em></h3>
+    <span class="next-arrow">→</span>
+  </a>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="site-footer">
+  <div>
+    <div class="footer-brand">Zhang <em>Yichi</em></div>
+    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
+  </div>
+  <div>
+    <h4>Sitemap</h4>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Projects.html" class="active">Projects</a></li>
+      <li><a href="Photography.html">Photography</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="index.html#contact">Email</a></li>
+      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+  <div class="copyright">
+    <span>© 2026 Zhang Yichi</span>
+    <span>All works belong to Yichi</span>
+  </div>
+</footer>
+
+<script src="project-detail.js"></script>
+<script>
+
+</script>
+
+<script>
+/* Show the "=" menu exactly when the header can no longer fit its links. */
+(() => {
+  const nav = document.querySelector('.topnav');
+  if (!nav) return;
+  const links = nav.querySelector('.topnav__links');
+  const brand = nav.querySelector('.topnav__brand');
+  const toggle = nav.querySelector('.topnav__toggle');
+  if (!links || !toggle) return;
+  let need = 0;
+  function measure() {
+    nav.classList.remove('compact');
+    const lw = links.scrollWidth;
+    const bw = brand ? brand.offsetWidth : 0;
+    const cs = getComputedStyle(nav);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    if (lw > 0) need = bw + lw + pad + 48;
+  }
+  function apply() { if (!need) measure(); nav.classList.toggle('compact', window.innerWidth < need); }
+  function refresh() { measure(); apply(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', apply);
+  refresh();
+})();
+</script>
+<script>(()=>{const fitOne=el=>{const f=el.querySelector('iframe');if(!f)return;const w=el.clientWidth,hh=el.clientHeight;if(!(w>0))return;if(el.matches('.phone,.cover-phone')){f.style.transform='scale('+(w/402)+')';}else if(el.matches('.opening__bg--ui')){const s=Math.max(w/1440,hh/900);if(s>0)f.style.transform='scale('+s+')';}else{const bar=el.querySelector('.browser__bar,.cover-browser__bar');const bh=bar?bar.offsetHeight:0;const s=w/1280;if(!(s>0))return;f.style.transform='scale('+s+')';f.style.height=Math.max(0,(hh-bh)/s)+'px';}};const all=()=>document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(fitOne);const ro=new ResizeObserver(es=>es.forEach(e=>fitOne(e.target)));document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(el=>ro.observe(el));all();requestAnimationFrame(all);setTimeout(all,300);addEventListener('load',all);addEventListener('resize',all);})();</script>
+</body>
+</html>

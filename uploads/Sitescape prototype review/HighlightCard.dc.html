@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/styles.css">
+  <script src="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/_ds_bundle.js"></script>
+</helmet>
+<div style="break-inside: avoid; margin-bottom: 22px; display: flex; flex-direction: column; gap: 8px; cursor: pointer" onClick="{{ item.open }}">
+  <dc-import name="Cover" cover="{{ item.cover }}" domain="{{ item.domain }}" tint="{{ item.author.tint }}" treatment="{{ item.treatment }}" hint-size="100%,160px"></dc-import>
+  <div style="font-family: var(--font-heading); font-weight: 600; font-size: 15px; line-height: 1.25; letter-spacing: -0.01em; text-wrap: pretty">{{ item.title }}</div>
+  <div style="display: flex; align-items: center; gap: 8px"><span class="tag tag-accent">{{ item.section_tag }}</span></div>
+  <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; min-width: 0">
+    <span style="width: 20px; height: 20px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9px; font-weight: 600; background: {{ item.author.bg }}; color: var(--color-text)">{{ item.author.initials }}</span>
+    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{ item.author.name }}</span>
+    <span class="text-muted" style="white-space: nowrap; font-size: 11px">{{ item.author.role1 }}</span>
+    <button onClick="{{ item.toggleLike }}" style="margin-left: auto; display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; padding: 4px; font: inherit; font-size: 12px; cursor: pointer; color: {{ item.likeColor }}" style-hover="color: var(--color-accent-2-600)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" fill-opacity="{{ item.likeFill }}" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"></path></svg>
+      <span>{{ item.likeCount }}</span>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:180,&quot;height&quot;:300},&quot;item&quot;:{&quot;editor&quot;:null,&quot;default&quot;:null,&quot;tsType&quot;:&quot;HighlightItem&quot;}}"></script>
+</body>
+</html>

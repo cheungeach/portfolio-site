@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/styles.css">
+<script src="_ds/broadsheet-8516a637-84e5-461b-88a7-d5644fcfd477/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<style>
+body{margin:0;background:transparent}
+a{color:#0088b0}a:hover{color:#006786}
+@keyframes isl-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes isl-pulse{0%,100%{box-shadow:0 0 18px 6px var(--glow),0 0 48px 16px color-mix(in srgb,var(--glow) 45%,transparent)}50%{box-shadow:0 0 26px 10px var(--glow),0 0 70px 26px color-mix(in srgb,var(--glow) 55%,transparent)}}
+@keyframes isl-sheet{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes isl-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes isl-dot{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+@keyframes isl-dash{to{stroke-dashoffset:-40}}
+@keyframes isl-scan{0%{top:0}100%{top:calc(100% - 3px)}}
+@keyframes isl-stamp{0%{transform:scale(1.6) rotate(-14deg);opacity:0}60%{transform:scale(.96) rotate(-8deg);opacity:1}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+</style>
+</helmet>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="position:absolute;inset:0;overflow:hidden;font-family:'Source Serif 4',Georgia,serif;color:var(--ink);background:var(--sky);--bg:{{ t.bg }};--sky:{{ t.sky }};--paper:{{ t.paper }};--ink:{{ t.ink }};--muted:{{ t.muted }};--accent:{{ t.accent }};--accent2:{{ t.accent2 }};--shadow:{{ t.shadow }};--border:{{ t.border }};--glow:{{ t.glow }};--tex:{{ t.tex }};--sheet:{{ t.sheet }};--tint:{{ t.tint }};--blob:{{ t.blob }}">
+
+<!-- ═══ AUTH ═══ -->
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;padding:120px 32px 48px;box-sizing:border-box">
+  <div style="position:relative;height:230px;display:flex;align-items:flex-end;justify-content:center">
+    <x-import component-from-global-scope="zj-walker" from="./zj-walker.js" ink="#201e1d" speed=".85" style="width:100%;height:210px" hint-size="100%,210px"></x-import>
+    <div style="position:absolute;right:26px;top:6px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:isl-pulse 3s ease-in-out infinite, isl-float 4s ease-in-out infinite"></div>
+  </div>
+  <h1 style="margin:22px 0 8px;font-size:52px;line-height:1;font-weight:400;font-style:italic;letter-spacing:-.02em">Footprints</h1>
+  <p style="margin:0 0 auto;font-size:18px;line-height:1.4;color:var(--muted);text-wrap:pretty">A map of the small things people did here. Make a list, walk it, nap on it, leave a trace.</p>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <sc-if value="{{ isSignUp }}" hint-placeholder-val="{{ false }}">
+      <input placeholder="Your name" style="height:52px;padding:0 18px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:17px;color:var(--ink);outline:none" />
+    </sc-if>
+    <input placeholder="Email" style="height:52px;padding:0 18px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:17px;color:var(--ink);outline:none" />
+    <input placeholder="Password" type="password" style="height:52px;padding:0 18px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:17px;color:var(--ink);outline:none" />
+    <button onClick="{{ signIn }}" style="height:54px;margin-top:8px;border:2px solid var(--ink);border-radius:14px;background:var(--ink);color:var(--paper);font:inherit;font-size:18px;cursor:pointer" style-hover="background:var(--accent);border-color:var(--accent)">{{ authCta }}</button>
+    <button onClick="{{ toggleAuth }}" style="height:44px;border:none;background:none;font:inherit;font-size:16px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px">{{ authAlt }}</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ MAP ═══ -->
+<sc-if value="{{ isMap }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0">
+  <iframe ref="{{ mapRef }}" src="./isles-map.html" title="Berkeley map" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--sky)"></iframe>
+  <div style="position:absolute;left:0;right:0;top:0;height:150px;background:linear-gradient(180deg,var(--sky) 0%,transparent 100%);opacity:.85;pointer-events:none"></div>
+  <div style="position:absolute;top:62px;left:20px;right:20px;display:flex;gap:10px;align-items:center">
+    <div style="flex:1;height:46px;border-radius:14px;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(10px);display:flex;align-items:center;gap:10px;padding:0 16px;box-sizing:border-box;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-size:16px;color:var(--muted)"><i class="ph-bold ph-magnifying-glass" style="font-size:20px;color:var(--ink)"></i>Search Berkeley</div>
+    <div onClick="{{ goMe }}" style="width:46px;height:46px;box-sizing:border-box;border-radius:50%;background:var(--paper);color:var(--ink);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:18px;font-style:italic;cursor:pointer;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink)">M</div>
+  </div>
+  <div style="position:absolute;top:120px;left:20px;font-size:13px;color:var(--muted);font-style:italic">Berkeley, CA · {{ totalStories }} stories · {{ placeCount }} places</div>
+  <div style="position:absolute;left:20px;right:20px;bottom:112px;display:flex;flex-direction:column-reverse;gap:12px;pointer-events:none">
+  <sc-if value="{{ hasToday }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ goPostcard }}" style="align-self:flex-start;pointer-events:auto;display:flex;align-items:center;gap:10px;padding:8px 12px 8px 8px;border-radius:14px;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(10px);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;animation:isl-fade .5s ease-out" style-hover="border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)">
+    <div style="display:flex">
+      <sc-for list="{{ todayDots }}" as="d" hint-placeholder-count="2"><div style="width:22px;height:22px;border-radius:50%;background:{{ d.color }};border:2px solid var(--paper);margin-left:{{ d.ml }}px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-style:italic">{{ d.n }}</div></sc-for>
+    </div>
+    <div style="font-size:14px;line-height:1.2"><div>{{ todayCount }} today</div><div style="font-size:12px;color:var(--accent)">Make postcard →</div></div>
+  </div>
+  </sc-if>
+  <sc-if value="{{ showSpriteTip }}" hint-placeholder-val="{{ true }}">
+  <div onClick="{{ goGuide }}" style="align-self:flex-end;pointer-events:auto;display:flex;align-items:center;gap:12px;cursor:pointer;animation:isl-fade .5s ease-out">
+    <div style="max-width:220px;padding:10px 14px;border-radius:14px 14px 2px 14px;background:var(--paper);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink);font-size:14px;line-height:1.35;color:var(--ink);text-wrap:pretty">{{ spriteTip }}</div>
+    <div style="width:26px;height:26px;flex:none;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:isl-pulse 3s ease-in-out infinite, isl-float 4s ease-in-out infinite"></div>
+  </div>
+  </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ PLACE SHEET ═══ -->
+<sc-if value="{{ hasPlace }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closePlace }}" style="position:absolute;inset:0;background:rgba(32,30,29,.18)"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:66%;background:var(--sheet);border-radius:24px 24px 0 0;border:2px solid var(--ink);border-bottom:none;box-shadow:0 -6px 0 rgba(32,30,29,.05);display:flex;flex-direction:column;animation:isl-sheet .35s ease-out">
+  <div style="width:44px;height:4px;border-radius:14px;background:var(--muted);opacity:.5;margin:10px auto 0"></div>
+  <div style="padding:16px 24px 8px">
+    <div style="font-size:13px;color:var(--muted);font-style:italic">{{ place.kind }}</div>
+    <h2 style="margin:4px 0 6px;font-size:28px;line-height:1.1;font-weight:600">{{ place.name }}</h2>
+    <div style="font-size:15px;color:var(--muted)">{{ place.count }} stories · {{ place.people }} people · {{ place.groups }} lists</div>
+  </div>
+  <div style="flex:1;overflow:auto;padding:8px 24px 100px">
+    <sc-for list="{{ placeStories }}" as="s" hint-placeholder-count="3">
+      <div onClick="{{ s.openPerson }}" style="display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;cursor:pointer;animation:isl-fade .4s ease-out both;animation-delay:{{ s.delay }}s">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--paper);color:var(--ink);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:17px;font-style:italic">{{ s.initial }}</div>
+        <div>
+          <div style="display:flex;justify-content:space-between;gap:8px;font-size:15px"><span style="font-weight:600">{{ s.person }}</span><span style="color:var(--muted)">{{ s.when }}</span></div>
+          <div style="font-size:13px;color:var(--accent);margin:2px 0 6px;font-style:italic">{{ s.group }}</div>
+          <div style="font-size:16px;line-height:1.4;text-wrap:pretty">{{ s.text }}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="position:absolute;left:24px;right:24px;bottom:24px;display:flex;gap:10px">
+    <button onClick="{{ goGuide }}" style="width:54px;height:54px;flex:none;border:2px solid var(--ink);border-radius:14px;background:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center"><div style="width:16px;height:16px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:isl-pulse 3s ease-in-out infinite"></div></button>
+    <button onClick="{{ checkInHere }}" style="flex:1;height:54px;border:none;border-radius:14px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--accent);font:inherit;font-size:17px;cursor:pointer" style-hover="background:var(--accent);border-color:var(--accent);box-shadow:3px 3px 0 var(--ink)">{{ checkInLabel }}</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ GROUPS ═══ -->
+<sc-if value="{{ isGroups }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:70px 24px 120px;box-sizing:border-box;background:var(--bg)">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end">
+    <h1 style="margin:0;font-size:36px;line-height:1;font-weight:600">Lists</h1>
+    <button onClick="{{ goCreate }}" style="height:40px;padding:0 16px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);font:inherit;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap" style-hover="background:var(--tint)"><i class="ph-bold ph-plus"></i>New list</button>
+  </div>
+  <div style="margin:28px 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Yours</div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <sc-for list="{{ myGroups }}" as="g" hint-placeholder-count="2">
+      <div onClick="{{ g.open }}" style="padding:18px 20px;border-radius:18px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;display:grid;grid-template-columns:1fr 64px;gap:14px;align-items:center" style-hover="border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)">
+        <div>
+          <div style="font-size:20px;line-height:1.2;font-weight:600;text-wrap:pretty">{{ g.title }}</div>
+          <div style="font-size:14px;color:var(--muted);margin:6px 0 10px">{{ g.doneCount }} of {{ g.total }} · {{ g.placesCount }} places <span style="color:var(--ink)">★ {{ g.rating }}</span> <span style="font-style:italic">{{ g.byline }}</span></div>
+          <div style="height:6px;border:2px solid var(--ink);box-sizing:content-box;background:var(--tint);border-radius:14px"><div style="height:100%;width:{{ g.pct }}%;background:var(--accent);border-radius:14px;transition:width .4s"></div></div>
+        </div>
+        <div style="width:58px;height:58px;border-radius:50%;border:2px solid var(--ink);box-sizing:border-box;background:conic-gradient(var(--accent) {{ g.pct }}%, var(--paper) 0);display:flex;align-items:center;justify-content:center"><div style="width:40px;height:40px;border-radius:50%;background:var(--paper);border:2px solid var(--ink);box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:14px;font-style:italic;color:var(--ink)">{{ g.pct }}</div></div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="margin:32px 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Around Berkeley</div>
+  <div style="display:flex;flex-direction:column;gap:2px">
+    <sc-for list="{{ otherGroups }}" as="g" hint-placeholder-count="3">
+      <div onClick="{{ g.open }}" style="display:grid;grid-template-columns:36px 1fr auto;gap:14px;align-items:center;padding:14px 0;cursor:pointer">
+        <div onClick="{{ g.openAuthor }}" style="width:36px;height:36px;border-radius:50%;background:var(--paper);color:var(--ink);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:16px">{{ g.initial }}</div>
+        <div><div style="font-size:17px;line-height:1.25;font-weight:600">{{ g.title }}</div><div style="font-size:14px;color:var(--muted)">by {{ g.author }} · {{ g.total }} things · <span style="color:var(--ink)">★ {{ g.rating }}</span> ({{ g.ratingCount }})</div></div>
+        <button onClick="{{ g.toggleSave }}" style="width:36px;height:36px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px" style-hover="background:var(--tint)"><i class="{{ g.saveIcon }}"></i></button>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ GROUP DETAIL ═══ -->
+<sc-if value="{{ isGroup }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:62px 24px 120px;box-sizing:border-box;background:var(--bg)">
+  <button onClick="{{ back }}" style="height:40px;padding:0 4px;border:none;background:none;font:inherit;font-size:16px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:-4px"><i class="ph-bold ph-arrow-left" style="font-size:20px"></i>Back</button>
+  <div onClick="{{ group.openAuthor }}" style="display:flex;align-items:center;gap:10px;margin-top:14px;cursor:pointer"><div style="width:28px;height:28px;border-radius:50%;background:var(--paper);color:var(--ink);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:13px">{{ group.initial }}</div><span style="font-size:15px;color:var(--muted)">{{ group.author }}</span></div>
+  <h1 style="margin:12px 0 10px;font-size:34px;line-height:1.05;font-weight:600;text-wrap:pretty">{{ group.title }}</h1>
+  <p style="margin:0 0 18px;font-size:16px;line-height:1.45;color:var(--muted);font-style:italic;text-wrap:pretty">{{ group.desc }}</p>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px"><span style="font-size:18px;letter-spacing:2px;color:var(--ink);line-height:1"><sc-for list="{{ group.starsRow }}" as="k" hint-placeholder-count="5">{{ k.ch }}</sc-for></span><span style="font-size:16px;font-weight:600">{{ group.rating }}</span><span style="font-size:14px;color:var(--muted)">{{ group.ratingCount }} ratings</span></div>
+  <sc-if value="{{ group.showSave }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ group.toggleSave }}" style="height:50px;width:100%;margin-bottom:22px;border:{{ group.saveBorder }};border-radius:14px;background:{{ group.saveBg }};color:{{ group.saveFg }};font:inherit;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s"><i class="{{ group.saveIcon }}" style="font-size:20px"></i>{{ group.saveLabel }}</button>
+  </sc-if>
+  <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:44px;line-height:1;font-style:italic">{{ group.doneCount }}</span><span style="font-size:16px;color:var(--muted);white-space:nowrap">of {{ group.total }} done</span></div>
+  <div style="height:6px;border:2px solid var(--ink);box-sizing:content-box;margin:12px 0 28px;background:var(--tint);border-radius:14px"><div style="height:100%;width:{{ group.pct }}%;background:var(--accent);border-radius:14px;transition:width .4s"></div></div>
+  <div style="display:flex;flex-direction:column">
+    <sc-for list="{{ groupItems }}" as="it" hint-placeholder-count="6">
+      <div style="display:grid;grid-template-columns:28px 1fr;gap:14px;padding:12px 0;align-items:start">
+        <div onClick="{{ it.toggle }}" style="width:26px;height:26px;margin-top:2px;border-radius:50%;border:2px solid {{ it.ringColor }};background:{{ it.fill }};display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s"><sc-if value="{{ it.done }}" hint-placeholder-val="{{ false }}"><i class="ph-bold ph-check" style="color:#fff;font-size:15px"></i></sc-if></div>
+        <div>
+          <div style="font-size:17px;line-height:1.35;text-wrap:pretty;text-decoration:{{ it.deco }};color:{{ it.textColor }}"><span style="color:var(--muted);font-style:italic;margin-right:8px">{{ it.n }}</span>{{ it.text }}</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap">
+            <div onClick="{{ it.openPlace }}" style="display:inline-flex;align-items:center;gap:5px;font-size:14px;color:var(--accent);cursor:pointer"><i class="ph-bold ph-map-pin"></i>{{ it.place }}</div>
+            <sc-if value="{{ it.hasAvg }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--muted)"><span style="color:var(--ink)">★</span> {{ it.avg }}</span></sc-if>
+            <sc-if value="{{ it.done }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;gap:2px;font-size:16px;line-height:1;cursor:pointer"><sc-for list="{{ it.myStars }}" as="k" hint-placeholder-count="5"><span onClick="{{ k.rate }}" style="color:{{ k.color }};padding:2px 1px">{{ k.ch }}</span></sc-for></span></sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+    <sc-if value="{{ group.hasMore }}" hint-placeholder-val="{{ false }}"><div style="padding:16px 0;font-size:15px;color:var(--muted);font-style:italic">…and {{ group.more }} more</div></sc-if>
+  </div>
+  <div style="margin:36px 0 14px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">What people said</div>
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <sc-for list="{{ group.reviews }}" as="r" hint-placeholder-count="2">
+      <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:start">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--paper);color:var(--ink);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:14px">{{ r.initial }}</div>
+        <div><div style="display:flex;gap:10px;align-items:baseline;font-size:14px"><span style="font-weight:600">{{ r.who }}</span><span style="color:var(--ink);letter-spacing:1px;font-size:13px">{{ r.stars }}</span></div><div style="font-size:16px;line-height:1.4;margin-top:2px;text-wrap:pretty">{{ r.text }}</div></div>
+      </div>
+    </sc-for>
+  </div>
+  <input value="{{ reviewDraft }}" onChange="{{ setReviewDraft }}" placeholder="Leave a note for the next person…" style="width:100%;height:48px;margin-top:20px;padding:0 14px;box-sizing:border-box;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:16px;color:var(--ink);outline:none" />
+</div>
+</sc-if>
+
+<!-- ═══ PROFILE ═══ -->
+<sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:62px 24px 120px;box-sizing:border-box;background:var(--bg)">
+  <sc-if value="{{ canBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ back }}" style="height:40px;padding:0 4px;border:none;background:none;font:inherit;font-size:16px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:-4px"><i class="ph-bold ph-arrow-left" style="font-size:20px"></i>Back</button></sc-if>
+  <sc-if value="{{ isSelf }}" hint-placeholder-val="{{ true }}"><div style="display:flex;justify-content:flex-end"><button onClick="{{ goSettings }}" style="width:40px;height:40px;border:none;background:none;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:-8px"><i class="ph-bold ph-gear" style="font-size:22px"></i></button></div></sc-if>
+  <sc-if value="{{ isVisitorPreview }}" hint-placeholder-val="{{ false }}"><div style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:14px;background:var(--tint);font-size:13px;color:var(--muted);margin-top:8px"><i class="ph-bold ph-eye"></i>Previewing as a visitor</div></sc-if>
+  <div style="display:flex;align-items:center;gap:18px;margin-top:14px">
+    <div style="position:relative;width:76px;height:76px;flex:none"><div style="width:76px;height:76px;border-radius:50%;background:var(--paper);border:2.5px solid var(--ink);box-sizing:border-box;box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;font-size:32px;font-style:italic;color:var(--ink)">{{ person.initial }}</div><div style="position:absolute;right:-2px;top:-2px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:isl-pulse 3s ease-in-out infinite"></div></div>
+    <div><h1 style="margin:0;font-size:30px;line-height:1.05;font-weight:600">{{ person.name }}</h1><div style="font-size:15px;color:var(--muted);margin-top:4px">{{ person.tag }}</div></div>
+  </div>
+  <p style="margin:18px 0 22px;font-size:17px;line-height:1.45;font-style:italic;text-wrap:pretty">{{ person.bio }}</p>
+  <sc-if value="{{ show.stats }}" hint-placeholder-val="{{ true }}">
+  <div style="display:flex;gap:26px;flex-wrap:wrap">
+    <div><div style="font-size:30px;line-height:1;font-style:italic">{{ person.cityCount }}</div><div style="font-size:13px;color:var(--muted);margin-top:4px">cities</div></div>
+    <div><div style="font-size:30px;line-height:1;font-style:italic">{{ person.storyCount }}</div><div style="font-size:13px;color:var(--muted);margin-top:4px">stories</div></div>
+    <div><div style="font-size:30px;line-height:1;font-style:italic">{{ person.madeCount }}</div><div style="font-size:13px;color:var(--muted);margin-top:4px">made</div></div>
+    <sc-if value="{{ show.saved }}" hint-placeholder-val="{{ true }}"><div><div style="font-size:30px;line-height:1;font-style:italic">{{ person.savedCount }}</div><div style="font-size:13px;color:var(--muted);margin-top:4px">saved</div></div></sc-if>
+  </div>
+  </sc-if>
+  <sc-if value="{{ show.cities }}" hint-placeholder-val="{{ true }}">
+  <div style="margin:36px 0 0;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Cities · {{ person.cityCount }}</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px;padding:8px 0 0">
+    <sc-for list="{{ personCities }}" as="c" hint-placeholder-count="4">
+      <div onClick="{{ c.open }}" style="position:relative;cursor:pointer;animation:isl-fade .5s ease-out both;animation-delay:{{ c.delay }}s" style-hover="transform:translateY(-3px)">
+        <svg viewBox="0 0 200 190" style="width:100%;display:block;overflow:visible">
+          <defs>
+            <clipPath id="{{ c.clipId }}"><polygon points="100,44 190,96 100,148 10,96"></polygon></clipPath>
+            <pattern id="{{ c.dotId }}" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".7" fill="var(--ink)" fill-opacity=".35"></circle></pattern>
+          </defs>
+          <ellipse cx="100" cy="150" rx="92" ry="22" fill="var(--ink)" opacity=".12"></ellipse>
+          <polygon points="10,96 100,148 100,166 10,114" fill="var(--ink)"></polygon>
+          <polygon points="100,148 190,96 190,114 100,166" fill="var(--ink)" opacity=".72"></polygon>
+          <g clip-path="url(#{{ c.clipId }})" style="filter:grayscale(1) sepia(.35) contrast(1.25) brightness(1.1)">
+            <g transform="matrix(0.703 0.406 -0.703 0.406 100 44)"><image href="{{ c.tile }}" x="0" y="0" width="128" height="128" preserveAspectRatio="none"></image></g>
+          </g>
+          <polygon points="100,44 190,96 100,148 10,96" fill="url(#{{ c.dotId }})" style="mix-blend-mode:multiply"></polygon>
+          <polygon points="100,44 190,96 100,148 10,96" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"></polygon>
+          <sc-for list="{{ c.faces }}" as="f" hint-placeholder-count="6"><polygon points="{{ f.pts }}" fill="{{ f.fill }}" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"></polygon></sc-for>
+          <sc-for list="{{ c.lines }}" as="l" hint-placeholder-count="0"><line x1="{{ l.x1 }}" y1="{{ l.y1 }}" x2="{{ l.x2 }}" y2="{{ l.y2 }}" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"></line></sc-for>
+          <sc-for list="{{ c.blobs }}" as="b" hint-placeholder-count="0"><circle cx="{{ b.cx }}" cy="{{ b.cy }}" r="{{ b.r }}" fill="var(--paper)" stroke="var(--ink)" stroke-width="2"></circle></sc-for>
+        </svg>
+        <div style="text-align:center;margin-top:-6px"><div style="font-size:14px;font-weight:600;line-height:1.2">{{ c.name }}</div><div style="font-size:12px;color:var(--muted);font-style:italic">{{ c.sub }}</div></div>
+      </div>
+    </sc-for>
+  </div>
+  <div style="font-size:10px;color:var(--muted);text-align:right;margin-top:6px">Tiles © Esri · © OpenStreetMap contributors</div>
+  </sc-if>
+  <sc-if value="{{ show.stories }}" hint-placeholder-val="{{ true }}">
+  <div style="margin:32px 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Stories · {{ person.storyCount }}</div>
+  <div style="position:relative;height:300px;border-radius:18px;overflow:hidden;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink)">
+    <iframe ref="{{ traceMapRef }}" src="./isles-map.html" title="Stories map" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--sky)"></iframe>
+  </div>
+  <p style="margin:10px 0 0;font-size:14px;color:var(--muted);font-style:italic">Tap a landmark to read what {{ person.first }} left there.</p>
+  </sc-if>
+  <sc-if value="{{ show.made }}" hint-placeholder-val="{{ true }}">
+  <div style="margin:32px 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Made · {{ person.madeCount }}</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <sc-for list="{{ personMade }}" as="g" hint-placeholder-count="2">
+      <div onClick="{{ g.open }}" style="padding:16px 18px;border-radius:18px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer" style-hover="border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)">
+        <div style="font-size:18px;line-height:1.2;font-weight:600">{{ g.title }}</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px">{{ g.doneCount }} of {{ g.total }} · {{ g.placesCount }} places · <span style="color:var(--ink)">★ {{ g.rating }}</span></div>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+  <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+  <div style="margin:32px 0 12px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Saved · {{ person.savedCount }}</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <sc-for list="{{ personSaved }}" as="g" hint-placeholder-count="1">
+      <div onClick="{{ g.open }}" style="padding:16px 18px;border-radius:18px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer;display:grid;grid-template-columns:1fr 36px;gap:12px;align-items:center" style-hover="border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)">
+        <div><div style="font-size:18px;line-height:1.2;font-weight:600">{{ g.title }}</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:4px">by {{ g.author }} · {{ g.doneCount }} of {{ g.total }} · <span style="color:var(--ink)">★ {{ g.rating }}</span></div></div>
+        <div onClick="{{ g.openAuthor }}" style="width:36px;height:36px;border-radius:50%;background:var(--paper);color:var(--ink);border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-style:italic;font-size:15px">{{ g.initial }}</div>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ═══ GUIDE ═══ -->
+<sc-if value="{{ isGuide }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--sky)">
+  <div style="padding:62px 24px 0;display:flex;align-items:center;gap:14px">
+    <button onClick="{{ back }}" style="width:40px;height:40px;border:none;background:none;font:inherit;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:-8px"><i class="ph-bold ph-arrow-left" style="font-size:22px"></i></button>
+    <div style="width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:isl-pulse 3s ease-in-out infinite, isl-float 4s ease-in-out infinite"></div>
+    <div><div style="font-size:20px;font-weight:600;line-height:1">Guide</div><div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:3px">knows what happened here</div></div>
+  </div>
+  <div style="flex:1;overflow:auto;padding:20px 24px 12px;display:flex;flex-direction:column;gap:14px">
+    <sc-for list="{{ msgs }}" as="m" hint-placeholder-count="1">
+      <div style="display:flex;justify-content:{{ m.justify }};animation:isl-fade .35s ease-out">
+        <div style="max-width:84%;padding:12px 16px;border-radius:{{ m.radius }};background:{{ m.bg }};color:{{ m.fg }};font-size:16px;line-height:1.45;text-wrap:pretty;box-shadow:{{ m.shadow }}">{{ m.text }}</div>
+      </div>
+    </sc-for>
+    <sc-if value="{{ typing }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;gap:5px;padding:14px 16px;width:fit-content;border-radius:16px 16px 16px 2px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink)">
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--glow);animation:isl-dot 1.2s infinite"></div>
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--glow);animation:isl-dot 1.2s infinite;animation-delay:.2s"></div>
+        <div style="width:7px;height:7px;border-radius:50%;background:var(--glow);animation:isl-dot 1.2s infinite;animation-delay:.4s"></div>
+      </div>
+    </sc-if>
+  </div>
+  <div style="padding:0 24px 8px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none">
+    <sc-for list="{{ chips }}" as="c" hint-placeholder-count="3">
+      <button onClick="{{ c.ask }}" style="flex:none;height:38px;padding:0 14px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);font:inherit;font-size:14px;color:var(--ink);cursor:pointer" style-hover="background:var(--tint)">{{ c.label }}</button>
+    </sc-for>
+  </div>
+  <div style="padding:8px 24px 40px;display:flex;gap:10px">
+    <input value="{{ draft }}" onChange="{{ setDraft }}" onKeyDown="{{ onKey }}" placeholder="Ask the Guide about this place…" style="flex:1;height:50px;padding:0 16px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:16px;color:var(--ink);outline:none" />
+    <button onClick="{{ send }}" style="width:50px;height:50px;border:none;border-radius:14px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center" style-hover="background:var(--accent);border-color:var(--accent);box-shadow:3px 3px 0 var(--ink)"><i class="ph-bold ph-paper-plane-tilt" style="font-size:20px"></i></button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ CREATE ═══ -->
+<sc-if value="{{ isCreate }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:62px 24px 60px;box-sizing:border-box;background:var(--bg)">
+  <button onClick="{{ back }}" style="height:40px;padding:0 4px;border:none;background:none;font:inherit;font-size:16px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:-4px"><i class="ph-bold ph-arrow-left" style="font-size:20px"></i>Back</button>
+  <h1 style="margin:14px 0 6px;font-size:34px;line-height:1.05;font-weight:600">New list</h1>
+  <p style="margin:0 0 24px;font-size:16px;color:var(--muted);font-style:italic">Things worth doing, pinned to isles.</p>
+  <label style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Title</label>
+  <input value="{{ ng.name }}" onChange="{{ setNgName }}" placeholder="e.g. Every bakery on Shattuck" style="width:100%;height:52px;padding:0 16px;box-sizing:border-box;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:18px;color:var(--ink);outline:none" />
+  <label style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px">One line about it</label>
+  <input value="{{ ng.desc }}" onChange="{{ setNgDesc }}" placeholder="Why this list exists" style="width:100%;height:52px;padding:0 16px;box-sizing:border-box;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:16px;color:var(--ink);outline:none" />
+  <label style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px">Isle color</label>
+  <div style="display:flex;gap:12px">
+    <sc-for list="{{ colors }}" as="c" hint-placeholder-count="4">
+      <div onClick="{{ c.pick }}" style="width:40px;height:34px;border-radius:var(--blob);background:{{ c.hex }};cursor:pointer;outline:2px solid {{ c.ring }};outline-offset:3px;transition:outline-color .2s"></div>
+    </sc-for>
+  </div>
+  <label style="display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:24px 0 8px">Things ({{ ngCount }})</label>
+  <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:8px">
+    <sc-for list="{{ ngItems }}" as="it" hint-placeholder-count="0">
+      <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:10px 0;animation:isl-fade .3s ease-out">
+        <div><div style="font-size:17px;line-height:1.3"><span style="color:var(--muted);font-style:italic;margin-right:8px">{{ it.n }}</span>{{ it.text }}</div><div style="font-size:14px;color:var(--accent);margin-top:2px"><i class="ph-bold ph-map-pin"></i> {{ it.place }}</div></div>
+        <button onClick="{{ it.remove }}" style="width:32px;height:32px;border:none;background:none;color:var(--muted);cursor:pointer;font-size:18px"><i class="ph-bold ph-x"></i></button>
+      </div>
+    </sc-for>
+  </div>
+  <div style="display:flex;gap:8px">
+    <input value="{{ ngItem }}" onChange="{{ setNgItem }}" onKeyDown="{{ onNgKey }}" placeholder="Add a thing to do…" style="flex:1;height:48px;padding:0 14px;box-sizing:border-box;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:16px;color:var(--ink);outline:none" />
+    <select value="{{ ngPlace }}" onChange="{{ setNgPlace }}" style="height:48px;padding:0 10px;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:14px;color:var(--ink);max-width:130px">
+      <sc-for list="{{ placeOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.name }}</option></sc-for>
+    </select>
+    <button onClick="{{ addNgItem }}" style="width:48px;height:48px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);cursor:pointer;font-size:20px;color:var(--ink);display:flex;align-items:center;justify-content:center" style-hover="background:var(--tint)"><i class="ph-bold ph-plus"></i></button>
+  </div>
+  <button onClick="{{ createGroup }}" style="width:100%;height:54px;margin-top:32px;border:none;border-radius:14px;background:{{ createBg }};color:#fff;font:inherit;font-size:18px;cursor:pointer;transition:background .2s">Make the list</button>
+</div>
+</sc-if>
+
+<!-- ═══ CHECK-IN ═══ -->
+<sc-if value="{{ isCheckin }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:62px 24px 48px;box-sizing:border-box;background:var(--bg)">
+  <button onClick="{{ back }}" style="height:40px;padding:0 4px;border:none;background:none;font:inherit;font-size:16px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:-4px"><i class="ph-bold ph-arrow-left" style="font-size:20px"></i>Back</button>
+  <div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:14px">Check in · {{ nowLabel }}</div>
+  <h1 style="margin:4px 0 20px;font-size:32px;line-height:1.05;font-weight:600">{{ place.name }}</h1>
+  <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:var(--tint);border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)">
+    <image-slot id="ci-{{ place.id }}" shape="rect" placeholder="Your photo of {{ place.name }}" style="width:100%;height:100%"></image-slot>
+    <sc-if value="{{ ci.scanning }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:color-mix(in srgb,var(--glow) 12%,transparent);pointer-events:none"></div>
+      <div style="position:absolute;left:0;right:0;height:6px;border:2px solid var(--ink);box-sizing:content-box;background:var(--glow);box-shadow:0 0 18px 4px var(--glow);animation:isl-scan 1.3s ease-in-out infinite alternate;pointer-events:none"></div>
+      <div style="position:absolute;left:0;right:0;bottom:18px;display:flex;justify-content:center;gap:8px;align-items:center;pointer-events:none"><div style="width:14px;height:14px;border-radius:50%;background:radial-gradient(circle,#fff 0%,var(--glow) 60%,transparent 100%);animation:isl-pulse 1.2s ease-in-out infinite"></div><span style="font-size:14px;font-style:italic;color:var(--ink);background:var(--paper);padding:4px 10px;border-radius:14px">The Guide is looking…</span></div>
+    </sc-if>
+    <sc-if value="{{ ci.recognized }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;right:14px;top:14px;width:78px;height:78px;border-radius:50%;border:2px solid var(--accent2);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;letter-spacing:.08em;text-transform:uppercase;line-height:1.2;text-align:center;animation:isl-stamp .5s ease-out both;background:color-mix(in srgb,var(--paper) 70%,transparent)">Seen<br/>{{ nowLabel }}</div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ ci.idle }}" hint-placeholder-val="{{ true }}">
+    <button onClick="{{ takePhoto }}" style="width:100%;height:54px;margin-top:16px;border:none;border-radius:14px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--accent);font:inherit;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px" style-hover="background:var(--accent);border-color:var(--accent);box-shadow:3px 3px 0 var(--ink)"><i class="ph-bold ph-camera" style="font-size:22px"></i>Take a photo</button>
+    <p style="margin:12px 0 0;font-size:14px;color:var(--muted);font-style:italic;text-align:center">The Guide will recognise what’s in it and match it to your list.</p>
+  </sc-if>
+  <sc-if value="{{ ci.recognized }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:20px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">The Guide sees</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+      <sc-for list="{{ ciTags }}" as="tg" hint-placeholder-count="4">
+        <span style="padding:6px 12px;border-radius:14px;background:var(--tint);color:var(--ink);font-size:14px;animation:isl-fade .4s ease-out both;animation-delay:{{ tg.delay }}s">{{ tg.label }}</span>
+      </sc-for>
+    </div>
+    <sc-if value="{{ ci.hasMatch }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid;grid-template-columns:26px 1fr;gap:12px;align-items:start;margin-top:20px;padding:14px 16px;border-radius:18px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);animation:isl-fade .4s ease-out both;animation-delay:.5s">
+        <div style="width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center"><i class="ph-bold ph-check" style="color:#fff;font-size:15px"></i></div>
+        <div><div style="font-size:13px;color:var(--accent);font-style:italic">Matches {{ ci.matchN }} on your list</div><div style="font-size:16px;line-height:1.35;margin-top:2px;text-wrap:pretty">{{ ci.matchText }}</div></div>
+      </div>
+    </sc-if>
+    <textarea value="{{ ci.note }}" onChange="{{ setCiNote }}" placeholder="What happened here? One or two lines." style="width:100%;min-height:84px;margin-top:20px;padding:14px 16px;box-sizing:border-box;border-radius:14px;border:2px solid var(--ink);background:var(--paper);font:inherit;font-size:16px;line-height:1.4;color:var(--ink);outline:none;resize:none"></textarea>
+    <button onClick="{{ leaveTrace }}" style="width:100%;height:54px;margin-top:16px;border:none;border-radius:14px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--accent);font:inherit;font-size:17px;cursor:pointer" style-hover="background:var(--accent);border-color:var(--accent);box-shadow:3px 3px 0 var(--ink)">Leave a trace</button>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ═══ POSTCARD ═══ -->
+<sc-if value="{{ isPostcard }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:62px 24px 48px;box-sizing:border-box;background:var(--bg)">
+  <button onClick="{{ back }}" style="height:40px;padding:0 4px;border:none;background:none;font:inherit;font-size:16px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:-4px"><i class="ph-bold ph-arrow-left" style="font-size:20px"></i>Back</button>
+  <div style="font-size:13px;color:var(--muted);font-style:italic;margin-top:14px">The Guide made this from your day</div>
+  <h1 style="margin:4px 0 18px;font-size:32px;line-height:1.05;font-weight:600">Your postcard</h1>
+  <div ref="{{ cardRef }}" data-om-raster="true" style="position:relative;width:100%;aspect-ratio:3/4;background:var(--paper);border-radius:14px;box-shadow:0 12px 32px rgba(45,43,43,.22);overflow:hidden;font-family:'Source Serif 4',Georgia,serif;color:var(--ink)">
+    <div style="position:absolute;inset:0;background-image:radial-gradient(circle,rgba(32,30,29,.16) 30%,transparent 32%);background-size:3px 3px;opacity:var(--tex);pointer-events:none"></div>
+    <div style="position:absolute;inset:0;background:var(--sky);opacity:.45"></div>
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <path d="{{ postcardPath }}" fill="none" stroke="var(--accent)" stroke-width=".6" stroke-dasharray="1.4 1.8" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+    </svg>
+    <sc-for list="{{ postcardIsles }}" as="p" hint-placeholder-count="7">
+      <div style="position:absolute;left:{{ p.x }}%;top:{{ p.y }}%;width:{{ p.w }}px;transform:translate(-50%,-50%);opacity:{{ p.opacity }}">
+        <div style="position:absolute;left:-3px;right:-3px;top:8px;bottom:-8px;border-radius:var(--blob);background:var(--shadow);filter:blur(1.5px)"></div>
+        <div style="position:relative;width:100%;aspect-ratio:1.28;border-radius:var(--blob);background:var(--paper);border:var(--border)"></div>
+        <div style="margin-top:4px;text-align:center;font-size:9px;line-height:1.1;white-space:nowrap;color:var(--muted);font-style:italic">{{ p.name }}</div>
+      </div>
+    </sc-for>
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <path d="{{ leaderPath }}" fill="none" stroke="var(--accent2)" stroke-width=".9" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".7"></path>
+    </svg>
+    <sc-for list="{{ postcardStamps }}" as="s" hint-placeholder-count="3">
+      <div style="position:absolute;left:{{ s.sx }}%;top:{{ s.sy }}%;width:56px;transform:translate(-50%,-50%) rotate({{ s.rot }}deg);background:#fff;padding:3px 3px 5px;box-shadow:0 2px 6px rgba(45,43,43,.25)">
+        <div style="width:100%;aspect-ratio:1;background:var(--tint);outline:1.5px dashed var(--ink);outline-offset:-3px;display:flex;align-items:center;justify-content:center;font:9px ui-monospace,monospace;color:var(--muted);text-align:center;line-height:1.2">{{ s.stampLabel }}</div>
+        <div style="font-size:8px;line-height:1.15;margin-top:3px;text-align:center;color:var(--ink)">{{ s.when }} · {{ s.n }}</div>
+      </div>
+    </sc-for>
+    <div style="position:absolute;left:18px;bottom:18px;right:96px">
+      <div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)">Berkeley, CA · {{ todayDate }}</div>
+      <div style="font-size:26px;line-height:1;font-style:italic;margin-top:4px">{{ postcardTitle }}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;line-height:1.45;text-wrap:pretty">{{ postcardLine }}</div>
+      <div style="font-size:13px;font-style:italic;margin-top:10px">— Mia</div>
+    </div>
+    <div style="position:absolute;right:16px;bottom:18px;width:66px;height:66px;border-radius:50%;border:1.5px solid var(--accent2);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;letter-spacing:.08em;text-transform:uppercase;line-height:1.25;text-align:center;transform:rotate(8deg)">Footprints<br/>{{ postcardNo }}</div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:20px">
+    <button onClick="{{ savePostcard }}" style="flex:1;height:52px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);font:inherit;font-size:16px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--tint)"><i class="ph-bold ph-download-simple" style="font-size:20px"></i>Save to Photos</button>
+    <button onClick="{{ sendPostcard }}" style="flex:1;height:52px;border:none;border-radius:14px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--accent);font:inherit;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--accent);border-color:var(--accent);box-shadow:3px 3px 0 var(--ink)"><i class="ph-bold ph-link-simple" style="font-size:20px"></i>Send a link</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══ TOAST ═══ -->
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:24px;right:24px;bottom:110px;display:flex;justify-content:center;pointer-events:none">
+  <div style="padding:12px 18px;border-radius:14px;background:var(--ink);color:var(--paper);font-size:15px;line-height:1.3;box-shadow:0 6px 20px rgba(45,43,43,.25);animation:isl-fade .3s ease-out;display:flex;align-items:center;gap:10px"><i class="ph-bold ph-check" style="font-size:16px"></i>{{ toastMsg }}</div>
+</div>
+</sc-if>
+
+<!-- ═══ SETTINGS ═══ -->
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;padding:62px 24px 120px;box-sizing:border-box;background:var(--bg)">
+  <button onClick="{{ back }}" style="height:40px;padding:0 4px;border:none;background:none;font:inherit;font-size:16px;color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:6px;margin-left:-4px"><i class="ph-bold ph-arrow-left" style="font-size:20px"></i>Back</button>
+  <h1 style="margin:14px 0 6px;font-size:34px;line-height:1.05;font-weight:600">What others see</h1>
+  <p style="margin:0 0 28px;font-size:16px;color:var(--muted);font-style:italic;text-wrap:pretty">Your page, as a visitor would find it. Turn off anything you’d rather keep for yourself.</p>
+  <div style="display:flex;flex-direction:column">
+    <sc-for list="{{ privacyRows }}" as="r" hint-placeholder-count="5">
+      <div onClick="{{ r.toggle }}" style="display:grid;grid-template-columns:1fr 52px;gap:16px;align-items:center;padding:18px 0;cursor:pointer">
+        <div><div style="font-size:18px;line-height:1.2;font-weight:600">{{ r.label }}</div><div style="font-size:14px;color:var(--muted);margin-top:3px">{{ r.hint }}</div></div>
+        <div style="width:52px;height:32px;border-radius:16px;background:{{ r.bg }};position:relative;transition:background .2s"><div style="position:absolute;top:3px;left:{{ r.knob }}px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(45,43,43,.3);transition:left .2s"></div></div>
+      </div>
+    </sc-for>
+  </div>
+  <button onClick="{{ previewAsVisitor }}" style="width:100%;height:52px;margin-top:28px;border:2px solid var(--ink);border-radius:14px;background:var(--paper);font:inherit;font-size:16px;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--tint)"><i class="ph-bold ph-eye" style="font-size:20px"></i>Preview as a visitor</button>
+</div>
+</sc-if>
+
+<!-- ═══ TAB BAR ═══ -->
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:14px;right:14px;bottom:24px;height:66px;padding:0 10px;box-sizing:border-box;border-radius:24px;background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center">
+  <div onClick="{{ tabMap }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0"><div style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ tabBg.map }};color:{{ tabColors.map }};transition:background .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.2 9 4l6 2.2 5.5-2v13.6L15 20l-6-2.2-5.5 2Z"></path><path d="M9 4v13.8M15 6.2V20"></path></svg></div><span style="font-size:12px;color:var(--ink)">Map</span></div>
+  <div onClick="{{ tabGroups }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0"><div style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ tabBg.groups }};color:{{ tabColors.groups }};transition:background .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5v17"></path><path d="M5 4h11l-2.5 3.5L16 11H5"></path><path d="M9 15.5h10M9 19.5h7"></path></svg></div><span style="font-size:12px;color:var(--ink)">Lists</span></div>
+  <div onClick="{{ tabMe }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 0"><div style="width:56px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;background:{{ tabBg.me }};color:{{ tabColors.me }};transition:background .2s"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="10" y="1.5" width="6" height="6" transform="rotate(15 13 4.5)"></rect><path d="M5 9h14l-7 7Z"></path><path d="M10.5 15.5 7 22h3l2.5-4.5Z"></path><path d="M13 16l4 6h-3l-2.5-4Z"></path></svg></div><span style="font-size:12px;color:var(--ink)">Me</span></div>
+</div>
+</sc-if>
+
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:402,&quot;height&quot;:874},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;paper&quot;,&quot;dusk&quot;,&quot;wash&quot;],&quot;default&quot;:&quot;paper&quot;,&quot;tsType&quot;:&quot;'paper'|'dusk'|'wash'&quot;,&quot;section&quot;:&quot;Look&quot;},&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auth&quot;,&quot;map&quot;,&quot;place&quot;,&quot;groups&quot;,&quot;group&quot;,&quot;profile&quot;,&quot;other&quot;,&quot;settings&quot;,&quot;guide&quot;,&quot;create&quot;,&quot;checkin&quot;,&quot;postcard&quot;],&quot;default&quot;:&quot;auth&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype&quot;}}">
+const THEMES = {
+  paper: { bg:'radial-gradient(circle at 100% 0%, rgba(56,166,207,.28), transparent 190px), radial-gradient(circle at 1px 1px, rgba(32,30,29,.13) 1px, transparent 1.6px) 0 0/16px 16px, #f3f2f2', sky:'radial-gradient(circle at 100% 0%, rgba(56,166,207,.28), transparent 190px), radial-gradient(circle at 1px 1px, rgba(32,30,29,.13) 1px, transparent 1.6px) 0 0/16px 16px, #f3f2f2', paper:'#fbf9f8', ink:'#201e1d', muted:'#605d5d', accent:'#0088b0', accent2:'#d6006c', shadow:'#d7d3d3', border:'none', glow:'#38a6cf', tex:'.55', sheet:'#f8f4f4', tint:'#eae7e7', blob:'58% 42% 55% 45% / 52% 60% 40% 48%' },
+  dusk:  { bg:'linear-gradient(180deg,#e3ddf0 0%,#f6e2d6 60%,#fcefe4 100%)', sky:'linear-gradient(180deg,#d9d2ec 0%,#f3dcd0 55%,#fbeee2 100%)', paper:'#fffaf3', ink:'#2d2b2b', muted:'#6f6672', accent:'#0088b0', accent2:'#d6006c', shadow:'rgba(122,96,150,.28)', border:'none', glow:'#edbb00', tex:'0', sheet:'#fffaf3', tint:'#efe4e6', blob:'62% 38% 50% 50% / 55% 55% 45% 45%' },
+  wash:  { bg:'radial-gradient(ellipse 60% 40% at 20% 15%, #cbeeff 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 85% 80%, #ffdee6 0%, transparent 70%), #f7f3ea', sky:'radial-gradient(ellipse 55% 35% at 15% 20%, #cbeeff 0%, transparent 70%), radial-gradient(ellipse 45% 35% at 90% 70%, #ffdee6 0%, transparent 70%), radial-gradient(ellipse 40% 30% at 60% 45%, #fdf1c2 0%, transparent 70%), #f7f3ea', paper:'#fffdf8', ink:'#201e1d', muted:'#605d5d', accent:'#0088b0', accent2:'#d6006c', shadow:'rgba(32,30,29,.16)', border:'1.5px solid #201e1d', glow:'#ff458e', tex:'0', sheet:'#fffdf8', tint:'#efe9dc', blob:'55% 45% 48% 52% / 48% 55% 45% 52%' },
+};
+const PLACES = [
+  { id:'campanile', name:'Sather Tower', kind:'landmark', lat:37.8721, lng:-122.2578, size:72 },
+  { id:'doe', name:'Doe Library', kind:'library', lat:37.8724, lng:-122.2596, size:58 },
+  { id:'bigc', name:'The Big C', kind:'hill', lat:37.8746, lng:-122.2503, size:52 },
+  { id:'telegraph', name:'Telegraph Ave', kind:'street', lat:37.8672, lng:-122.2590, size:64 },
+  { id:'indianrock', name:'Rose Garden', kind:'park', lat:37.8785, lng:-122.2657, size:50 },
+  { id:'marina', name:'Cheese Board', kind:'bakery', lat:37.8797, lng:-122.2694, size:56 },
+  { id:'glade', name:'Memorial Glade', kind:'lawn', lat:37.8733, lng:-122.2606, size:54 },
+].map(p=>({ ...p, x: Math.round((p.lng+122.2705)/0.0215*80+10), y: Math.round((37.881-p.lat)/0.0145*80+8) }));
+const PEOPLE = {
+  mia:  { name:'Mia Chen', tag:'Class of ’26 · Cognitive Science', bio:'Trying to finish 100 things before the Campanile plays for me one last time.', color:'#d6006c' },
+  jun:  { name:'Jun Park', tag:'Photographer · Oakland', bio:'I chase the last twenty minutes of light around the Bay.', color:'#0088b0' },
+  theo: { name:'Theo Alvarez', tag:'Grad student · Econ', bio:'Berkeley on a budget, one receipt at a time.', color:'#7d7979' },
+  noor: { name:'Noor Haddad', tag:'Class of ’27 · Architecture', bio:'Ranking every quiet corner in this city by how little I can hear.', color:'#006786' },
+  sam:  { name:'Sam Okafor', tag:'Alumnus ’19', bio:'Came back for the naps.', color:'#aa0b56' },
+};
+const GROUPS = [
+  { id:'g1', author:'mia', title:'100 things before I graduate', desc:'The list everyone says they’ll do and no one finishes. I’m at 37.', total:100, items:[
+    ['Hike to the Big C at 6am on the first day of senior year','bigc'],
+    ['Buy a used book from Moe’s you’ll never read','telegraph'],
+    ['Climb Sather Tower and stay for the 5:50 carillon','campanile'],
+    ['Pull one all-nighter in the North Reading Room','doe'],
+    ['Nap on Memorial Glade during a lecture you should be in','glade'],
+    ['Watch fog swallow the bridge from the Rose Garden','indianrock'],
+    ['Eat Cheese Board pizza on the Shattuck median','marina'],
+    ['Eat a slice at Sliver standing up','telegraph'],
+  ], done:[0,1,2,3] },
+  { id:'g6', author:'mia', title:'Every bakery on Shattuck', desc:'Ranked by how far I’d walk in the rain for it.', total:7, items:[
+    ['Cheese Board, sourdough baguette, warm','marina'],['Doe steps with a croissant from the Free Speech Café','doe'],['Late-night slice run down Telegraph','telegraph'],
+  ], done:[0,1] },
+  { id:'g7', author:'mia', title:'Sunrises I actually got up for', desc:'Three so far. Two were worth it.', total:5, items:[
+    ['The Big C, first light','bigc'],['Rose Garden terraces, 6:40','indianrock'],['Glade, still wet','glade'],
+  ], done:[0,1,2] },
+  { id:'g10', author:'mia', title:'Fog-chasing in San Francisco', desc:'Where to stand when the city disappears.', total:9, items:[
+    ['Twin Peaks, 7am, before the fog lifts','Twin Peaks'],['Coffee at Trouble while it rolls in','Outer Sunset'],['Baker Beach with the bridge half gone','Baker Beach'],
+  ], done:[0,1] },
+  { id:'g11', author:'mia', title:'Oakland First Fridays, properly', desc:'Telegraph, the other one.', total:6, items:[
+    ['Tacos from the truck by the mural','Telegraph Ave, Oakland'],['Lake Merritt loop after dark','Lake Merritt'],
+  ], done:[0] },
+  { id:'g12', author:'mia', title:'Tahoe in one weekend', desc:'Two days, one lake, zero plans.', total:8, items:[
+    ['Swim at Sand Harbor before the crowd','Sand Harbor'],['Emerald Bay from the overlook','Emerald Bay'],
+  ], done:[0] },
+  { id:'g8', author:'jun', title:'Ferry Building, done properly', desc:'Saturday market, one stall at a time.', total:11, items:[
+    ['Porchetta sandwich, Roli Roti','Ferry Building'],['Blue Bottle, then the back pier','Ferry Building'],
+  ], done:[] },
+  { id:'g9', author:'noor', title:'Quiet corners of Oakland', desc:'The sequel. Louder city, quieter spots.', total:7, items:[
+    ['Morcom Rose Garden, weekday morning','Morcom Rose Garden'],['Chapel of the Chimes, any hour','Chapel of the Chimes'],
+  ], done:[] },
+  { id:'g2', author:'jun', title:'Berkeley at golden hour', desc:'Twelve places, each at the exact minute they turn gold.', total:12, items:[
+    ['Carillon from Doe’s steps, 6:12pm','campanile'],['Cheese Board median, sunset','marina'],['Big C looking west','bigc'],['Rose Garden, last light','indianrock'],
+  ], done:[0,1] },
+  { id:'g3', author:'theo', title:'Southside on $10', desc:'A full day of eating for a single Hamilton.', total:20, items:[
+    ['$4 bánh mì on the Campanile steps','campanile'],['Amoeba, then a slice at Sliver','telegraph'],
+  ], done:[0,1] },
+  { id:'g4', author:'noor', title:'Study spots, ranked by silence', desc:'Decibels measured. Feelings noted.', total:9, items:[
+    ['North Reading Room at 2am','doe'],['The Rose Garden amphitheater','indianrock'],['Under the Campanile between chimes','campanile'],
+  ], done:[0,1,2] },
+  { id:'g5', author:'sam', title:'Naps of Berkeley', desc:'Where to sleep in public with dignity.', total:14, items:[
+    ['Under the redwood on Memorial Glade','glade'],['Third-floor Doe, window seat','doe'],
+  ], done:[0,1] },
+];
+const REVIEWS = {
+  g1:{ rating:4.8, count:212, notes:[ {who:'jun', stars:5, text:'Did #3 because of this. The 5:50 carillon is the correct one.'}, {who:'theo', stars:4, text:'Good list, expensive list. Skip #7, do #8.'} ] },
+  g2:{ rating:4.6, count:58, notes:[ {who:'mia', stars:5, text:'The minute-exact times are real. Set an alarm.'}, {who:'noor', stars:4, text:'Beautiful. Cold. Bring a jacket to all twelve.'} ] },
+  g3:{ rating:4.2, count:141, notes:[ {who:'sam', stars:4, text:'Made it to $9.75. The bánh mì is the anchor.'}, {who:'mia', stars:4, text:'Prices went up since. Still works with $12.'} ] },
+  g4:{ rating:4.9, count:34, notes:[ {who:'mia', stars:5, text:'North Reading Room at 2am changed my GPA.'} ] },
+  g5:{ rating:3.9, count:77, notes:[ {who:'theo', stars:3, text:'Got woken up by a tour group at #1. Otherwise solid.'}, {who:'jun', stars:5, text:'Third-floor Doe is a masterpiece.'} ] },
+  g6:{ rating:4.4, count:19, notes:[ {who:'sam', stars:4, text:'Cheese Board line is the price of admission.'} ] },
+  g8:{ rating:4.7, count:63, notes:[ {who:'mia', stars:5, text:'The porchetta line is worth every minute.'} ] },
+  g9:{ rating:4.5, count:21, notes:[ {who:'jun', stars:4, text:'Chapel of the Chimes at 4pm. Nobody. Perfect.'} ] },
+  g10:{ rating:4.3, count:12, notes:[ {who:'jun', stars:4, text:'Twin Peaks at 7 is correct. Bring gloves.'} ] },
+  g11:{ rating:4.0, count:5, notes:[] }, g12:{ rating:4.6, count:8, notes:[ {who:'sam', stars:5, text:'Sand Harbor at 8am. Yes.'} ] },
+  g7:{ rating:4.1, count:9, notes:[ {who:'noor', stars:4, text:'The Rose Garden one, yes. The Glade one, no.'} ] },
+};
+const ITEM_STARS = { 'g1:0':4.9,'g1:1':4.2,'g1:2':5,'g1:3':3.6,'g1:4':4.7,'g1:5':4.8,'g1:6':4.9,'g1:7':4.4,'g2:0':5,'g2:1':4.8,'g2:2':4.6,'g2:3':4.7,'g3:0':4.9,'g3:1':4.3,'g4:0':5,'g4:1':4.8,'g4:2':4.6,'g5:0':4.9,'g5:1':4.7,'g6:0':5,'g6:1':4.1,'g6:2':4.3,'g7:0':4.8,'g7:1':4.5,'g7:2':3.2 };
+const STORIES = [
+  { place:'campanile', person:'mia', group:'g1', text:'#3 done. Climbed up at 5:40 and watched the fog pour over the bridge while the bells went.', when:'May 3' },
+  { place:'campanile', person:'jun', group:'g2', text:'Shot the carillon from Doe’s steps at 6:12. The whole tower went gold for ninety seconds.', when:'Apr 18' },
+  { place:'campanile', person:'theo', group:'g3', text:'$4 bánh mì on the steps. Best seat in Berkeley for the price of nothing.', when:'Mar 9' },
+  { place:'campanile', person:'noor', group:'g4', text:'Between chimes it is completely silent for eleven minutes. Measured.', when:'Feb 2' },
+  { place:'doe', person:'noor', group:'g4', text:'North Reading Room, 2am. So quiet I could hear the clock on the far wall.', when:'Apr 30' },
+  { place:'doe', person:'mia', group:'g1', text:'#4: the all-nighter. Never again. The ceiling is beautiful at 4am though.', when:'Apr 12' },
+  { place:'doe', person:'sam', group:'g5', text:'Third floor, window seat, sun on your shoulder. 8/10 nap.', when:'Jan 20' },
+  { place:'telegraph', person:'theo', group:'g3', text:'Amoeba for an hour, then a slice at Sliver. $9.50 total, day made.', when:'Mar 9' },
+  { place:'telegraph', person:'mia', group:'g1', text:'#2: bought a used copy of Ulysses from Moe’s. Have not opened it. Will not.', when:'Sep 14' },
+  { place:'bigc', person:'mia', group:'g1', text:'#1: 6am, first day of senior year. Cold, foggy, worth it.', when:'Aug 27' },
+  { place:'bigc', person:'jun', group:'g2', text:'Looking west at 7:48pm. The Bay turned into a sheet of brass.', when:'Jun 3' },
+  { place:'marina', person:'jun', group:'g2', text:'Pizza on the median at sunset. The whole street went peach and stayed there.', when:'May 25' },
+  { place:'indianrock', person:'noor', group:'g4', text:'Turns out the quietest study spot is a rose garden amphitheater. 31 dB.', when:'Mar 22' },
+  { place:'indianrock', person:'jun', group:'g2', text:'Last light hits the terraces at 7:31. Bring a jacket.', when:'Apr 2' },
+  { place:'glade', person:'sam', group:'g5', text:'Napped under the redwood for 40 minutes during someone else’s lecture. 10/10.', when:'Apr 9' },
+  { place:'glade', person:'theo', group:'g3', text:'Free lunch: the Glade on a Thursday. Every club is handing out pizza.', when:'Feb 27' },
+];
+const TAGS = { campanile:['Sather Tower','carillon bells','fog','late light','4 people'], doe:['Doe Library','reading room','oak desks','quiet'], bigc:['The Big C','hillside','Bay view','sunrise'], telegraph:['Telegraph Ave','storefront','pizza slice','crowd'], indianrock:['Rose Garden','terraces','roses','skyline'], marina:['Cheese Board','median','pizza box','peach sky'], glade:['Memorial Glade','lawn','redwood','picnic'] };
+const SEED_TODAY = [ {place:'doe', itemIdx:3, when:'10:15', label:'reading room'}, {place:'telegraph', itemIdx:1, when:'12:40', label:'Moe’s'} ];
+const CITIES = {
+  berkeley:{ name:'Berkeley', lat:37.8716, lng:-122.2727, z:12 },
+  sf:{ name:'San Francisco', lat:37.7749, lng:-122.4194, z:11 },
+  oakland:{ name:'Oakland', lat:37.8044, lng:-122.2712, z:12 },
+  tahoe:{ name:'Lake Tahoe', lat:39.0968, lng:-120.0324, z:10 },
+  la:{ name:'Los Angeles', lat:34.0522, lng:-118.2437, z:10 },
+};
+const PERSON_CITIES = { mia:{berkeley:31, sf:4, oakland:1, tahoe:1}, jun:{berkeley:22, sf:38, oakland:9}, theo:{berkeley:14, oakland:6}, noor:{berkeley:11, sf:3}, sam:{berkeley:7, la:12} };
+const PRIVACY_DEFAULT = { cities:true, stories:true, made:true, saved:true, stats:true };
+const OTHER_PRIVACY = { jun:{cities:true, stories:true, made:true, saved:false, stats:true}, theo:PRIVACY_DEFAULT, noor:{cities:true, stories:false, made:true, saved:true, stats:true}, sam:PRIVACY_DEFAULT };
+const PALETTE = ['#0088b0','#d6006c','#006786','#aa0b56'];
+const REPLIES = {
+  route: 'Here’s a loop for this afternoon: start at Doe Library (Noor says the North Reading Room is quietest after 4), climb Sather Tower for the 5:50 carillon — that’s #3 on your list — then walk down to Telegraph for a slice at Sliver like Theo did. About 90 minutes. I’ve drawn it on the map.',
+  here: 'Four people left traces here. Mia climbed the tower at 5:40 for her list. Jun photographed it going gold at 6:12. Theo ate a $4 bánh mì on the steps. And Noor measured eleven silent minutes between chimes. Want to do one of theirs?',
+  surprise: 'Nobody on your list has done this yet: the carillonist plays student requests on Fridays. Ask for something at the door — I can pin it as #38.',
+  default: 'I don’t know that one yet, but Jun was here last Friday and might. Want me to ask him, or add it to your list so someone else can answer?',
+};
+class Component extends DCLogic {
+  state = { screen:'auth', stack:[], placeId:null, personId:null, groupId:null, done:{}, msgs:[], typing:false, draft:'', authMode:'in', groups:GROUPS, ng:{name:'',desc:'',color:'#0088b0',items:[]}, ngItem:'', ngPlace:'campanile', showRoute:false, routeDone:false, tipDismissed:false, today:SEED_TODAY, stories:STORIES, ci:{step:'idle', note:''}, ciPlace:'campanile', traceTip:null, saved:['g4','g5','g3','g8','g9'], myStars:{}, reviewDraft:'', privacy:PRIVACY_DEFAULT, toast:null, cardRef:null };
+  cardRef = React.createRef();
+  toast(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}), 2600); }
+  savePostcard(){
+    const node=this.cardRef.current; if(!node){ this.toast('Saved to Photos'); return; }
+    const root=node.closest('[style*="--bg"]'); const vars=root?root.getAttribute('style'):'';
+    const w=node.offsetWidth, h=node.offsetHeight;
+    const inner=new XMLSerializer().serializeToString(node);
+    const html='<div xmlns="http://www.w3.org/1999/xhtml" style="'+vars.replace(/"/g,"'")+';position:relative;width:'+w+'px;height:'+h+'px;overflow:hidden">'+inner+'</div>';
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w*2+'" height="'+h*2+'" viewBox="0 0 '+w+' '+h+'"><foreignObject width="100%" height="100%">'+html+'</foreignObject></svg>';
+    const img=new Image();
+    img.onload=()=>{ try{ const c=document.createElement('canvas'); c.width=w*2; c.height=h*2; c.getContext('2d').drawImage(img,0,0,w*2,h*2); c.toBlob(b=>{ if(!b){ this.toast('Couldn’t save'); return; } const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='footprints-postcard.png'; a.click(); this.toast('Saved to Photos'); }); }catch(e){ this.toast('Couldn’t save'); } };
+    img.onerror=()=>this.toast('Couldn’t save');
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  }
+  sendPostcard(){ const id='mia-'+new Date().toISOString().slice(5,10).replace('-',''); const link='footprints.app/p/'+id; if(navigator.clipboard) navigator.clipboard.writeText('https://'+link).catch(()=>{}); this.toast('Link copied · '+link); }
+  componentDidMount(){ window.addEventListener('message', this.onMsg); const s=this.props.startScreen; if(s && s!=='auth') this.setState({screen:s, placeId:s==='place'?'campanile':null, personId:s==='profile'?'mia':s==='other'?'jun':null, ...(s==='other'?{screen:'profile', stack:[{screen:'map',placeId:null,personId:null,groupId:null}]}:{}), ...(s==='settings'?{stack:[{screen:'profile',placeId:null,personId:'mia',groupId:null}]}:{}), groupId:s==='group'?'g1':null, ...(s==='place'?{screen:'map'}:{}), ...(s==='checkin'?{ci:{step:'done', note:''}}:{}), ...(s==='postcard'?{today:[...SEED_TODAY,{place:'campanile', itemIdx:2, when:'17:50', label:'carillon'}]}:{}) }); if(s==='guide') this.seedGuide('campanile'); }
+  mapRef = React.createRef();
+  mapReady = false;
+  traceMapRef = React.createRef();
+  onMsg = (e)=>{ const d=e.data||{};
+    if(this.mapRef.current && e.source===this.mapRef.current.contentWindow){ if(d.type==='ready'){ this.mapReady=true; this.postMap('init'); } if(d.type==='isle'){ this.setState({placeId:d.id, tipDismissed:true}); } return; }
+    if(this.traceMapRef.current && e.source===this.traceMapRef.current.contentWindow){ if(d.type==='ready'){ this.traceReady=true; this.postTraceMap(); } if(d.type==='isle'){ this.tab('map',{placeId:d.id}); } }
+  };
+  postTraceMap(){ const w=this.traceMapRef.current && this.traceMapRef.current.contentWindow; if(!w) return; const pid=this.state.personId||'mia'; const mine=this.state.stories.filter(s=>s.person===pid); const ids=[...new Set(mine.map(s=>s.place))]; w.postMessage({ type:'init', theme:this.props.theme||'paper', fit:true, pad:{tl:[30,40],br:[30,40]}, places:PLACES.filter(p=>ids.includes(p.id)).map(p=>({id:p.id,name:p.name,kind:p.kind,lat:p.lat,lng:p.lng,size:Math.round(p.size*.8),count:mine.filter(s=>s.place===p.id).length,isHere:false})), route:[] }, '*'); }
+  postMap(type){ const w=this.mapRef.current && this.mapRef.current.contentWindow; if(!w) return; const stories=this.state.stories; w.postMessage({ type, theme:this.props.theme||'paper', fit:true, places:PLACES.map(p=>({id:p.id,name:p.name,kind:p.kind,lat:p.lat,lng:p.lng,size:p.size,count:stories.filter(s=>s.place===p.id).length,isHere:p.id==='campanile'})), route: this.state.showRoute ? ['doe','campanile','telegraph'] : [] }, '*'); }
+  componentDidUpdate(pp, ps){ if(this.mapReady && (ps.stories!==this.state.stories || ps.showRoute!==this.state.showRoute || pp.theme!==this.props.theme)) this.postMap('update'); if(ps.screen!=='map' && this.state.screen==='map') this.mapReady=false; if(this.traceReady && this.state.screen==='profile' && (ps.personId!==this.state.personId || ps.stories!==this.state.stories)) this.postTraceMap(); if(ps.screen==='profile' && this.state.screen!=='profile') this.traceReady=false; }
+  componentWillUnmount(){ window.removeEventListener('message', this.onMsg); }
+  takePhoto(){ this.setState({ci:{step:'scan', note:''}}); setTimeout(()=>this.setState(s=>({ci:{...s.ci, step:'done'}})), 1800); }
+  leaveTrace(){
+    const st=this.state; const pid=st.ciPlace; const idx=GROUPS[0].items.findIndex(it=>it[1]===pid);
+    const now=new Date(); const when=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+    const text = st.ci.note.trim() || ((idx>=0?('#'+String(idx+1).padStart(2,'0')+' done. '):'') + 'Was here at ' + when + '.');
+    this.setState(s=>({
+      stories:[{place:pid, person:'mia', group:'g1', text, when:'Today'}, ...s.stories],
+      done: idx>=0 ? {...s.done, ['g1:'+idx]:true} : s.done,
+      today:[...s.today, {place:pid, itemIdx:idx, when, label:(TAGS[pid]||[])[1]||'here'}],
+      ci:{step:'idle', note:''}, screen:'map', stack:[], placeId:null, tipDismissed:false,
+      traceTip: 'That’s '+(s.today.length+1)+' today. Want me to turn it into a postcard?'
+    }));
+  }
+  snap(s){ return {screen:s.screen, placeId:s.placeId, personId:s.personId, groupId:s.groupId}; }
+  go(screen, patch={}){ this.setState(s=>({ stack:[...s.stack, this.snap(s)], screen, ...patch })); }
+  back(){ this.setState(s=>{ const st=[...s.stack]; const prev=st.pop(); return prev ? {...prev, stack:st} : {screen:'map', stack:[]}; }); }
+  tab(screen, patch={}){ this.setState({screen, stack:[], placeId:null, personId:null, groupId:null, visitorPreview:false, ...patch}); }
+  isDone(gid, i){ const g=this.state.groups.find(x=>x.id===gid); return this.state.done[gid+':'+i] ?? (g ? g.done.includes(i) : false); }
+  seedGuide(placeId){
+    const p=PLACES.find(x=>x.id===placeId); const n=STORIES.filter(s=>s.place===placeId).length;
+    const text = p ? `You’re near ${p.name}. ${n} people left traces here — the most recent was Mia, who climbed it at 5:40 for #3 of her hundred. Want me to plan a route through a few of them, or tell you what happened here?` : 'Evening, Mia. 37 of 100 done. Sather Tower is a four-minute walk and three people did something there this week. Where should we start?';
+    this.setState({ msgs:[{who:'guide', text}] });
+  }
+  ask(kind, label){
+    this.setState(s=>({ msgs:[...s.msgs, {who:'me', text:label}], typing:true, draft:'' }));
+    setTimeout(()=> this.setState(s=>({ msgs:[...s.msgs, {who:'guide', text:REPLIES[kind]||REPLIES.default}], typing:false, showRoute: s.showRoute || kind==='route' })), 1100);
+  }
+  renderVals(){
+    const st=this.state; const t=THEMES[this.props.theme] || THEMES.paper;
+    const me='mia'; const STORIES=st.stories;
+    const groups=st.groups;
+    const active=st.placeId;
+    const places=PLACES.map((p,i)=>{ const count=STORIES.filter(s=>s.place===p.id).length; return {...p, count, numSize:Math.round(p.size*.32), dur:5+i*.7, delay:-i*1.3, isHere:p.id==='campanile', open:()=>this.setState({placeId:p.id, tipDismissed:true})}; });
+    const place=PLACES.find(p=>p.id===(st.screen==='checkin'?st.ciPlace:active))||PLACES[0];
+    const placeStoriesRaw=STORIES.filter(s=>s.place===place.id);
+    const placeStories=placeStoriesRaw.map((s,i)=>{ const pe=PEOPLE[s.person]; const g=groups.find(x=>x.id===s.group); return { text:s.text, when:s.when, person:pe.name, initial:pe.name[0], color:pe.color, group:g?g.title:'', delay:i*.06, openPerson:()=>this.go('profile',{personId:s.person, placeId:null}) }; });
+    const decorate=g=>{ const a=PEOPLE[g.author]; const rv=REVIEWS[g.id]||{rating:0,count:0,notes:[]}; const isMine=g.author===me; const isSaved=st.saved.includes(g.id); const doneCount=g.items.reduce((n,_,i)=>n+(this.isDone(g.id,i)?1:0),0)+(g.total-g.items.length>0 && g.done.length>0 ? Math.max(0,(g.id==='g1'?33:0)) : 0); const pct=Math.round(doneCount/g.total*100); return {...g, author:a.name, initial:a.name[0], color:g.color||a.color, doneCount, pct, placesCount:new Set(g.items.map(i=>i[1])).size, hasMore:g.total>g.items.length, more:g.total-g.items.length, rating:rv.rating.toFixed(1), ratingCount:rv.count, isMine, isSaved, showSave:!isMine, saveLabel:isSaved?'On my list':'Add to my lists', saveBg:isSaved?t.paper:t.accent, saveFg:isSaved?t.ink:'#fff', saveBorder:isSaved?'1px solid '+t.ink:'none', saveIcon:isSaved?'ph-bold ph-check':'ph-bold ph-plus', toggleSave:(e)=>{ if(e&&e.stopPropagation) e.stopPropagation(); this.setState(x=>({saved:x.saved.includes(g.id)?x.saved.filter(i=>i!==g.id):[...x.saved,g.id]})); }, reviews:rv.notes.map(n=>({ who:PEOPLE[n.who].name, initial:PEOPLE[n.who].name[0], color:PEOPLE[n.who].color, text:n.text, stars:'★'.repeat(n.stars)+'☆'.repeat(5-n.stars) })), starsRow:[1,2,3,4,5].map(k=>({ filled:k<=Math.round(rv.rating), ch:k<=Math.round(rv.rating)?'★':'☆' })), open:()=>this.go('group',{groupId:g.id, placeId:null}), openAuthor:()=>this.go('profile',{personId:g.author, placeId:null}) }; };
+    const allGroups=groups.map(decorate);
+    const myGroups=allGroups.filter(g=>g.isMine || g.isSaved).map(g=>({...g, byline:g.isMine?'':'by '+g.author}));
+    const otherGroups=allGroups.filter(g=>!g.isMine && !g.isSaved);
+    const group=allGroups.find(g=>g.id===st.groupId)||allGroups[0];
+    const groupItems=group.items.map((it,i)=>{ const done=this.isDone(group.id,i); const pl=PLACES.find(p=>p.id===it[1]); const avg=ITEM_STARS[group.id+':'+i]; const mine=st.myStars[group.id+':'+i]||0; return { n:String(i+1).padStart(2,'0'), text:it[0], place:pl?pl.name:it[1], done, avg:avg?avg.toFixed(1):'', hasAvg:!!avg, myStars:[1,2,3,4,5].map(k=>({ ch:k<=mine?'★':'☆', color:k<=mine?t.accent2:t.muted, rate:(e)=>{ e.stopPropagation(); this.setState(x=>({myStars:{...x.myStars,[group.id+':'+i]:k}})); } })), deco:done?'line-through':'none', textColor:done?t.muted:t.ink, ringColor:t.ink, fill:done?t.ink:'transparent', toggle:()=>this.setState(s=>({done:{...s.done,[group.id+':'+i]:!done}})), openPlace:()=>{ if(pl) this.tab('map',{placeId:it[1]}); else this.toast(it[1]+' · not on the map yet'); } }; });
+    const personId=st.personId||me; const pe=PEOPLE[personId];
+    const personStoriesRaw=STORIES.filter(s=>s.person===personId);
+    const isSelf=personId===me && !st.visitorPreview;
+    const priv = personId===me ? st.privacy : (OTHER_PRIVACY[personId]||PRIVACY_DEFAULT);
+    const show = isSelf ? {cities:true,stories:true,made:true,saved:true,stats:true} : priv;
+    const cityMap=PERSON_CITIES[personId]||{berkeley:personStoriesRaw.length};
+    const cityIds=Object.keys(cityMap);
+    const storyTotal=Object.values(cityMap).reduce((a,b)=>a+b,0);
+    const OTHER_SAVED={ jun:['g1','g4'], theo:['g1','g5'], noor:['g1'], sam:['g3','g5','g1'] };
+    const savedIds = personId===me ? st.saved : (OTHER_SAVED[personId]||[]);
+    const personMade=allGroups.filter(g=>groups.find(x=>x.id===g.id).author===personId);
+    const personSaved=allGroups.filter(g=>savedIds.includes(g.id) && groups.find(x=>x.id===g.id).author!==personId);
+    const person={ ...pe, initial:pe.name[0], cityCount:cityIds.length, storyCount:storyTotal, madeCount:personMade.length, savedCount:personSaved.length };
+    const ISO=(x,y,z)=>[(100+(x-y)*0.703).toFixed(1),(96+(x+y)*0.406-z).toFixed(1)];
+    const isoBox=(x,y,w,d,h,fillTop)=>{ const p=(a,b,c)=>ISO(a,b,c).join(','); return [ {pts:[p(x+w,y,0),p(x+w,y+d,0),p(x+w,y+d,h),p(x+w,y,h)].join(' '), fill:'var(--tint)'}, {pts:[p(x,y+d,0),p(x+w,y+d,0),p(x+w,y+d,h),p(x,y+d,h)].join(' '), fill:'var(--paper)'}, {pts:[p(x,y,h),p(x+w,y,h),p(x+w,y+d,h),p(x,y+d,h)].join(' '), fill:fillTop||'var(--paper)'} ]; };
+    const isoLine=(x1,y1,z1,x2,y2,z2)=>{ const a=ISO(x1,y1,z1), b=ISO(x2,y2,z2); return {x1:a[0],y1:a[1],x2:b[0],y2:b[1]}; };
+    const isoBlob=(x,y,z,r)=>{ const a=ISO(x,y,z); return {cx:a[0],cy:a[1],r}; };
+    const SKYLINE={
+      berkeley:()=>({ faces:[...isoBox(-8,-8,16,16,58),...isoBox(-5,-5,10,10,68),...isoBox(-2,-2,4,4,78),...isoBox(-40,10,26,16,12),...isoBox(14,-38,18,14,10)], lines:[], blobs:[isoBlob(30,20,10,7),isoBlob(-30,-30,9,6)] }),
+      sf:()=>({ faces:[...isoBox(10,-10,10,10,54),...isoBox(-10,10,10,10,54),...isoBox(-40,-40,12,12,44),...isoBox(-26,-40,10,10,32),...isoBox(20,20,12,12,30)], lines:[isoLine(15,-5,54,-5,15,54),isoLine(15,-5,54,40,-30,10),isoLine(-5,15,54,-30,40,10),isoLine(6,4,0,6,4,42)], blobs:[] }),
+      oakland:()=>({ faces:[...isoBox(-6,-6,12,12,40),...isoBox(-34,20,14,14,22),...isoBox(16,-34,10,10,26)], lines:[isoLine(30,10,0,30,10,48),isoLine(30,10,48,54,-14,44),isoLine(54,-14,44,54,-14,30),isoLine(-20,-30,0,-20,-30,42),isoLine(-20,-30,42,4,-54,38)], blobs:[isoBlob(-38,-8,8,6)] }),
+      tahoe:()=>({ faces:[...isoBox(-40,-40,80,80,3,'var(--tint)')], lines:[isoLine(-30,20,0,-30,20,30),isoLine(20,-30,0,20,-30,36),isoLine(0,30,0,0,30,24),isoLine(30,10,0,30,10,28)], blobs:[isoBlob(-30,20,30,9),isoBlob(20,-30,36,11),isoBlob(0,30,24,8),isoBlob(30,10,28,8),isoBlob(-30,20,18,7),isoBlob(20,-30,22,8)] }),
+      la:()=>({ faces:[...isoBox(-10,-10,14,14,50),...isoBox(8,-30,12,12,40),...isoBox(-30,8,12,12,36),...isoBox(20,20,10,10,26)], lines:[isoLine(-40,-40,0,-40,-40,34),isoLine(40,-10,0,40,-10,30)], blobs:[isoBlob(-40,-40,34,8),isoBlob(40,-10,30,7)] }),
+    };
+    const tileFor=(lat,lng,z)=>{ const n=Math.pow(2,z); const tx=Math.floor((lng+180)/360*n); const lr=lat*Math.PI/180; const ty=Math.floor((1-Math.log(Math.tan(lr)+1/Math.cos(lr))/Math.PI)/2*n); return 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/'+z+'/'+ty+'/'+tx; };
+    const personCities=cityIds.map((cid,i)=>{ const c=CITIES[cid]; const sk=(SKYLINE[cid]||SKYLINE.berkeley)(); const n=cityMap[cid]; return { name:c.name, sub:n+(n>1?' stories':' story'), tile:tileFor(c.lat,c.lng,c.z), clipId:'clip-'+personId+'-'+cid, dotId:'dot-'+personId+'-'+cid, faces:sk.faces, lines:sk.lines, blobs:sk.blobs, delay:i*.08, open:()=>{ if(cid==='berkeley') this.tab('map'); else this.toast(c.name+' · coming to the map soon'); } }; });
+    const tilesFor=(lat,lng,S,z)=>{ const n=Math.pow(2,z); const cx=(lng+180)/360*n*256; const lr=lat*Math.PI/180; const cy=(1-Math.log(Math.tan(lr)+1/Math.cos(lr))/Math.PI)/2*n*256; const x0=Math.floor((cx-S/2)/256), x1=Math.floor((cx+S/2)/256), y0=Math.floor((cy-S/2)/256), y1=Math.floor((cy+S/2)/256); const out=[]; for(let tx=x0;tx<=x1;tx++) for(let ty=y0;ty<=y1;ty++) out.push({ url:`https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/${z}/${ty}/${tx}`, left:Math.round(tx*256-(cx-S/2)), top:Math.round(ty*256-(cy-S/2)) }); return out; };
+    const personStories=personStoriesRaw.map(s=>({ text:s.text, when:s.when, placeName:PLACES.find(p=>p.id===s.place).name, openPlace:()=>this.tab('map',{placeId:s.place}) }));
+    const msgs=st.msgs.map(m=> m.who==='me' ? { text:m.text, justify:'flex-end', radius:'16px 16px 2px 16px', bg:t.ink, fg:t.paper, shadow:'3px 3px 0 '+t.accent } : { text:m.text, justify:'flex-start', radius:'16px 16px 16px 2px', bg:t.paper, fg:t.ink, shadow:'inset 0 0 0 2px '+t.ink+', 3px 3px 0 '+t.ink });
+    const chips=[{label:'Plan me a route',kind:'route'},{label:'What happened here?',kind:'here'},{label:'Surprise me',kind:'surprise'}].map(c=>({label:c.label, ask:()=>this.ask(c.kind,c.label)}));
+    const ng=st.ng; const ngValid=ng.name.trim().length>0 && ng.items.length>0;
+    const tabColor=k=>{ const cur = st.screen==='map'?'map': st.screen==='groups'||st.screen==='group'||st.screen==='create'?'groups': st.screen==='profile'||st.screen==='settings'?'me':''; return cur===k?t.paper:t.ink; }; const tabBgOf=k=>{ const cur = st.screen==='map'?'map': st.screen==='groups'||st.screen==='group'||st.screen==='create'?'groups': st.screen==='profile'||st.screen==='settings'?'me':''; return cur===k?t.ink:'transparent'; };
+    const checkedHere = groupItems.length && false;
+    const myItemHere = GROUPS[0].items.findIndex(it=>it[1]===place.id);
+    const hereDone = myItemHere>=0 && this.isDone('g1', myItemHere);
+    const ciPlace=PLACES.find(p=>p.id===st.ciPlace)||PLACES[0];
+    const ciIdx=GROUPS[0].items.findIndex(it=>it[1]===ciPlace.id);
+    const now=new Date(); const nowLabel=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+    const todayDate=now.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const visitedIds=st.today.map(d=>d.place);
+    // postcard layout: fit all isles into the card's upper band (px, 354x472), then push apart so nothing overlaps
+    const CW=354, CH=472; const lats=PLACES.map(p=>p.lat), lngs=PLACES.map(p=>p.lng);
+    const minLat=Math.min(...lats), maxLat=Math.max(...lats), minLng=Math.min(...lngs), maxLng=Math.max(...lngs);
+    const pos=PLACES.map(p=>({ id:p.id, x:40+(p.lng-minLng)/(maxLng-minLng||1)*(CW-80), y:70+(maxLat-p.lat)/(maxLat-minLat||1)*(CH*0.52-70) }));
+    for(let k=0;k<40;k++) for(let a=0;a<pos.length;a++) for(let b=a+1;b<pos.length;b++){ const dx=pos[b].x-pos[a].x, dy=pos[b].y-pos[a].y; const d=Math.hypot(dx,dy)||1; const min=78; if(d<min){ const push=(min-d)/2; const ux=dx/d, uy=dy/d; pos[a].x-=ux*push; pos[a].y-=uy*push; pos[b].x+=ux*push; pos[b].y+=uy*push; } }
+    pos.forEach(q=>{ q.x=Math.max(40,Math.min(CW-40,q.x)); q.y=Math.max(100,Math.min(CH*0.6,q.y)); });
+    const SLOTS=[{x:18,y:9},{x:82,y:9},{x:88,y:40},{x:12,y:46},{x:50,y:8}];
+    const postcardIsles=PLACES.map((p,i)=>{ const vi=visitedIds.indexOf(p.id); const d=st.today[vi]; const q=pos[i]; const slot=SLOTS[vi%SLOTS.length]||SLOTS[0]; return { name:p.name, x:+(q.x/CW*100).toFixed(2), y:+(q.y/CH*100).toFixed(2), w:Math.max(38,Math.round(p.size*.6)), visited:vi>=0, opacity:vi>=0?1:.5, rot:[-8,6,-4,9][vi%4]||-6, sx:slot.x, sy:slot.y, when:d?d.when:'', n:d&&d.itemIdx>=0?'#'+String(d.itemIdx+1).padStart(2,'0'):'', stampLabel:d?d.label:'' }; });
+    const visitedPts=st.today.map(d=>pos.find(q=>q.id===d.place)).filter(Boolean).map(q=>[+(q.x/CW*100).toFixed(2), +(q.y/CH*100).toFixed(2)]);
+    const leaderPath=st.today.map((d,vi)=>{ const q=pos.find(q=>q.id===d.place); const s=SLOTS[vi%SLOTS.length]; return q?`M ${s.x} ${s.y} L ${(q.x/CW*100).toFixed(2)} ${(q.y/CH*100).toFixed(2)}`:''; }).join(' ');
+    const postcardPath=(visitedPts.length>1 ? visitedPts.map((pt,i)=>(i?'L':'M')+pt[0]+' '+pt[1]).join(' ') : '');
+    const todayItems=st.today.map(d=>d.itemIdx>=0?GROUPS[0].items[d.itemIdx][0]:PLACES.find(p=>p.id===d.place).name);
+    const nums=st.today.filter(d=>d.itemIdx>=0).map(d=>d.itemIdx+1).sort((a,b)=>a-b);
+    return {
+      isCheckin:st.screen==='checkin', isPostcard:st.screen==='postcard', nowLabel, todayDate,
+      ci:{ idle:st.ci.step==='idle', scanning:st.ci.step==='scan', recognized:st.ci.step==='done', note:st.ci.note, hasMatch:ciIdx>=0, matchN:'#'+String(ciIdx+1).padStart(2,'0'), matchText:ciIdx>=0?GROUPS[0].items[ciIdx][0]:'' },
+      ciTags:(TAGS[ciPlace.id]||[]).map((l,i)=>({label:l, delay:i*.08})), takePhoto:()=>this.takePhoto(), leaveTrace:()=>this.leaveTrace(), setCiNote:e=>{ const v=e.target.value; this.setState(s=>({ci:{...s.ci, note:v}})); },
+      hasToday: st.today.length>0, todayCount:st.today.length, todayDots:st.today.map((d,i)=>({ n:d.itemIdx>=0?d.itemIdx+1:'·', color:i%2?t.ink:t.accent, ml:i?-8:0 })), goPostcard:()=>this.go('postcard',{placeId:null}),
+      postcardIsles, postcardPath, leaderPath, postcardStamps: postcardIsles.filter(p=>p.visited), postcardTitle: st.today.length+' things, one day', postcardLine: todayItems.join(' · '), postcardNo: nums.length? 'No. '+nums.join(', ') : 'a wander',
+      t, isAuth:st.screen==='auth', isMap:st.screen==='map', isGroups:st.screen==='groups', isGroup:st.screen==='group', isProfile:st.screen==='profile', isGuide:st.screen==='guide', isCreate:st.screen==='create',
+      isSignUp:st.authMode==='up', authCta:st.authMode==='up'?'Create account':'Sign in', authAlt:st.authMode==='up'?'I already have an account':'New here? Make an account',
+      signIn:()=>this.setState({screen:'map', stack:[]}), toggleAuth:()=>this.setState(s=>({authMode:s.authMode==='up'?'in':'up'})),
+      mapRef:this.mapRef, totalStories:STORIES.length, placeCount:PLACES.length, routeOpacity: st.showRoute?1:0,
+      showSpriteTip: !st.tipDismissed && !active, spriteTip: st.traceTip ? st.traceTip : st.showRoute ? 'Your route is on the map. Doe first.' : '3 people did something at Sather Tower this week. Want the story?',
+      hasPlace: st.screen==='map' && !!active, place:{...place, count:placeStoriesRaw.length, people:new Set(placeStoriesRaw.map(s=>s.person)).size, groups:new Set(placeStoriesRaw.map(s=>s.group)).size}, placeStories, closePlace:()=>this.setState({placeId:null}),
+      checkInLabel: myItemHere<0 ? 'Check in here' : hereDone ? 'Done · #'+String(myItemHere+1).padStart(2,'0')+' on your list' : 'Check in · #'+String(myItemHere+1).padStart(2,'0'),
+      checkInHere:()=>{ if(hereDone) return; this.go('checkin',{placeId:null, ciPlace:place.id, ci:{step:'idle', note:''}}); },
+      goGuide:()=>{ if(st.traceTip){ this.go('postcard',{placeId:null, traceTip:null}); return; } this.seedGuide(active); this.go('guide',{placeId:null}); }, goMe:()=>this.tab('profile',{personId:me}), goCreate:()=>this.go('create'),
+      myGroups, otherGroups, group, groupItems, reviewDraft:st.reviewDraft, setReviewDraft:e=>this.setState({reviewDraft:e.target.value}), back:()=>this.back(), canBack: st.stack.length>0,
+      person:{...person, first:person.name.split(' ')[0]}, personMade, personSaved, hasSaved:personSaved.length>0 && show.saved, personStories, personCities, show, isSelf, isVisitorPreview: personId===me && !!st.visitorPreview, traceMapRef:this.traceMapRef,
+      goSettings:()=>this.go('settings'), previewAsVisitor:()=>this.go('profile',{personId:me, visitorPreview:true}),
+      privacyRows:[['cities','Cities','The 3D city shelf and how many places you’ve been'],['stories','Stories','Your traces on the map, with what you wrote'],['made','Lists you made','Your own lists and their ratings'],['saved','Lists you saved','Other people’s lists you’re working through'],['stats','Counts','The numbers under your name']].map(([k,label,hint])=>({ label, hint, bg: st.privacy[k]?t.accent:t.muted, knob: st.privacy[k]?23:3, toggle:()=>this.setState(x=>({privacy:{...x.privacy,[k]:!x.privacy[k]}})) })),
+      isSettings:st.screen==='settings', hasToast:!!st.toast, toastMsg:st.toast, cardRef:this.cardRef, savePostcard:()=>this.savePostcard(), sendPostcard:()=>this.sendPostcard(),
+      msgs, typing:st.typing, chips, draft:st.draft, setDraft:e=>this.setState({draft:e.target.value}), send:()=>{ if(st.draft.trim()) this.ask('default', st.draft.trim()); }, onKey:e=>{ if(e.key==='Enter' && st.draft.trim()) this.ask('default', st.draft.trim()); },
+      ng, ngCount:ng.items.length, ngItems:ng.items.map((it,i)=>({ n:String(i+1).padStart(2,'0'), text:it[0], place:PLACES.find(p=>p.id===it[1]).name, remove:()=>this.setState(s=>({ng:{...s.ng, items:s.ng.items.filter((_,j)=>j!==i)}})) })),
+      ngItem:st.ngItem, ngPlace:st.ngPlace, setNgItem:e=>this.setState({ngItem:e.target.value}), setNgPlace:e=>this.setState({ngPlace:e.target.value}),
+      setNgName:e=>{ const v=e.target.value; this.setState(s=>({ng:{...s.ng,name:v}})); }, setNgDesc:e=>{ const v=e.target.value; this.setState(s=>({ng:{...s.ng,desc:v}})); },
+      addNgItem:()=>{ if(!st.ngItem.trim()) return; this.setState(s=>({ng:{...s.ng, items:[...s.ng.items,[s.ngItem.trim(), s.ngPlace]]}, ngItem:''})); }, onNgKey:e=>{ if(e.key==='Enter' && st.ngItem.trim()) this.setState(s=>({ng:{...s.ng, items:[...s.ng.items,[s.ngItem.trim(), s.ngPlace]]}, ngItem:''})); },
+      colors:PALETTE.map(hex=>({hex, ring:hex===ng.color?t.ink:'transparent', pick:()=>this.setState(s=>({ng:{...s.ng,color:hex}}))})),
+      placeOptions:PLACES.map(p=>({id:p.id,name:p.name})),
+      createBg: ngValid?t.accent:t.muted,
+      createGroup:()=>{ if(!ngValid) return; const id='g'+Date.now(); const g={id, author:me, title:ng.name.trim(), desc:ng.desc.trim()||'A new list.', total:ng.items.length, items:ng.items, done:[], color:ng.color}; this.setState(s=>({groups:[g,...s.groups], ng:{name:'',desc:'',color:'#0088b0',items:[]}, screen:'group', groupId:id, stack:[{screen:'groups',placeId:null,personId:null,groupId:null}]})); },
+      showTabs: ['map','groups','group','profile','create','settings'].includes(st.screen) && !(st.screen==='map' && active),
+      tabMap:()=>this.tab('map'), tabGroups:()=>this.tab('groups'), tabMe:()=>this.tab('profile',{personId:me}),
+      tabColors:{ map:tabColor('map'), groups:tabColor('groups'), me:tabColor('me') }, tabBg:{ map:tabBgOf('map'), groups:tabBgOf('groups'), me:tabBgOf('me') },
+    };
+  }
+}
+</script>
+</body>
+</html>

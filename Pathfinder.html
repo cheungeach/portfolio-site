@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="page-loader.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pathfinder — Zhang Yichi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="project-detail.css">
+<style>
+.map-frame{position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35)}
+.map-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.opening__bg--map{overflow:hidden;filter:none}
+.opening__bg--map iframe{position:absolute;inset:-4%;width:108%;height:108%;border:0;pointer-events:none;filter:grayscale(.3) brightness(.9)}
+.stat-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;margin-top:1rem}
+.stat{border-top:1px solid var(--line);padding-top:1.6rem}
+.stat-num{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2.2rem,4vw,3.4rem);line-height:1;color:var(--ivory);margin-bottom:.9rem}
+.stat-num em{font-style:italic;color:var(--gold)}
+.stat p{font-size:.7rem;line-height:1.85;color:var(--mist);opacity:.7}
+.stat-src{display:block;margin-top:.8rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.comp-table{width:100%;border-collapse:collapse;margin-top:1rem}
+.comp-table th{font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:400;text-align:left;padding:0 1.2rem 1.2rem 0;border-bottom:1px solid var(--line-strong)}
+.comp-table td{font-size:.74rem;line-height:1.85;color:var(--mist);padding:1.4rem 1.2rem 1.4rem 0;border-bottom:1px solid var(--line);vertical-align:top}
+.comp-table td:first-child{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--ivory);white-space:nowrap}
+.comp-table tr.is-us td{color:var(--ivory)}
+.comp-table tr.is-us td:first-child{color:var(--gold);font-style:italic}
+@media(max-width:920px){.stat-row{grid-template-columns:1fr 1fr}.comp-table,.comp-table tbody,.comp-table tr,.comp-table td{display:block}.comp-table thead{display:none}.comp-table td{padding:.4rem 0;border:none}.comp-table tr{padding:1.4rem 0;border-bottom:1px solid var(--line)}}
+@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
+.phone-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.4rem;margin-top:1rem}
+.phone{position:relative;width:100%;aspect-ratio:402/874;border-radius:36px;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35),inset 0 0 0 1px oklch(96% 0.006 78 / .1)}
+.phone iframe{position:absolute;top:0;left:0;width:402px;height:874px;border:0;transform-origin:0 0}
+.phone-cap{margin-top:1rem;font-size:.54rem;letter-spacing:.26em;text-transform:uppercase;color:var(--dim)}
+.phone-cap strong{display:block;font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.15rem;letter-spacing:0;text-transform:none;color:var(--ivory);margin-bottom:.35rem}
+.loop{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1.4rem;margin-top:1rem}
+.loop-step{border-top:1px solid var(--line);padding-top:1.6rem}
+.loop-n{font-size:.56rem;letter-spacing:.3em;color:var(--gold);margin-bottom:1rem}
+.loop-step h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.3rem;margin-bottom:.6rem}
+.loop-step p{font-size:.68rem;line-height:1.8;color:var(--mist);opacity:.7}
+.loop-step .scr{display:block;margin-top:.8rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
+.obj-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;margin-top:4rem}
+.obj{background:oklch(96% 0.006 78 / .02);border:1px solid var(--line);padding:2.2rem 2rem}
+.obj h3{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.7rem;margin-bottom:.7rem}
+.obj h3 em{font-style:italic;color:var(--gold)}
+.obj p{font-size:.72rem;line-height:1.95;color:var(--mist);opacity:.7}
+@media(max-width:920px){.loop{grid-template-columns:repeat(3,1fr)}.phone-row{grid-template-columns:1fr;max-width:402px;margin-left:auto;margin-right:auto}.obj-row{grid-template-columns:1fr}}
+@media(max-width:560px){.loop{grid-template-columns:1fr 1fr}}
+.hero-phones{position:absolute;right:3rem;top:50%;transform:translateY(-50%);z-index:3;display:flex;gap:1.6rem;align-items:flex-end;pointer-events:none}
+.hero-phones .phone{width:200px;pointer-events:auto}
+.hero-phones .phone:nth-child(2){width:236px;margin-bottom:3rem}
+.opening{min-height:78vh;padding-bottom:10vh}
+.browser--cover{aspect-ratio:16/9}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5rem;align-items:center;margin-top:1rem}
+.split.rev>.split__media{order:-1}
+.split__media img{display:block;width:100%;height:auto;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35)}
+.split__media .phone{max-width:340px;margin:0 auto}
+.split__media .map-frame{aspect-ratio:4/3}
+.split .section-lede{margin-bottom:2rem}
+.kv{display:flex;flex-direction:column;gap:1.4rem;margin-top:2rem}
+.kv div{border-top:1px solid var(--line);padding-top:1.2rem}
+.kv span{display:block;font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+.kv p{font-size:.76rem;line-height:1.95;color:var(--mist);opacity:.75}
+.browser{position:relative;width:100%;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:#f3f2f2;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55),0 8px 24px oklch(2% 0.005 240 / .35),inset 0 0 0 1px oklch(96% 0.006 78 / .1)}
+.browser__bar{height:34px;display:flex;align-items:center;gap:.5rem;padding:0 .9rem;background:#e7e5e3;border-bottom:1px solid #d7d4d1}
+.browser__bar i{width:10px;height:10px;border-radius:50%;background:#c9c5c1;display:block}
+.browser__bar span{flex:1;margin-left:.6rem;height:18px;border-radius:5px;background:#f6f5f3;font:11px/18px 'DM Mono',monospace;color:#7a7672;padding:0 .6rem}
+.browser iframe{position:absolute;top:34px;left:0;width:1280px;height:calc((100% - 34px) * (1280 / var(--bw,1280)));border:0;transform-origin:0 0}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:3rem;align-items:end;margin-top:1rem}
+@media(max-width:920px){.duo{grid-template-columns:1fr}.duo .phone{max-width:260px;margin:0 auto}}
+.try{display:grid;grid-template-columns:minmax(0,1fr) 402px;gap:5rem;align-items:center}
+.try .phone{width:402px;max-width:100%;margin:0 auto}
+.try-cta{display:inline-flex;align-items:center;gap:1rem;margin-top:2.4rem;padding:1.1rem 2.2rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.26em;text-transform:uppercase;color:var(--ink);background:var(--gold);border:1px solid var(--gold);border-radius:999px;text-decoration:none;transition:background .35s,transform .35s;box-shadow:0 12px 32px oklch(74% 0.10 78 / .25)}
+.try-cta:hover{background:oklch(82% 0.11 78);transform:translateY(-1px)}
+.algo{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2rem;margin-top:1rem}
+.algo div{border-top:1px solid var(--line);padding-top:1.6rem}
+.algo .n{font-size:.56rem;letter-spacing:.3em;color:var(--gold);margin-bottom:1rem}
+.algo h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.35rem;margin-bottom:.6rem}
+.algo p{font-size:.7rem;line-height:1.85;color:var(--mist);opacity:.7}
+.algo code{font-size:.62rem;color:var(--ivory);opacity:.85}
+@media(max-width:920px){.try{grid-template-columns:1fr}.algo{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.algo{grid-template-columns:1fr}}
+@media(max-width:1100px){.hero-phones{display:none}}
+@media(max-width:920px){.split{grid-template-columns:1fr;gap:3rem}.split.rev>.split__media{order:0}}
+
+/* pathfinder */
+.opening__bg--ui{overflow:hidden;filter:none;background:#f3f2f2}
+.opening__bg--ui iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;pointer-events:none;filter:grayscale(.15)}
+.opening__bg--ui::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,oklch(8% 0.005 50 / .96) 0%,oklch(8% 0.005 50 / .82) 45%,oklch(8% 0.005 50 / .55) 100%),linear-gradient(0deg,oklch(8% 0.005 50) 0%,transparent 40%)}
+.browser--lg{aspect-ratio:16/9}
+.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.4rem;margin-top:3rem}
+@media(max-width:920px){.shots{grid-template-columns:1fr}}
+.arch{margin-top:1rem;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;border:1px solid var(--line);position:relative}
+.arch>div{padding:2rem 1.6rem;border-right:1px solid var(--line);position:relative;min-height:220px}
+.arch>div:last-child{border-right:0}
+.arch .layer{font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
+.arch h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.35rem;margin-bottom:.8rem;color:var(--ivory)}
+.arch ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem}
+.arch li{font-size:.66rem;line-height:1.6;color:var(--mist);opacity:.75;font-family:'DM Mono',monospace}
+.arch li b{color:var(--ivory);font-weight:400;opacity:1}
+.arch .arrow{position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;background:var(--bg,oklch(8% 0.005 50));border:1px solid var(--line-strong);color:var(--gold);font-size:10px;display:flex;align-items:center;justify-content:center;z-index:2}
+.arch .swap{margin-top:1.2rem;padding-top:1rem;border-top:1px dashed var(--line);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);line-height:1.7}
+.arch .swap b{color:var(--gold);font-weight:400}
+@media(max-width:1000px){.arch{grid-template-columns:1fr 1fr}.arch>div{border-bottom:1px solid var(--line)}.arch>div:nth-child(2n){border-right:0}.arch .arrow{display:none}}
+@media(max-width:560px){.arch{grid-template-columns:1fr}.arch>div{border-right:0}}
+.schema{margin-top:1rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.6rem}
+.tbl{border:1px solid var(--line);font-family:'DM Mono',monospace}
+.tbl header{padding:.9rem 1.2rem;border-bottom:1px solid var(--line-strong);display:flex;justify-content:space-between;align-items:baseline}
+.tbl header b{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.3rem;color:var(--ivory)}
+.tbl header span{font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.tbl ul{list-style:none;margin:0;padding:.6rem 0}
+.tbl li{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 1.2rem;font-size:.62rem;color:var(--mist)}
+.tbl li i{font-style:normal;color:var(--dim);font-size:.55rem}
+.tbl li.key{color:var(--gold)}
+.tbl li.fk{color:var(--ivory)}
+.tbl li.fk i{color:var(--gold)}
+@media(max-width:920px){.schema{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.schema{grid-template-columns:1fr}}
+.pipe{margin-top:1rem;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1.4rem}
+.pipe>div{border-top:1px solid var(--line);padding-top:1.4rem}
+.pipe .n{font-size:.52rem;letter-spacing:.3em;color:var(--gold);margin-bottom:.9rem}
+.pipe h4{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.25rem;margin-bottom:.5rem}
+.pipe p{font-size:.66rem;line-height:1.8;color:var(--mist);opacity:.7}
+.pipe code{display:block;margin-top:.8rem;font-size:.55rem;color:var(--dim);font-family:'DM Mono',monospace;word-break:break-all}
+@media(max-width:1000px){.pipe{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.pipe{grid-template-columns:1fr}}
+.code{margin-top:1rem;border:1px solid var(--line);background:oklch(96% 0.006 78 / .02);padding:1.8rem 2rem;font-family:'DM Mono',monospace;font-size:.62rem;line-height:1.9;color:var(--mist);overflow:auto;white-space:pre}
+.code .c{color:var(--dim)}.code .k{color:var(--gold)}.code .s{color:oklch(80% 0.06 150)}
+.swap-table td:nth-child(2){color:var(--ivory)}
+/* live component sheet — Pathfinder tokens scoped */
+.pf{--color-bg:#f3f2f2;--color-surface:#eae9e9;--color-text:#201e1d;--color-divider:#d1d0d0;--color-accent:#0088b0;--color-neutral-300:#d7d3d3;--color-neutral-500:#9b9797;--color-neutral-700:#605d5d;--pf-ddl:#d7263d;--pf-match:#1f8a4c;--pf-big:#6e44ff;--pf-easy:#1c7ed6;--pf-warn:#f5a524;background:var(--color-bg);color:var(--color-text);font-family:'Source Serif 4',Georgia,serif;padding:2.6rem 2.4rem;margin-top:1rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.4rem 3rem;box-shadow:0 32px 90px oklch(2% 0.005 240 / .55)}
+.pf .lab{font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.26em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:.9rem}
+.pf-mode{display:inline-flex;border:1px solid var(--color-divider);border-radius:2px;overflow:hidden;background:var(--color-surface)}
+.pf-mode-opt{font:inherit;font-size:.7rem;padding:.42rem .8rem;border:0;background:transparent;color:var(--color-neutral-700);cursor:pointer;display:inline-flex;align-items:center;gap:.3rem;border-right:1px solid var(--color-divider)}
+.pf-mode-opt:last-child{border-right:0}
+.pf-mode-opt[aria-checked="true"]{background:var(--color-text);color:var(--color-bg)}
+.pf-mode-opt[data-mode="focus"][aria-checked="true"]{background:var(--color-accent)}
+.pf-mode-opt:disabled{opacity:.45;cursor:not-allowed}
+.pf-reason{display:inline-flex;align-items:center;gap:.4rem;font-size:.66rem;padding:.28rem .6rem .28rem .4rem;border-radius:2px;border:1px solid var(--color-divider);background:#fff;margin:0 .4rem .4rem 0;position:relative;cursor:default}
+.pf-reason b{font-family:'DM Mono',monospace;font-size:.55rem;font-weight:400;padding:.1rem .3rem;border-radius:1px;color:#fff}
+.pf-reason[data-code="DL"] b{background:var(--pf-ddl)}.pf-reason[data-code="MT"] b{background:var(--pf-match)}.pf-reason[data-code="BT"] b{background:var(--pf-big)}.pf-reason[data-code="EZ"] b{background:var(--pf-easy)}
+.pf-why{position:absolute;left:0;top:calc(100% + 6px);background:var(--color-text);color:var(--color-bg);font-size:.62rem;padding:.4rem .6rem;border-radius:2px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:3}
+.pf-reason:hover .pf-why{opacity:1}
+.pf-ring{display:inline-flex;align-items:center;gap:.5rem;font-size:.9rem}
+.pf-ring-val{font-variant-numeric:tabular-nums}
+.pf-ddl{display:inline-block;font-family:'DM Mono',monospace;font-size:.62rem;padding:.2rem .5rem;border-radius:999px;border:1px solid var(--color-divider);color:var(--color-neutral-700)}
+.pf-ddl[data-urgent="true"]{border-color:var(--pf-ddl);color:var(--pf-ddl)}
+.pf-story{font:inherit;font-size:.68rem;display:inline-flex;gap:.4rem;align-items:baseline;padding:.3rem .6rem;border:1px solid var(--color-divider);border-radius:2px;background:#fff;cursor:pointer;margin:0 .4rem .4rem 0}
+.pf-story b{font-family:'DM Mono',monospace;font-weight:400;font-size:.55rem;color:var(--color-accent)}
+.pf-story[data-state="selected"]{border-color:var(--color-accent);background:#e9f8ff}
+.pf-para{font-size:.78rem;line-height:1.7;padding:.3rem 0}
+.pf-para[data-cited="false"]{text-decoration:underline wavy var(--pf-warn);text-decoration-thickness:1.5px;text-underline-offset:4px}
+.pf-para small{display:block;font-family:'DM Mono',monospace;font-size:.5rem;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:.35rem}
+.pf-job{border:1px solid var(--color-divider);background:#fff;padding:1rem 1.1rem;display:grid;grid-template-columns:1fr auto;gap:.6rem 1rem;align-items:start}
+.pf-job h5{font-weight:600;font-size:.9rem;margin:0}
+.pf-job .org{font-size:.7rem;color:var(--color-neutral-700)}
+.pf-job .row{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center}
+.pf .span2{grid-column:span 2}
+@media(max-width:920px){.pf{grid-template-columns:1fr}.pf .span2{grid-column:auto}}
+</style>
+
+<style id="navmenu-css">
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:#f4f1ea;border-radius:2px}
+.navmenu{position:fixed;inset:0;z-index:1900;background:rgba(14,14,15,0.95);backdrop-filter:saturate(180%) blur(26px);-webkit-backdrop-filter:saturate(180%) blur(26px);display:flex;flex-direction:column;padding:92px 2rem 3rem;opacity:0;pointer-events:none;transition:opacity .4s ease}
+.navmenu.open{opacity:1;pointer-events:auto}
+.navmenu__close{position:absolute;top:1.5rem;right:1.4rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:none;border:none;cursor:pointer;color:#f4f1ea;font-size:1.7rem;line-height:1;opacity:.85}
+.navmenu__links{list-style:none;display:flex;flex-direction:column;gap:.2rem;margin:0;padding:0}
+.navmenu__links li{border-bottom:1px solid rgba(255,255,255,0.09)}
+.navmenu__links a{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;letter-spacing:.02em;color:#f4f1ea;text-decoration:none;padding:1.05rem .2rem;opacity:.92;transform:translateY(14px);transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s}
+.navmenu.open .navmenu__links a{transform:translateY(0)}
+.navmenu__links a.active{color:oklch(73% 0.10 76);opacity:1}
+.navmenu__links li:nth-child(1) a{transition-delay:.05s}
+.navmenu__links li:nth-child(2) a{transition-delay:.10s}
+.navmenu__links li:nth-child(3) a{transition-delay:.15s}
+.navmenu__links li:nth-child(4) a{transition-delay:.20s}
+.navmenu__links li:nth-child(5) a{transition-delay:.25s}
+.navmenu__links li:nth-child(6) a{transition-delay:.30s}
+.topnav.compact .topnav__links{display:none!important}.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+
+<style id="global-header-css">
+.topnav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(22,22,23,0.72);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(255,255,255,0.08);height:64px;box-sizing:border-box}
+.topnav__brand{font-family:'Cormorant Garamond',Georgia,serif;font-weight:400;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:oklch(96% 0.006 78);opacity:.9;line-height:1.4;text-decoration:none}
+.topnav__brand em{font-style:italic;color:oklch(73% 0.10 76)}
+.topnav__links{display:flex;gap:2.4rem;list-style:none;align-items:center;margin:0;padding:0}
+.topnav__links a{font-family:'DM Mono',ui-monospace,monospace;font-size:.56rem;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,0.72);opacity:1;transition:color .25s;position:relative;padding:.3rem 0;text-decoration:none;white-space:nowrap}
+.topnav__links a:hover{color:#fff}
+.topnav__links a.active{color:#fff}
+.topnav__links a.active::after{content:'';position:absolute;left:50%;bottom:-.32rem;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:oklch(73% 0.10 76)}
+.topnav__toggle{display:none;width:34px;height:34px;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
+.topnav__toggle span{display:block;width:19px;height:1.5px;background:oklch(96% 0.006 78);border-radius:2px}
+.topnav.compact .topnav__links{display:none!important}
+.topnav.compact .topnav__toggle{display:flex}
+@media(max-width:900px){.topnav{padding:1rem 1.3rem}.topnav__links{display:none!important}.topnav__toggle{display:flex}}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
+  <ul class="topnav__links">
+    <li><a href="index.html" data-nav="home">Home</a></li>
+    <li><a href="Projects.html" data-nav="projects" class="active">Projects</a></li>
+    <li><a href="About.html" data-nav="about">About</a></li>
+    <li><a href="Photography.html" data-nav="photography">Photography</a></li>
+    <li><a href="Space.html" data-nav="space">Space</a></li>
+    <li><a href="index.html#contact" data-nav="contact">Contact</a></li>
+  </ul>
+  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="navmenu" id="navMenu" aria-hidden="true">
+  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
+  <ul class="navmenu__links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="Projects.html" class="active">Projects</a></li>
+    <li><a href="About.html">About</a></li>
+    <li><a href="Photography.html">Photography</a></li>
+    <li><a href="Space.html">Space</a></li>
+    <li><a href="index.html#contact">Contact</a></li>
+  </ul>
+</div>
+<script>
+(() => {
+  const toggle = document.getElementById('navToggle');
+  const menu   = document.getElementById('navMenu');
+  const close  = document.getElementById('navClose');
+  if (!toggle || !menu) return;
+  const open = () => { menu.classList.add('open'); menu.setAttribute('aria-hidden','false'); toggle.setAttribute('aria-expanded','true'); document.body.style.overflow='hidden'; };
+  const shut = () => { menu.classList.remove('open'); menu.setAttribute('aria-hidden','true'); toggle.setAttribute('aria-expanded','false'); document.body.style.overflow=''; };
+  toggle.addEventListener('click', open);
+  close && close.addEventListener('click', shut);
+  menu.querySelectorAll('a').forEach(a => a.addEventListener('click', shut));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+})();
+</script>
+
+<div class="read-progress" id="readProgress"></div>
+
+<section class="opening">
+  <div class="opening__bg opening__bg--ui"><iframe src="pathfinder-app/report.html" title="" tabindex="-1" aria-hidden="true" loading="lazy"></iframe></div>
+  <div class="opening__overlay"></div>
+  <div class="opening__inner">
+    <a href="Projects.html" class="back-link">← Back to Archive</a>
+    <div class="opening__eyebrow">Project · 01 · System Design</div>
+    <h1 class="opening__title"><em>Pathfinder</em></h1>
+    <p class="opening__concept">A weekly job-search agent for students. Fewer, better, you decide. Every Monday it reads the postings, picks twenty, explains each pick with a reason tag, and drafts materials that cite the student's own stories — then the student chooses a mode per job: Skip, Focus, Assist or Managed.</p>
+    <div class="opening__meta">
+      <div class="meta-item"><span class="meta-label">Year</span><span class="meta-value">2026</span></div>
+      <div class="meta-item"><span class="meta-label">Medium</span><span class="meta-value">Next.js · SQLite · Design System</span></div>
+      <div class="meta-item"><span class="meta-label">Discipline</span><span class="meta-value">System Design · Product · UI</span></div>
+      <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value">Runnable, pipeline mocked</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--quote">
+  <div class="section__inner narrow">
+    <div class="section-eyebrow">Principle</div>
+    <p class="big-quote">The agent proposes. <em>The student decides.</em> Nothing is sent that wasn't chosen, and nothing is written that isn't cited.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="section__inner">
+    <div class="browser browser--lg"><div class="browser__bar"><i></i><i></i><i></i><span>pathfinder.app / report</span></div><iframe src="pathfinder-app/report.html" title="Pathfinder — weekly report" loading="lazy"></iframe></div>
+    <div class="phone-cap" style="margin-top:1rem">The weekly report · twenty jobs, a reason on each, a mode switch on every row</div>
+  </div>
+</section>
+
+<!-- ═══ 01 ARCHITECTURE ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">01 · Architecture</div>
+    <h2 class="section-title">Five layers, one <em>swap line</em></h2>
+    <p class="section-lede">The UI never learns whether a report was produced by rules or by a model. Everything that will change lives behind three functions in <code>lib/report.ts</code>; everything that won't — accounts, schema, components — is built for real from day one.</p>
+    <div class="arch">
+      <div><div class="layer">Sources</div><h4>Postings</h4><ul><li><b>Greenhouse</b> JSON</li><li><b>Lever</b> · <b>Ashby</b></li><li>School packs (Handshake)</li><li>Watchlist orgs</li></ul><div class="swap">Now · <b>lib/seed.ts</b> 20 postings</div><span class="arrow">→</span></div>
+      <div><div class="layer">Worker</div><h4>Weekly pipeline</h4><ul><li>Fetch → dedupe</li><li>Embed + score</li><li>Reason tags DL MT BT EZ</li><li>Draft with citations</li></ul><div class="swap">Now · <b>generateReport()</b> rule-based</div><span class="arrow">→</span></div>
+      <div><div class="layer">Data</div><h4>SQLite → Postgres</h4><ul><li>users · directions</li><li>resumes · stories</li><li>jobs · report_jobs</li><li>applications</li></ul><div class="swap">Now · <b>better-sqlite3</b> · WAL</div><span class="arrow">→</span></div>
+      <div><div class="layer">Server</div><h4>Next.js actions</h4><ul><li>bcrypt + signed cookie</li><li>middleware redirect</li><li><b>actions.ts</b> — every write</li><li>setMode · saveParagraphs</li></ul><div class="swap">Real · no mock</div><span class="arrow">→</span></div>
+      <div><div class="layer">Client</div><h4>Pathfinder DS</h4><ul><li>Broadsheet base</li><li>tokens.css light/dark</li><li>ModeSwitch · ReasonTag</li><li>MatchRing · StoryChip</li></ul><div class="swap">Real · same classes as the DS</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 02 DATA MODEL ═══ -->
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">02 · Data Model</div>
+    <h2 class="section-title">Seven tables; the student's <em>stories</em> are the centre</h2>
+    <p class="section-lede">Directions rank what the student wants; résumés bind to directions; stories are the evidence. A report row is a scored (user, job, week); choosing a mode turns it into an application whose paragraphs carry <code>storyIds</code> — the citation that the UI enforces.</p>
+    <div class="schema">
+      <div class="tbl"><header><b>users</b><span>auth</span></header><ul><li class="key">id<i>pk</i></li><li>email<i>unique</i></li><li>password_hash<i>bcrypt</i></li><li>quota<i>20</i></li><li>report_day · channel<i>Mon · email</i></li><li>school_pack<i>berkeley</i></li></ul></div>
+      <div class="tbl"><header><b>directions</b><span>intent</span></header><ul><li class="key">id<i>pk</i></li><li class="fk">user_id<i>→ users</i></li><li>name · hint</li><li>rank<i>1..n</i></li><li class="fk">resume_id<i>→ resumes</i></li></ul></div>
+      <div class="tbl"><header><b>stories</b><span>evidence</span></header><ul><li class="key">id<i>pk</i></li><li class="fk">user_id<i>→ users</i></li><li>title · body</li><li>tags<i>csv</i></li></ul></div>
+      <div class="tbl"><header><b>jobs</b><span>shared</span></header><ul><li class="key">id<i>pk</i></li><li>org · title · type · url</li><li>deadline<i>iso</i></li><li>direction_hint</li><li>big_title · easy_get<i>flags</i></li><li>base_score<i>70</i></li></ul></div>
+      <div class="tbl"><header><b>report_jobs</b><span>weekly</span></header><ul><li class="key">id<i>pk</i></li><li class="fk">user_id · job_id<i>→</i></li><li>week<i>monday iso</i></li><li>score · reasons<i>json</i></li><li>rationale · story_ids<i>json</i></li><li>mode<i>null | skip | focus…</i></li><li class="key">unique(user, job, week)</li></ul></div>
+      <div class="tbl"><header><b>applications</b><span>chosen</span></header><ul><li class="key">id<i>pk</i></li><li class="fk">user_id · job_id<i>→</i></li><li>mode<i>focus | assist | managed</i></li><li>status<i>drafting → offer</i></li><li>paragraphs<i>[{text, storyIds}]</i></li><li>strategy<i>json</i></li><li class="key">unique(user, job)</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section--dark" style="padding-top:0">
+  <div class="section__inner">
+    <div class="shots">
+      <div><div class="browser"><div class="browser__bar"><i></i><i></i><i></i><span>pathfinder.app / login</span></div><iframe src="pathfinder-app/landing.html" title="Pathfinder — sign in" loading="lazy"></iframe></div><div class="phone-cap"><strong>Sign in</strong>Real accounts — bcrypt, signed cookie, middleware redirect</div></div>
+      <div><div class="browser"><div class="browser__bar"><i></i><i></i><i></i><span>pathfinder.app / tracker</span></div><iframe src="pathfinder-app/tracker.html" title="Pathfinder — tracker" loading="lazy"></iframe></div><div class="phone-cap"><strong>Tracker</strong>applications.status as a board — drafting → ready → submitted → interview → offer</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 03 PIPELINE ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">03 · The Weekly Pipeline</div>
+    <h2 class="section-title">From two hundred postings to <em>twenty</em>, each with a reason</h2>
+    <div class="pipe">
+      <div><div class="n">01</div><h4>Fetch</h4><p>Pull ATS feeds and school packs; dedupe by org + title; drop past deadlines.</p><code>seedJobsIfEmpty()</code></div>
+      <div><div class="n">02</div><h4>Score</h4><p>Base score plus a boost for matching the student's ranked directions; penalty for none.</p><code>base + max(0, 10 − 2·rank)</code></div>
+      <div><div class="n">03</div><h4>Tag</h4><p>Four reasons, each with a one-line why: closes soon, strong match, big title, easy to get.</p><code>DL · MT · BT · EZ</code></div>
+      <div><div class="n">04</div><h4>Cite</h4><p>Find up to two stories whose tags appear in the posting; they become the rationale's evidence.</p><code>storyIds: [3, 7]</code></div>
+      <div><div class="n">05</div><h4>Rank &amp; cut</h4><p>Deadlines within 7 days first, then score. Keep the quota.</p><code>.slice(0, quota)</code></div>
+      <div><div class="n">06</div><h4>Draft on demand</h4><p>Materials are written only when a mode is chosen — one paragraph per cited story, one deliberately uncited.</p><code>ensureMaterials()</code></div>
+    </div>
+    <div class="code" style="margin-top:3rem"><span class="c">// lib/report.ts — the swap line. Replace the body, keep the signature; the UI does not change.</span>
+<span class="k">export function</span> generateReport(userId, week = currentWeek(), quota = <span class="s">20</span>) { <span class="c">/* rules → embeddings + Claude rerank */</span> }
+<span class="k">export function</span> ensureMaterials(userId, jobId) { <span class="c">/* template → Claude drafting from the Story Bank, with storyIds */</span> }
+<span class="k">export function</span> setMode(userId, reportId, mode) { <span class="c">/* skip deletes the draft; focus | assist | managed upserts an application */</span> }</div>
+  </div>
+</section>
+
+<!-- ═══ 04 STATES & MODES ═══ -->
+<section class="section">
+  <div class="section__inner">
+    <div class="split">
+      <div>
+        <div class="section-eyebrow">04 · Modes &amp; State</div>
+        <h2 class="section-title">Four modes decide how much the agent <em>does</em></h2>
+        <p class="section-lede">A mode is set per job on the report. It is the only place where autonomy is granted, and it is granted one posting at a time.</p>
+        <div class="kv">
+          <div><span>Skip</span><p>Deletes any draft. The job stays in the report as declined so it isn't re-proposed.</p></div>
+          <div><span>Focus</span><p>The student writes; the agent supplies strategy, story chips and the posting's own words.</p></div>
+          <div><span>Assist</span><p>The agent drafts every paragraph with citations; the student edits and submits.</p></div>
+          <div><span>Managed <em style="color:var(--dim)">· locked</em></span><p>Phase 3: Playwright submits on Greenhouse / Lever / Ashby. Shown with a lock so the boundary is visible now.</p></div>
+        </div>
+      </div>
+      <div class="split__media">
+        <div class="browser" style="aspect-ratio:4/3;margin-bottom:1.6rem"><div class="browser__bar"><i></i><i></i><i></i><span>pathfinder.app / jobs / 1</span></div><iframe src="pathfinder-app/workspace.html" title="Pathfinder — workspace" loading="lazy"></iframe></div>
+        <div class="code" style="margin-top:0"><span class="c">// application.status</span>
+drafting → ready → submitted → interview → rejected | offer
+
+<span class="c">// gate before "ready": every paragraph must cite a story</span>
+<span class="k">const</span> canSubmit = paragraphs.every(p => p.storyIds.length > <span class="s">0</span>);
+<span class="c">// uncited paragraphs get the amber underline and block submit</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 05 DESIGN SYSTEM ═══ -->
+<section class="section section--dark">
+  <div class="section__inner">
+    <div class="section-eyebrow">05 · Design System · Live</div>
+    <h2 class="section-title">Seven signature components, one <em>class contract</em></h2>
+    <p class="section-lede">Pathfinder's semantic layer sits on the Broadsheet base: same class names and <code>data-*</code> attributes in the design system and in React, so <code>bundle.css</code> applies unchanged. These are real, rendered from the tokens — hover a reason tag.</p>
+    <div class="pf">
+      <div><div class="lab">ModeSwitch · per job</div><div class="pf-mode" role="radiogroup"><button class="pf-mode-opt" data-mode="skip" aria-checked="false">Skip</button><button class="pf-mode-opt" data-mode="focus" aria-checked="true">Focus</button><button class="pf-mode-opt" data-mode="assist" aria-checked="false">Assist</button><button class="pf-mode-opt" data-mode="managed" aria-checked="false" disabled>Managed <svg width="10" height="10" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 80h-32V56a48 48 0 0 0-96 0v24H48a16 16 0 0 0-16 16v112a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V96a16 16 0 0 0-16-16ZM96 56a32 32 0 0 1 64 0v24H96Z"></path></svg></button></div></div>
+      <div><div class="lab">ReasonTag · with why</div><span class="pf-reason" data-code="DL"><b>DL</b><span>Closes soon</span><span class="pf-why">Deadline in 3 days</span></span><span class="pf-reason" data-code="MT"><b>MT</b><span>Strong match</span><span class="pf-why">Matches your #1 direction, Product</span></span><span class="pf-reason" data-code="BT"><b>BT</b><span>Big title</span><span class="pf-why">Stripe is on the watchlist</span></span><span class="pf-reason" data-code="EZ"><b>EZ</b><span>Easy to get</span><span class="pf-why">On-campus; no cover letter</span></span></div>
+      <div><div class="lab">MatchRing · DeadlineBadge</div><span class="pf-ring"><svg width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" fill="none" stroke="#d7d3d3" stroke-width="3"></circle><circle cx="22" cy="22" r="19" fill="none" stroke="#1f8a4c" stroke-width="3" stroke-linecap="round" stroke-dasharray="105 120" transform="rotate(-90 22 22)"></circle></svg><span class="pf-ring-val">88</span></span> &nbsp; <span class="pf-ddl" data-urgent="true">3d</span> <span class="pf-ddl" data-urgent="false">21d</span></div>
+      <div><div class="lab">StoryChip · the citation</div><button class="pf-story" data-state="selected"><b>#3</b><span>Shipped the club site in a week</span></button><button class="pf-story"><b>#7</b><span>Ran a 40-person survey</span></button></div>
+      <div class="span2"><div class="lab">Paragraph · cited vs uncited</div><div class="pf-para" data-cited="true">I built the club's website in a week with two friends; it now handles sign-ups for 300 members.<small>cites #3</small></div><div class="pf-para" data-cited="false">I am a fast learner who thrives in collaborative environments and brings energy to every team.<small>uncited · blocks submit</small></div></div>
+      <div class="span2"><div class="lab">Job row · the report unit</div><div class="pf-job"><div><h5>Product Intern, Summer 2027</h5><div class="org">Stripe · Internship · closes Oct 3</div></div><span class="pf-ring"><svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="12" fill="none" stroke="#d7d3d3" stroke-width="2"></circle><circle cx="14" cy="14" r="12" fill="none" stroke="#1f8a4c" stroke-width="2" stroke-linecap="round" stroke-dasharray="66 76" transform="rotate(-90 14 14)"></circle></svg><span class="pf-ring-val" style="font-size:.75rem">88</span></span><div class="row"><span class="pf-reason" data-code="DL"><b>DL</b><span>Closes soon</span></span><span class="pf-reason" data-code="MT"><b>MT</b><span>Strong match</span></span><span class="pf-ddl" data-urgent="true">3d</span></div></div></div>
+      <div><div class="lab">Tokens</div><div style="display:flex;gap:.5rem;flex-wrap:wrap"><i style="width:26px;height:26px;background:#0088b0;display:block" title="accent"></i><i style="width:26px;height:26px;background:#d6006c;display:block" title="accent-2"></i><i style="width:26px;height:26px;background:#d7263d;display:block" title="ddl"></i><i style="width:26px;height:26px;background:#1f8a4c;display:block" title="match"></i><i style="width:26px;height:26px;background:#6e44ff;display:block" title="big"></i><i style="width:26px;height:26px;background:#1c7ed6;display:block" title="easy"></i><i style="width:26px;height:26px;background:#f5a524;display:block" title="warn"></i></div><div class="lab" style="margin:.8rem 0 0">Source Serif 4 · 5px grid · radius 1–4px</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 06 MOCK → REAL ═══ -->
+<section class="section">
+  <div class="section__inner">
+    <div class="section-eyebrow">06 · Roadmap · What is mocked, and where the real thing goes</div>
+    <h2 class="section-title">Ship the shell first; <em>swap</em> the engine</h2>
+    <table class="comp-table swap-table">
+      <thead><tr><th>Mocked now</th><th>Real version</th><th>Phase</th></tr></thead>
+      <tbody>
+        <tr><td>seed.ts postings</td><td>Worker fetching Greenhouse / Lever / Ashby JSON + school packs</td><td>1</td></tr>
+        <tr><td>generateReport()</td><td>Embeddings + Claude rerank</td><td>1</td></tr>
+        <tr><td>ensureMaterials()</td><td>Claude drafting from the Story Bank, with storyIds citations</td><td>1</td></tr>
+        <tr><td>Résumé summary box</td><td>PDF upload + parsing</td><td>2</td></tr>
+        <tr><td>Autofill (disabled)</td><td>Browser extension</td><td>2</td></tr>
+        <tr><td>Managed (locked)</td><td>Playwright submit on Greenhouse / Lever / Ashby</td><td>3</td></tr>
+        <tr><td>SQLite</td><td>Supabase Postgres — swap lib/db.ts, keep the queries</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section section--closing">
+  <div class="section__inner narrow center">
+    <div class="section-eyebrow">Reflection</div>
+    <h2 class="closing-title">Build the decisions first.<br>The intelligence<br>can arrive later.</h2>
+    <p class="closing-body">Accounts, schema, components and the mode boundary are real today. <em>Three functions stand where the model will go.</em></p>
+    <div class="closing-rule"></div>
+    <p class="closing-sig">— 2026 · Zhang Yichi</p>
+  </div>
+</section>
+
+<section class="next-project">
+  <a href="Sitescape.html" class="next-link">
+    <span class="next-label">Next Project</span>
+    <h3 class="next-title"><em>Sitescape</em></h3>
+    <span class="next-arrow">→</span>
+  </a>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="site-footer">
+  <div>
+    <div class="footer-brand">Zhang <em>Yichi</em></div>
+    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
+  </div>
+  <div>
+    <h4>Sitemap</h4>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="Projects.html" class="active">Projects</a></li>
+      <li><a href="Photography.html">Photography</a></li>
+    </ul>
+  </div>
+  <div>
+    <h4>Connect</h4>
+    <ul>
+      <li><a href="index.html#contact">Email</a></li>
+      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
+      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+  <div class="copyright">
+    <span>© 2026 Zhang Yichi</span>
+    <span>All works belong to Yichi</span>
+  </div>
+</footer>
+
+<script src="project-detail.js"></script>
+<script>
+
+</script>
+
+<script>
+/* Show the "=" menu exactly when the header can no longer fit its links. */
+(() => {
+  const nav = document.querySelector('.topnav');
+  if (!nav) return;
+  const links = nav.querySelector('.topnav__links');
+  const brand = nav.querySelector('.topnav__brand');
+  const toggle = nav.querySelector('.topnav__toggle');
+  if (!links || !toggle) return;
+  let need = 0;
+  function measure() {
+    nav.classList.remove('compact');
+    const lw = links.scrollWidth;
+    const bw = brand ? brand.offsetWidth : 0;
+    const cs = getComputedStyle(nav);
+    const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    if (lw > 0) need = bw + lw + pad + 48;
+  }
+  function apply() { if (!need) measure(); nav.classList.toggle('compact', window.innerWidth < need); }
+  function refresh() { measure(); apply(); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  window.addEventListener('load', refresh);
+  window.addEventListener('resize', apply);
+  refresh();
+})();
+</script>
+<script>(()=>{const fitOne=el=>{const f=el.querySelector('iframe');if(!f)return;const w=el.clientWidth,hh=el.clientHeight;if(!(w>0))return;if(el.matches('.phone,.cover-phone')){f.style.transform='scale('+(w/402)+')';}else if(el.matches('.opening__bg--ui')){const s=Math.max(w/1440,hh/900);if(s>0)f.style.transform='scale('+s+')';}else{const bar=el.querySelector('.browser__bar,.cover-browser__bar');const bh=bar?bar.offsetHeight:0;const s=w/1280;if(!(s>0))return;f.style.transform='scale('+s+')';f.style.height=Math.max(0,(hh-bh)/s)+'px';}};const all=()=>document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(fitOne);const ro=new ResizeObserver(es=>es.forEach(e=>fitOne(e.target)));document.querySelectorAll('.phone,.cover-phone,.browser,.cover-browser__frame,.opening__bg--ui').forEach(el=>ro.observe(el));all();requestAnimationFrame(all);setTimeout(all,300);addEventListener('load',all);addEventListener('resize',all);})();</script>
+</body>
+</html>
