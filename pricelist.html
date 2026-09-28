@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Price List — Wong Jona</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#fff;color:#111}
+body{font-family:'Cormorant Garamond',serif;-webkit-font-smoothing:antialiased}
+a{color:#111;text-decoration:none}a:hover{color:#111;text-decoration:underline}
+.topnav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.08)}
+.topnav__left{display:flex;align-items:center;gap:1.6rem}
+.back{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:#111;opacity:.7}.back:hover{opacity:1;text-decoration:none}
+.topnav__brand{font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:#111}
+.bp-lang{display:flex;align-items:center;gap:.5rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase}
+.bp-lang__btn{background:none;border:none;padding:0;color:rgba(0,0,0,.45);font:inherit;letter-spacing:inherit;cursor:pointer;transition:color .2s}
+.bp-lang__btn.is-on,.bp-lang__btn:hover{color:#111}.bp-lang__sep{color:rgba(0,0,0,.3)}
+.bp-price{background:#fff;color:#111;padding:16vh 6vw 14vh;max-width:1100px;margin:0 auto}
+.bp-eyebrow{display:block;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.34em;text-transform:uppercase;color:rgba(0,0,0,.55);margin-bottom:.9rem}
+.bp-price__title{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(2.4rem,5vw,4rem);line-height:1;margin:0 0 6vh;color:#111}
+.bp-price__block{border-top:1px solid rgba(0,0,0,.14);padding:3.2rem 0}
+.bp-price__label{display:flex;align-items:baseline;gap:1.2rem;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;color:#111;margin-bottom:2.2rem}
+.bp-price__note{color:rgba(0,0,0,.5);letter-spacing:.2em}
+.bp-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2.4rem 3rem;margin-bottom:2.4rem}
+.bp-tier h3{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:1.5rem;margin:0 0 .6rem;color:#111}
+.bp-tier__price{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:300;line-height:1;color:#111;margin-bottom:.8rem}.bp-tier__price span{font-size:.95rem;color:rgba(0,0,0,.55)}
+.bp-tier p{font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:1.55;color:rgba(0,0,0,.7);margin:0;text-wrap:pretty}
+.bp-fine{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.6;color:rgba(0,0,0,.55);margin:.3rem 0}
+.bp-styles{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.7rem}
+.bp-styles li{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:#111;border:1px solid rgba(0,0,0,.3);border-radius:999px;padding:.5rem 1.1rem}
+.bp-steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:2rem 3rem;counter-reset:s}
+.bp-steps li{counter-increment:s;display:flex;flex-direction:column;gap:.4rem;font-family:'Cormorant Garamond',serif}
+.bp-steps li::before{content:counter(s,decimal-leading-zero);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.3em;color:rgba(0,0,0,.5);margin-bottom:.4rem}
+.bp-steps strong{font-weight:400;font-size:1.3rem;color:#111}.bp-steps span{font-size:1.02rem;line-height:1.55;color:rgba(0,0,0,.65)}
+
+.bp-btn{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:#111;text-decoration:none;border:1px solid #111;padding:.85rem 1.8rem;border-radius:999px;transition:background .25s,color .25s}
+.bp-btn:hover{background:#111;color:#fff;text-decoration:none}
+.bp-contact{margin:6vh 0 0;display:flex;flex-direction:column;align-items:center;gap:1.6rem}
+.bp-contact__row{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem 2rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;color:rgba(0,0,0,.65)}
+.bp-contact__row a{color:#111;border-bottom:1px solid rgba(0,0,0,.35)}.bp-contact__row a:hover{text-decoration:none;border-color:#111}
+html[lang="zh"] .bp-price__title,html[lang="zh"] .bp-tier h3,html[lang="zh"] .bp-steps strong,html[lang="zh"] .bp-tier p,html[lang="zh"] .bp-steps span,html[lang="zh"] .bp-fine,html[lang="zh"] .bp-styles li{font-family:'KaiTi','楷体','STKaiti','Cormorant Garamond',serif}
+@media(max-width:640px){.topnav{padding:1rem 1.3rem}.topnav__left{gap:1rem}}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav__left"><a class="back" href="bookphoto.html" data-i18n="back">← Back</a><a class="topnav__brand" href="bookphoto.html">Wong Jona</a></div><div class="bp-lang"><button type="button" class="bp-lang__btn is-on" data-lang="en">EN</button><span class="bp-lang__sep">/</span><button type="button" class="bp-lang__btn" data-lang="zh">中文</button></div></nav>
+<section class="bp-price" id="pricing">
+  <div class="bp-price__head"><span class="bp-eyebrow" data-i18n="priceEyebrow">Berkeley, CA · Photography</span><h2 class="bp-price__title" data-i18n="priceTitle">Price List</h2></div>
+  <div class="bp-price__block">
+    <div class="bp-price__label"><span data-i18n="sessions">Sessions</span><span class="bp-price__note" data-i18n="perHour">Rates per hour</span></div>
+    <div class="bp-tiers">
+      <div class="bp-tier"><h3 data-i18n="solo">Solo Portrait</h3><div class="bp-tier__price">$149<span data-i18n="hr"> / hour</span></div><p data-i18n="soloD">One person, one hour of dedicated shooting.</p></div>
+      <div class="bp-tier"><h3 data-i18n="duo">Duo &amp; Trio</h3><div class="bp-tier__price">$189<span data-i18n="hr"> / hour</span></div><p data-i18n="duoD">Group shots plus individual portraits for each person.</p></div>
+      <div class="bp-tier"><h3 data-i18n="group">Group</h3><div class="bp-tier__price">$290<span data-i18n="hr"> / hour</span></div><p data-i18n="groupD">Teams, clubs, friends, and events of four or more.</p></div>
+    </div>
+    <p class="bp-fine" data-i18n="overtime">Need more time? Overtime is billed in 20-minute increments.</p>
+    <p class="bp-fine" data-i18n="travel">Beyond Berkeley? Available across the Bay Area &amp; SF — travel fee $20–50 depending on location.</p>
+  </div>
+  <div class="bp-price__block">
+    <div class="bp-price__label"><span data-i18n="styles">Styles</span></div>
+    <ul class="bp-styles"><li data-i18n="s1">Classic Graduation</li><li data-i18n="s2">Classic Portrait</li><li data-i18n="s3">Professional Headshot</li><li data-i18n="s4">Fine Art</li><li data-i18n="s5">Street</li><li data-i18n="s6">Something else? Let's customize.</li></ul>
+  </div>
+  <div class="bp-price__block">
+    <div class="bp-price__label"><span data-i18n="how">How it works</span></div>
+    <ol class="bp-steps">
+      <li><strong data-i18n="h1">50% deposit to book</strong><span data-i18n="h1d">Balance due on the day of the shoot.</span></li>
+      <li><strong data-i18n="h2">One free reschedule</strong><span data-i18n="h2d">Plans change — move your date once at no charge.</span></li>
+      <li><strong data-i18n="h3">All photos within 48 hours</strong><span data-i18n="h3d">Every original file from the session, delivered to you.</span></li>
+      <li><strong data-i18n="h4">Retouching available</strong><span data-i18n="h4d">Professional retouching: $30 for 10 photos.</span></li>
+    </ol>
+  </div>
+  <div class="bp-contact"><a class="bp-btn" href="booking.html" data-i18n="bookCta">Book your session</a><div class="bp-contact__row"><span>Email · <a href="mailto:jonaphoto@outlook.com">jonaphoto@outlook.com</a></span><span>WeChat · WongJona</span><span>IG · <a href="https://instagram.com/moonquake_no.x" target="_blank" rel="noopener">moonquake_no.x</a></span></div></div>
+</section>
+<script>
+(()=>{
+const T={
+ en:{heroSub:'Photography · Berkeley, CA',book:'Book',price:'Price List',vol1:'Volume 01',vol2:'Volume 02',vol3:'Volume 03',portrait:'Portrait',landscape:'Landscape',humanity:'Humanity',open:'Open Book →',priceEyebrow:'Berkeley, CA · Photography',priceTitle:'Price List',sessions:'Sessions',perHour:'Rates per hour',solo:'Solo Portrait',duo:'Duo & Trio',group:'Group',hr:' / hour',soloD:'One person, one hour of dedicated shooting.',duoD:'Group shots plus individual portraits for each person.',groupD:'Teams, clubs, friends, and events of four or more.',overtime:'Need more time? Overtime is billed in 20-minute increments.',travel:'Beyond Berkeley? Available across the Bay Area & SF — travel fee $20–50 depending on location.',styles:'Styles',s1:'Classic Graduation',s2:'Classic Portrait',s3:'Professional Headshot',s4:'Fine Art',s5:'Street',s6:"Something else? Let's customize.",how:'How it works',h1:'50% deposit to book',h1d:'Balance due on the day of the shoot.',h2:'One free reschedule',h2d:'Plans change — move your date once at no charge.',h3:'All photos within 48 hours',h3d:'Confirmation within 48 hours. Every original file from the session, delivered to you.',h4:'Retouching available',h4d:'Professional retouching: $30 for 10 photos.',bookCta:'Book your session'},
+ zh:{heroSub:'摄影 · 加州伯克利',book:'预约',price:'价目表',vol1:'第一卷',vol2:'第二卷',vol3:'第三卷',portrait:'人像',landscape:'风景',humanity:'人文',open:'打开 →',priceEyebrow:'加州伯克利 · 摄影',priceTitle:'价目表',sessions:'拍摄',perHour:'按小时计费',solo:'单人写真',duo:'双人 / 三人',group:'多人 / 团体',hr:' / 小时',soloD:'一人，一小时专属拍摄。',duoD:'合照加每人单独的个人照。',groupD:'四人及以上的团队、社团、朋友与活动。',overtime:'需要更多时间？超时按每 20 分钟计费。',travel:'伯克利以外？湾区与旧金山均可，视地点收取 $20–50 交通费。',styles:'风格',s1:'经典毕业照',s2:'经典人像',s3:'职业形象照',s4:'艺术写真',s5:'街拍',s6:'其他想法？一起定制。',how:'流程',h1:'预付 50% 定金',h1d:'余款拍摄当天付清。',h2:'一次免费改期',h2d:'计划有变，可免费改期一次。',h3:'48 小时内交付全部照片',h3d:'本次拍摄的所有原片全部交付。',h4:'可选精修',h4d:'专业精修：$30 / 10 张。',bookCta:'预约拍摄'}
+};
+T.en.back='← Back';T.zh.back='← 返回';
+const apply=l=>{document.documentElement.lang=l;document.querySelectorAll('[data-i18n]').forEach(e=>{const s=T[l][e.dataset.i18n];if(s!=null)e.textContent=s;});document.querySelectorAll('.bp-lang__btn').forEach(b=>b.classList.toggle('is-on',b.dataset.lang===l));try{localStorage.setItem('bp-lang',l)}catch(_){}};
+document.querySelectorAll('.bp-lang__btn').forEach(b=>b.addEventListener('click',()=>apply(b.dataset.lang)));
+let l='en';try{l=localStorage.getItem('bp-lang')||'en'}catch(_){}
+apply(l);
+})();
+</script>
+</body>
+</html>

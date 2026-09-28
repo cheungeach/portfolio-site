@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="page-loader.js"></script>
+<script src="bookphoto-loader.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Photography — Zhang Yichi</title>
+<title>Wong Jona — Photography</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
@@ -353,7 +353,7 @@ html, body {
 /* ── Intro scroll runway ── */
 .photo-intro {
   position: relative;
-  height: 320vh;
+  height: 100vh;
 }
 .photo-intro__sticky {
   position: sticky;
@@ -450,12 +450,15 @@ html, body {
 .prow__cta{margin-left:auto;font-size:.55rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.55);border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:.25rem;transition:color .4s}
 .prow:hover .prow__cta{color:#fff}
 .prow__track{display:flex;overflow:hidden;width:100%}
-.prow__strip{display:flex;gap:1.2rem;padding-right:1.2rem;flex:none;animation:prowScroll var(--dur,60s) linear infinite}
+.prow__strip{display:flex;gap:1.2rem;padding-right:1.2rem;flex:none;will-change:transform;animation:prowScroll var(--dur,60s) linear infinite;animation-play-state:paused}
+.prow.ready .prow__strip{animation-play-state:running}
+.prow__strip img{opacity:0;transition:opacity .6s ease}
+.prow.ready .prow__strip img{opacity:1}
 .prow--rev .prow__strip{animation-direction:reverse}
 .prow:hover .prow__strip{animation-play-state:paused}
 .prow__strip img{height:clamp(180px,26vh,320px);width:auto;flex:none;display:block;filter:saturate(.85) brightness(.82);transition:filter .5s ease}
 .prow:hover .prow__strip img{filter:none}
-@keyframes prowScroll{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@keyframes prowScroll{from{transform:translateX(0)}to{transform:translateX(calc(-1 * var(--w,100%)))}}
 @media (prefers-reduced-motion:reduce){.prow__strip{animation:none}}
 .book-anchors{position:fixed;left:50%;top:50%;width:0;height:0;overflow:visible;pointer-events:none}
 .book-anchors .book{position:absolute;width:0;height:0;opacity:0}
@@ -1105,7 +1108,8 @@ html, body {
   line-height: 1.4;
   text-decoration: none;
 }
-.topnav__brand em { font-style: italic; color: var(--gold); }
+.topnav__brand em { font-style: italic; color: #fff; }
+.topnav__brand{color:#fff}
 
 .topnav__links {
   display: flex;
@@ -1603,6 +1607,28 @@ html, body {
 .copyright{grid-column:1 / -1;padding-top:4rem;margin-top:4rem;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;color:var(--dim,#7a746b)}
 @media(max-width:880px){.site-footer{grid-template-columns:1fr;gap:2.5rem;padding:4vh 1.5rem}.copyright{flex-direction:column;gap:1rem}}
 
+.site-footer--min{display:block;padding:4vh 3rem}
+.topnav__brand{color:#fff!important;opacity:1}
+.bp-lang{display:flex;align-items:center;gap:.5rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:#fff}
+.bp-lang__btn{background:none;border:none;padding:0;color:rgba(255,255,255,.5);font:inherit;letter-spacing:inherit;cursor:pointer;transition:color .2s}
+.bp-lang__btn.is-on,.bp-lang__btn:hover{color:#fff}.bp-lang__sep{color:rgba(255,255,255,.3)}
+.bp-hero{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1.1rem;padding:0 6vw;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.15) 50%,rgba(0,0,0,.55))}
+.bp-hero__name{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2.6rem,7vw,6rem);line-height:1;letter-spacing:.04em;color:#fff;margin:0}
+.bp-hero__sub{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.34em;text-transform:uppercase;color:#fff;margin:0;opacity:.85}
+.bp-hero__actions{display:flex;gap:1rem;margin-top:1.4rem;flex-wrap:wrap;justify-content:center}
+.bp-btn{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,.7);padding:.85rem 1.8rem;border-radius:999px;transition:background .25s,color .25s}
+.bp-btn:hover{background:#fff;color:#000}
+.bp-icons{display:flex;gap:1.4rem;margin-top:2.2rem}
+.bp-icon{position:relative;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;color:#fff;background:none;border:none;cursor:pointer;opacity:.85;transition:opacity .2s,background .2s}
+.bp-icon:hover{opacity:1;background:rgba(255,255,255,.12)}
+.bp-icon__tip{position:absolute;top:calc(100% + .4rem);left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.2em;color:#fff;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s}
+.bp-icon:hover .bp-icon__tip,.bp-icon.copied .bp-icon__tip{opacity:1}
+.bp-contact{margin:6vh 0 0;display:flex;flex-direction:column;align-items:center;gap:1.6rem}
+.bp-contact__row{display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem 2rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;color:rgba(255,255,255,.7)}
+.bp-contact__row a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35)}.bp-contact__row a:hover{color:#fff;border-color:#fff}
+.bp-price__cta{margin:5vh 0 0;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:#fff;text-align:center}
+html[lang="zh"] .bp-hero__name,html[lang="zh"] .bp-price__title,html[lang="zh"] .bp-tier h3,html[lang="zh"] .bp-steps strong,html[lang="zh"] .bp-tier p,html[lang="zh"] .bp-steps span,html[lang="zh"] .bp-fine,html[lang="zh"] .bp-styles li,html[lang="zh"] .prow__title{font-family:'KaiTi','楷体','STKaiti','Cormorant Garamond',serif}
+.pg-loader__brand{white-space:nowrap}
 </style>
 
 <style id="navmenu-css">
@@ -1648,31 +1674,11 @@ html, body {
      GLOBAL TOP NAV — identical on every page
 ═══════════════════════════════════════════ -->
 <nav class="topnav">
-  <a href="index.html" class="topnav__brand">Zhang <em>Yichi</em></a>
-  <ul class="topnav__links">
-    <li><a href="index.html" data-nav="home">Home</a></li>
-    <li><a href="Projects.html" data-nav="projects">Projects</a></li>
-    <li><a href="About.html" data-nav="about">About</a></li>
-    <li><a href="Photography.html" data-nav="photography" class="active">Photography</a></li>
-    <li><a href="Space.html" data-nav="space">Space</a></li>
-    <li><a href="index.html#contact" data-nav="contact">Contact</a></li>
-  </ul>
-  <button class="topnav__toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
-    <span></span><span></span>
-  </button>
+  <span class="topnav__brand">Wong Jona</span>
+  <div class="bp-lang" role="group" aria-label="Language"><button type="button" class="bp-lang__btn is-on" data-lang="en">EN</button><span class="bp-lang__sep">/</span><button type="button" class="bp-lang__btn" data-lang="zh">中文</button></div>
 </nav>
 
-<div class="navmenu" id="navMenu" aria-hidden="true">
-  <button class="navmenu__close" id="navClose" aria-label="Close">&times;</button>
-  <ul class="navmenu__links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="Projects.html">Projects</a></li>
-    <li><a href="About.html">About</a></li>
-    <li><a href="Photography.html" class="active">Photography</a></li>
-    <li><a href="Space.html">Space</a></li>
-    <li><a href="index.html#contact">Contact</a></li>
-  </ul>
-</div>
+
 <script>
 (() => {
   const toggle = document.getElementById('navToggle');
@@ -1697,11 +1703,18 @@ html, body {
         <video class="photo-intro__video" id="photoIntroVid"
                src="uploads/start.mp4"
                autoplay muted loop playsinline></video>
-        <div class="photo-intro__dim" id="photoIntroDim"></div>
-
-        <!-- Final centered composition: only the intro paragraph -->
-        <div class="photo-intro__final" id="photoFinal">
-          <p class="photo-intro__lede">National Geographic Photography Award recipient and finalist in the World Meteorological Organization Calendar Competition. I specialize in capturing unexpected and emotionally charged moments, pursuing storytelling-driven imagery — even within commercial photography.</p>
+        <div class="bp-hero" id="bpHero">
+          <h1 class="bp-hero__name">Wong Jona</h1>
+          <p class="bp-hero__sub" data-i18n="heroSub">Photography · Berkeley, CA</p>
+          <div class="bp-hero__actions">
+            <a class="bp-btn" href="booking.html" data-i18n="book">Book</a>
+            <a class="bp-btn" href="pricelist.html" data-i18n="price">Price List</a>
+          </div>
+          <div class="bp-icons" aria-label="Contact">
+<a class="bp-icon" href="mailto:jonaphoto@outlook.com" title="jonaphoto@outlook.com" aria-label="Email"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></a>
+<button class="bp-icon" type="button" data-wx="WongJona" title="WeChat: WongJona" aria-label="WeChat"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9.5 4C5.9 4 3 6.5 3 9.6c0 1.8 1 3.4 2.5 4.4L5 16.5l2.6-1.4c.6.2 1.2.3 1.9.3"></path><path d="M14.5 8.5c3.3 0 6 2.2 6 5 0 1.5-.8 2.9-2.1 3.8l.5 2.2-2.3-1.2c-.7.2-1.4.3-2.1.3-3.3 0-6-2.2-6-5s2.7-5.1 6-5.1z"></path></svg><span class="bp-icon__tip">WongJona</span></button>
+<a class="bp-icon" href="https://instagram.com/moonquake_no.x" target="_blank" rel="noopener" title="@moonquake_no.x" aria-label="Instagram"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r=".9" fill="currentColor" stroke="none"></circle></svg></a>
+</div>
         </div>
       </div>
     </div>
@@ -1709,16 +1722,16 @@ html, body {
     <!-- Three category rows, each a looping strip -->
     <div class="photo-shelf" id="photo-books">
       <div class="prow" data-book="portrait" role="button" tabindex="0" aria-label="Open Portrait">
-        <div class="prow__head"><span class="prow__label">Volume 01</span><h3 class="prow__title">Portrait</h3><span class="prow__cta">Open Book →</span></div>
-        <div class="prow__track"><div class="prow__strip"><img src="uploads/portrait%20photo1.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p12.jpg" alt="" loading="lazy"><img src="uploads/portrait%20photo3.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p15.jpg" alt="" loading="lazy"><img src="uploads/portrait%20photo5.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p18.jpg" alt="" loading="lazy"><img src="uploads/portrait%20photo7.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p21.jpg" alt="" loading="lazy"><img src="photos/portrait/p24.jpg" alt="" loading="lazy"><img src="photos/portrait/p27.jpg" alt="" loading="lazy"></div><div class="prow__strip" aria-hidden="true"><img src="uploads/portrait%20photo1.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p12.jpg" alt="" loading="lazy"><img src="uploads/portrait%20photo3.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p15.jpg" alt="" loading="lazy"><img src="uploads/portrait%20photo5.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p18.jpg" alt="" loading="lazy"><img src="uploads/portrait%20photo7.JPG.jpg" alt="" loading="lazy"><img src="photos/portrait/p21.jpg" alt="" loading="lazy"><img src="photos/portrait/p24.jpg" alt="" loading="lazy"><img src="photos/portrait/p27.jpg" alt="" loading="lazy"></div></div>
+        <div class="prow__head"><span class="prow__label" data-i18n="vol1">Volume 01</span><h3 class="prow__title" data-i18n="portrait">Portrait</h3><span class="prow__cta" data-i18n="open">Open Book →</span></div>
+        <div class="prow__track"><div class="prow__strip"><img src="uploads/portrait%20photo1.JPG.jpg" alt=""><img src="photos/portrait/p12.jpg" alt=""><img src="uploads/portrait%20photo3.JPG.jpg" alt=""><img src="photos/portrait/p15.jpg" alt=""><img src="uploads/portrait%20photo5.JPG.jpg" alt=""><img src="photos/portrait/p18.jpg" alt=""><img src="uploads/portrait%20photo7.JPG.jpg" alt=""><img src="photos/portrait/p21.jpg" alt=""><img src="photos/portrait/p24.jpg" alt=""><img src="photos/portrait/p27.jpg" alt=""></div><div class="prow__strip" aria-hidden="true"><img src="uploads/portrait%20photo1.JPG.jpg" alt=""><img src="photos/portrait/p12.jpg" alt=""><img src="uploads/portrait%20photo3.JPG.jpg" alt=""><img src="photos/portrait/p15.jpg" alt=""><img src="uploads/portrait%20photo5.JPG.jpg" alt=""><img src="photos/portrait/p18.jpg" alt=""><img src="uploads/portrait%20photo7.JPG.jpg" alt=""><img src="photos/portrait/p21.jpg" alt=""><img src="photos/portrait/p24.jpg" alt=""><img src="photos/portrait/p27.jpg" alt=""></div></div>
       </div>
       <div class="prow prow--rev" data-book="landscape" role="button" tabindex="0" aria-label="Open Landscape">
-        <div class="prow__head"><span class="prow__label">Volume 02</span><h3 class="prow__title">Landscape</h3><span class="prow__cta">Open Book →</span></div>
-        <div class="prow__track"><div class="prow__strip"><img src="uploads/landscape1.jpg" alt="" loading="lazy"><img src="uploads/landscape2.jpg" alt="" loading="lazy"><img src="uploads/landscape3.jpg" alt="" loading="lazy"><img src="uploads/landscape4.jpg" alt="" loading="lazy"><img src="uploads/landscape5.jpg" alt="" loading="lazy"><img src="uploads/landscape6.jpg" alt="" loading="lazy"><img src="uploads/landscape7.jpg" alt="" loading="lazy"></div><div class="prow__strip" aria-hidden="true"><img src="uploads/landscape1.jpg" alt="" loading="lazy"><img src="uploads/landscape2.jpg" alt="" loading="lazy"><img src="uploads/landscape3.jpg" alt="" loading="lazy"><img src="uploads/landscape4.jpg" alt="" loading="lazy"><img src="uploads/landscape5.jpg" alt="" loading="lazy"><img src="uploads/landscape6.jpg" alt="" loading="lazy"><img src="uploads/landscape7.jpg" alt="" loading="lazy"></div></div>
+        <div class="prow__head"><span class="prow__label" data-i18n="vol2">Volume 02</span><h3 class="prow__title" data-i18n="landscape">Landscape</h3><span class="prow__cta" data-i18n="open">Open Book →</span></div>
+        <div class="prow__track"><div class="prow__strip"><img src="uploads/landscape1.jpg" alt=""><img src="uploads/landscape2.jpg" alt=""><img src="uploads/landscape3.jpg" alt=""><img src="uploads/landscape4.jpg" alt=""><img src="uploads/landscape5.jpg" alt=""><img src="uploads/landscape6.jpg" alt=""><img src="uploads/landscape7.jpg" alt=""></div><div class="prow__strip" aria-hidden="true"><img src="uploads/landscape1.jpg" alt=""><img src="uploads/landscape2.jpg" alt=""><img src="uploads/landscape3.jpg" alt=""><img src="uploads/landscape4.jpg" alt=""><img src="uploads/landscape5.jpg" alt=""><img src="uploads/landscape6.jpg" alt=""><img src="uploads/landscape7.jpg" alt=""></div></div>
       </div>
       <div class="prow" data-book="humanity" role="button" tabindex="0" aria-label="Open Humanity">
-        <div class="prow__head"><span class="prow__label">Volume 03</span><h3 class="prow__title">Humanity</h3><span class="prow__cta">Open Book →</span></div>
-        <div class="prow__track"><div class="prow__strip"><img src="uploads/humanity1.jpg" alt="" loading="lazy"><img src="uploads/humanity2.jpg" alt="" loading="lazy"><img src="uploads/humanity3.jpg" alt="" loading="lazy"><img src="uploads/humanity4.jpg" alt="" loading="lazy"><img src="uploads/humanity5.jpg" alt="" loading="lazy"><img src="uploads/humanity6-ee0c7e5e.jpg" alt="" loading="lazy"></div><div class="prow__strip" aria-hidden="true"><img src="uploads/humanity1.jpg" alt="" loading="lazy"><img src="uploads/humanity2.jpg" alt="" loading="lazy"><img src="uploads/humanity3.jpg" alt="" loading="lazy"><img src="uploads/humanity4.jpg" alt="" loading="lazy"><img src="uploads/humanity5.jpg" alt="" loading="lazy"><img src="uploads/humanity6-ee0c7e5e.jpg" alt="" loading="lazy"></div></div>
+        <div class="prow__head"><span class="prow__label" data-i18n="vol3">Volume 03</span><h3 class="prow__title" data-i18n="humanity">Humanity</h3><span class="prow__cta" data-i18n="open">Open Book →</span></div>
+        <div class="prow__track"><div class="prow__strip"><img src="uploads/humanity1.jpg" alt=""><img src="uploads/humanity2.jpg" alt=""><img src="uploads/humanity3.jpg" alt=""><img src="uploads/humanity4.jpg" alt=""><img src="uploads/humanity5.jpg" alt=""><img src="uploads/humanity6-ee0c7e5e.jpg" alt=""></div><div class="prow__strip" aria-hidden="true"><img src="uploads/humanity1.jpg" alt=""><img src="uploads/humanity2.jpg" alt=""><img src="uploads/humanity3.jpg" alt=""><img src="uploads/humanity4.jpg" alt=""><img src="uploads/humanity5.jpg" alt=""><img src="uploads/humanity6-ee0c7e5e.jpg" alt=""></div></div>
       </div>
     </div>
     <!-- hidden anchors for the expand/reader animation -->
@@ -1751,41 +1764,9 @@ html, body {
 <!-- ═══════════════════════════════════════════
        FOOTER — consistent with Projects
   ═══════════════════════════════════════════ -->
-<footer class="site-footer">
-  <div>
-    <div class="footer-brand">Zhang <em>Yichi</em></div>
-    <p class="footer-tagline">Designer working at the threshold of perception, system, and storytelling. Based in the Bay Area.</p>
-  </div>
-  <div>
-    <h4>Sitemap</h4>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="Projects.html">Projects</a></li>
-      <li><a href="About.html">About</a></li>
-    </ul>
-  </div>
-  <div>
-    <h4>Connect</h4>
-    <ul>
-      <li><a href="index.html#contact">Email</a></li>
-      <li><a href="https://www.linkedin.com/in/y-c-zhang" target="_blank" rel="noopener">LinkedIn</a></li>
-      <li><a href="https://www.instagram.com/moonquake_no.x/" target="_blank" rel="noopener">Instagram</a></li>
-    </ul>
-  </div>
-  <div>
-    <h4>Archive</h4>
-    <ul>
-      <li><a href="#">2025</a></li>
-      <li><a href="#">2023</a></li>
-      <li><a href="#">2022</a></li>
-      <li><a href="#">Older</a></li>
-    </ul>
-  </div>
-  <div class="copyright">
-    <span>© 2026 Zhang Yichi</span>
-    <span>All works belong to Yichi</span>
-  </div>
-</footer>
+
+
+<footer class="site-footer site-footer--min"><div class="copyright" style="grid-column:1/-1;margin:0;padding:0;border:0"><span>© 2026 Wong Jona</span><span>All works belong to Wong Jona</span></div></footer>
 
 
 <script>
@@ -1940,11 +1921,7 @@ html, body {
     if (titleEl) titleEl.style.opacity = titleT;
     if (ledeEl)  ledeEl.style.opacity  = introT;
   }
-  if (photoIntro) {
-    window.addEventListener('scroll', updatePhoto, { passive: true });
-    window.addEventListener('resize', updatePhoto);
-    updatePhoto();
-  }
+  /* intro is static on this page */
 
   /* ── ART BOOK READER — horizontal slide carousel + sidebar previews ── */
   const reader        = document.getElementById('reader');
@@ -2152,6 +2129,18 @@ html, body {
     }
 
     document.querySelectorAll('.prow').forEach(row => {
+      const strips = row.querySelectorAll('.prow__strip');
+      const imgs = [...strips[0].querySelectorAll('img')];
+      const ready = () => {
+        // width of one strip including its trailing gap = exact loop distance
+        const w = strips[0].getBoundingClientRect().width;
+        if (!w) return;
+        row.style.setProperty('--w', w + 'px');
+        row.style.setProperty('--dur', Math.max(30, w / 40) + 's'); // ~40px/s
+        row.classList.add('ready');
+      };
+      Promise.all(imgs.map(i => i.complete ? Promise.resolve() : new Promise(r => { i.onload = i.onerror = r; }))).then(ready);
+      window.addEventListener('resize', () => { row.classList.remove('ready'); requestAnimationFrame(ready); });
       const go = () => {
         const b = document.querySelector('.book-anchors .book[data-book="' + row.dataset.book + '"]');
         if (!b) return;
@@ -2282,6 +2271,19 @@ html, body {
   window.addEventListener('load', refresh);
   window.addEventListener('resize', apply);
   refresh();
+})();
+</script>
+<script>
+(()=>{
+const T={
+ en:{heroSub:'Photography · Berkeley, CA',book:'Book',price:'Price List',vol1:'Volume 01',vol2:'Volume 02',vol3:'Volume 03',portrait:'Portrait',landscape:'Landscape',humanity:'Humanity',open:'Open Book →',priceEyebrow:'Berkeley, CA · Photography',priceTitle:'Price List',sessions:'Sessions',perHour:'Rates per hour',solo:'Solo Portrait',duo:'Duo & Trio',group:'Group',hr:' / hour',soloD:'One person, one hour of dedicated shooting.',duoD:'Group shots plus individual portraits for each person.',groupD:'Teams, clubs, friends, and events of four or more.',overtime:'Need more time? Overtime is billed in 20-minute increments.',travel:'Beyond Berkeley? Available across the Bay Area & SF — travel fee $20–50 depending on location.',styles:'Styles',s1:'Classic Graduation',s2:'Classic Portrait',s3:'Professional Headshot',s4:'Fine Art',s5:'Street',s6:"Something else? Let's customize.",how:'How it works',h1:'50% deposit to book',h1d:'Balance due on the day of the shoot.',h2:'One free reschedule',h2d:'Plans change — move your date once at no charge.',h3:'All photos within 48 hours',h3d:'Every original file from the session, delivered to you.',h4:'Retouching available',h4d:'Professional retouching: $30 for 10 photos.',bookCta:'Book your session'},
+ zh:{heroSub:'摄影 · 加州伯克利',book:'预约',price:'价目表',vol1:'第一卷',vol2:'第二卷',vol3:'第三卷',portrait:'人像',landscape:'风景',humanity:'人文',open:'打开 →',priceEyebrow:'加州伯克利 · 摄影',priceTitle:'价目表',sessions:'拍摄',perHour:'按小时计费',solo:'单人写真',duo:'双人 / 三人',group:'多人 / 团体',hr:' / 小时',soloD:'一人，一小时专属拍摄。',duoD:'合照加每人单独的个人照。',groupD:'四人及以上的团队、社团、朋友与活动。',overtime:'需要更多时间？超时按每 20 分钟计费。',travel:'伯克利以外？湾区与旧金山均可，视地点收取 $20–50 交通费。',styles:'风格',s1:'经典毕业照',s2:'经典人像',s3:'职业形象照',s4:'艺术写真',s5:'街拍',s6:'其他想法？一起定制。',how:'流程',h1:'预付 50% 定金',h1d:'余款拍摄当天付清。',h2:'一次免费改期',h2d:'计划有变，可免费改期一次。',h3:'48 小时内交付全部照片',h3d:'本次拍摄的所有原片全部交付。',h4:'可选精修',h4d:'专业精修：$30 / 10 张。',bookCta:'预约拍摄'}
+};
+const apply=l=>{document.documentElement.lang=l;document.querySelectorAll('[data-i18n]').forEach(e=>{const s=T[l][e.dataset.i18n];if(s!=null)e.textContent=s;});document.querySelectorAll('.bp-lang__btn').forEach(b=>b.classList.toggle('is-on',b.dataset.lang===l));try{localStorage.setItem('bp-lang',l)}catch(_){}};
+document.querySelectorAll('.bp-lang__btn').forEach(b=>b.addEventListener('click',()=>apply(b.dataset.lang)));
+document.querySelectorAll('[data-wx]').forEach(b=>b.addEventListener('click',()=>{navigator.clipboard&&navigator.clipboard.writeText(b.dataset.wx);const t=b.querySelector('.bp-icon__tip');t.textContent='WongJona · copied';b.classList.add('copied');setTimeout(()=>{b.classList.remove('copied');t.textContent='WongJona';},1500);}));
+let l='en';try{l=localStorage.getItem('bp-lang')||'en'}catch(_){}
+apply(l);
 })();
 </script>
 </body>

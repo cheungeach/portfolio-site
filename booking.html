@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Session — Wong Jona</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script>
+/* ── AVAILABILITY RULES ─────────────────────────────────────────
+   Weekly pattern (Pacific). Edit hours as "HH:MM". Slots are generated
+   from 7 to 21 days ahead, 3.5 hours apart. Add blocked dates below. */
+window.BP_WEEKLY = {
+  2: { from: "13:00", to: "20:00" },   // Tuesday  1pm+
+  3: { from: "14:00", to: "20:00" },   // Wednesday 2pm+
+  5: { from: "17:00", to: "20:00" },   // Friday 5pm+
+  6: { from: "09:00", to: "20:00" },   // Saturday all day
+  0: { from: "09:00", to: "20:00" }    // Sunday all day
+};
+window.BP_STEP_HOURS = 3.5;             // gap between slots
+window.BP_RANGE_DAYS = [7, 21];         // show from 7 to 21 days ahead
+window.BP_BLOCKED_DATES = ["2026-10-02","2026-10-10"];   // whole days off, "YYYY-MM-DD"
+window.BP_EXTRA_SLOTS = [];             // one-off additions, "YYYY-MM-DD HH:MM"
+window.BP_TAKEN = [];                   // booked slots, "YYYY-MM-DD HH:MM"
+window.BP_SLOTS = (()=>{
+  const pad=n=>String(n).padStart(2,'0');
+  const out=[...window.BP_EXTRA_SLOTS];
+  const today=new Date();today.setHours(0,0,0,0);
+  for(let d=window.BP_RANGE_DAYS[0];d<=window.BP_RANGE_DAYS[1];d++){
+    const day=new Date(today);day.setDate(today.getDate()+d);
+    const ds=day.getFullYear()+'-'+pad(day.getMonth()+1)+'-'+pad(day.getDate());
+    if(window.BP_BLOCKED_DATES.includes(ds))continue;
+    const r=window.BP_WEEKLY[day.getDay()];if(!r)continue;
+    const [fh,fm]=r.from.split(':').map(Number),[th,tm]=r.to.split(':').map(Number);
+    for(let m=fh*60+fm;m<=th*60+tm;m+=window.BP_STEP_HOURS*60){out.push(ds+' '+pad(Math.floor(m/60))+':'+pad(m%60));}
+  }
+  return out;
+})();
+</script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#fff;color:#111}
+body{font-family:'Cormorant Garamond',serif;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:#111;text-decoration:none}a:hover{color:#111;text-decoration:underline}
+.topnav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.5rem 3rem;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.08)}
+.topnav__left{display:flex;align-items:center;gap:1.6rem}
+.back{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.28em;text-transform:uppercase;color:#111;opacity:.7;margin:0}.back:hover{opacity:1;text-decoration:none}
+.topnav__brand{font-family:'Cormorant Garamond',serif;font-size:1rem;letter-spacing:.35em;text-transform:uppercase;color:#111}
+.bp-lang{display:flex;align-items:center;gap:.5rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase}
+.bp-lang__btn{background:none;border:none;padding:0;color:rgba(0,0,0,.5);font:inherit;letter-spacing:inherit;cursor:pointer;transition:color .2s}
+.bp-lang__btn.is-on,.bp-lang__btn:hover{color:#111}.bp-lang__sep{color:rgba(0,0,0,.35)}
+.wrap{max-width:820px;margin:0 auto;padding:18vh 6vw 14vh}
+.eyebrow{display:block;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.34em;text-transform:uppercase;color:rgba(0,0,0,.55);margin-bottom:.9rem}
+h1{font-weight:500;font-size:clamp(2.4rem,5vw,4rem);line-height:1;margin-bottom:1.2rem}
+.lede{font-size:1.15rem;line-height:1.6;color:rgba(0,0,0,.7);max-width:56ch;text-wrap:pretty;margin-bottom:5vh}
+.block--contact{padding-top:0;border-top:0;padding-bottom:3rem}
+.block{border-top:1px solid rgba(0,0,0,.14);padding:2.6rem 0}
+.label{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;margin-bottom:1.6rem;display:flex;gap:1rem;align-items:baseline}
+.label small{color:rgba(0,0,0,.5);letter-spacing:.2em;text-transform:none;font-size:.6rem}
+.days{display:flex;flex-direction:column;gap:1.4rem}
+.day{display:grid;grid-template-columns:minmax(120px,180px) 1fr;gap:1rem 2rem;align-items:start}
+.day__date{font-size:1.25rem;line-height:1.3}.day__date small{display:block;font-family:'DM Mono',monospace;font-size:.55rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(0,0,0,.5);margin-top:.3rem}
+.slots{display:flex;flex-wrap:wrap;gap:.6rem}
+.slot{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.14em;color:#111;background:none;border:1px solid rgba(0,0,0,.35);border-radius:999px;padding:.55rem 1rem;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.slot:hover{border-color:#111}.slot.is-on{background:#111;color:#fff;border-color:#111}
+.empty{color:rgba(0,0,0,.55);font-size:1.05rem}
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem}
+.tier{position:relative}.tier input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.tier span{display:flex;flex-direction:column;gap:.3rem;border:1px solid rgba(0,0,0,.3);border-radius:14px;padding:1rem 1.1rem;transition:border-color .2s,background .2s;height:100%}
+.tier b{font-weight:400;font-size:1.2rem}.tier i{font-style:normal;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:rgba(0,0,0,.55)}
+.tier input:checked+span{border-color:#111;background:rgba(0,0,0,.05)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.4rem 2rem}
+.field{display:flex;flex-direction:column;gap:.5rem}.field--full{grid-column:1/-1}
+.field label{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(0,0,0,.6)}
+.field input,.field select,.field textarea{background:transparent;border:0;border-bottom:1px solid rgba(0,0,0,.35);color:#111;font-family:'Cormorant Garamond',serif;font-size:1.15rem;padding:.55rem 0;outline:none;border-radius:0;transition:border-color .2s}
+.field select option{color:#111}
+.field input:focus,.field select:focus,.field textarea:focus{border-bottom-color:#111}
+.field textarea{resize:vertical;min-height:90px}
+.summary{font-size:1.1rem;color:rgba(0,0,0,.75);margin:2rem 0 1.4rem;min-height:1.5em}.summary b{font-weight:400;color:#111}
+.submit{display:inline-flex;align-items:center;gap:.8rem;font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.3em;text-transform:uppercase;color:#fff;background:#111;border:1px solid #111;border-radius:999px;padding:.95rem 2rem;cursor:pointer;transition:opacity .2s}
+.submit:disabled{opacity:.35;cursor:not-allowed}
+.contact{display:flex;flex-wrap:wrap;gap:1.2rem 2.6rem;font-size:1.05rem}
+.contact span{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(0,0,0,.5);display:block;margin-bottom:.35rem}
+
+html[lang="zh"] body,html[lang="zh"] .field input,html[lang="zh"] .field textarea,html[lang="zh"] .field select{font-family:'KaiTi','楷体','STKaiti','Cormorant Garamond',serif}
+@media(max-width:640px){.topnav{padding:1rem 1.3rem}.day{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="topnav__left"><a class="back" href="bookphoto.html" data-i18n="back">← Back</a><a class="topnav__brand" href="bookphoto.html">Wong Jona</a></div><div class="bp-lang"><button type="button" class="bp-lang__btn is-on" data-lang="en">EN</button><span class="bp-lang__sep">/</span><button type="button" class="bp-lang__btn" data-lang="zh">中文</button></div></nav>
+<main class="wrap">
+<span class="eyebrow" data-i18n="eyebrow">Berkeley, CA · Photography</span>
+<h1 data-i18n="title">Book a Session</h1>
+<p class="lede" data-i18n="lede">Pick an open time below and tell me a little about the shoot. I'll send a confirmation within 48 hours; a 50% deposit secures the slot.</p>
+<section class="block block--contact">
+<div class="label"><span data-i18n="l4">Reach me directly</span></div>
+<div class="contact">
+<div><span>Email</span><a href="mailto:jonaphoto@outlook.com">jonaphoto@outlook.com</a></div>
+<div><span>WeChat</span>WongJona</div>
+<div><span>Instagram</span><a href="https://instagram.com/moonquake_no.x" target="_blank" rel="noopener">moonquake_no.x</a></div>
+</div>
+</section>
+<form id="bookForm" action="https://formsubmit.co/jonaphoto@outlook.com" method="POST">
+<input type="hidden" name="_subject" value="New booking — Wong Jona Photography">
+<input type="hidden" name="_template" value="table">
+<input type="hidden" name="_captcha" value="false">
+<input type="hidden" name="_next" id="nextUrl" value="">
+<input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+<input type="hidden" name="Slot" id="slotField" required>
+<section class="block">
+<div class="label"><span data-i18n="l1">1 · Choose a time</span><small data-i18n="tz">Pacific Time · 2 hours default</small></div>
+<div class="days" id="days"></div>
+</section>
+<section class="block">
+<div class="label"><span data-i18n="l2">2 · Session</span></div>
+<div class="tiers">
+<label class="tier"><input type="radio" name="Session" value="Solo Portrait — $149/hr" checked><span><b data-i18n="solo">Solo Portrait</b><i>$149 / hr</i></span></label>
+<label class="tier"><input type="radio" name="Session" value="Duo & Trio — $189/hr"><span><b data-i18n="duo">Duo &amp; Trio</b><i>$189 / hr</i></span></label>
+<label class="tier"><input type="radio" name="Session" value="Group — $290/hr"><span><b data-i18n="group">Group</b><i>$290 / hr</i></span></label>
+</div>
+</section>
+<section class="block">
+<div class="label"><span data-i18n="l3">3 · About you</span></div>
+<div class="grid">
+<div class="field"><label for="fName" data-i18n="name">Name</label><input id="fName" name="Name" required autocomplete="name"></div>
+<div class="field"><label for="fContact" data-i18n="contact">Contact (Email / WeChat / Phone)</label><input id="fContact" name="Contact" required></div>
+<div class="field"><label for="fStyle" data-i18n="style">Style (optional)</label><select id="fStyle" name="Style"><option value="">—</option><option>Classic Graduation</option><option>Classic Portrait</option><option>Professional Headshot</option><option>Fine Art</option><option>Street</option><option>Custom</option></select></div>
+<div class="field"><label for="fLoc" data-i18n="loc">Location</label><input id="fLoc" name="Location" placeholder="Berkeley campus / SF / …"></div>
+<div class="field"><label for="fHrs" data-i18n="hrs">Hours</label><select id="fHrs" name="Hours"><option>1</option><option>1.5</option><option selected>2</option><option>2.5</option><option>3</option><option>4</option><option>5</option><option>6</option><option>8</option><option data-i18n="fullDay">Full day</option></select></div>
+<div class="field field--full"><label for="fNote" data-i18n="note">Anything else</label><textarea id="fNote" name="Notes" data-i18n-ph="notePh" placeholder="People count, outfit ideas, references…"></textarea></div>
+</div>
+<p class="summary" id="summary"></p>
+<button class="submit" type="submit" id="submitBtn" disabled><span data-i18n="send">Request this slot</span><span>→</span></button>
+</section>
+</form>
+</main>
+<script>
+(()=>{
+const T={
+en:{eyebrow:'Berkeley, CA · Photography',title:'Book a Session',lede:"Pick an open time below and tell me a little about the shoot. I'll send a confirmation within 48 hours; a 50% deposit secures the slot.",l1:'1 · Choose a time',tz:'Pacific Time · 2 hours default',l2:'2 · Session',l3:'3 · About you',l4:'Reach me directly',solo:'Solo Portrait',duo:'Duo & Trio',group:'Group',name:'Name',contact:'Contact (Email / WeChat / Phone)',style:'Style (optional)',fullDay:'Full day',loc:'Location',hrs:'Hours',note:'Anything else',notePh:'People count, outfit ideas, references…',send:'Request this slot',back:'← Back',empty:'No open slots right now — email me and we\'ll find a time.',pick:'Choose a time above to continue.',sum:'Requesting <b>{d}</b> at <b>{t}</b>.',thanks:'Thanks — you\'ll hear from me within 48 hours.'},
+zh:{eyebrow:'加州伯克利 · 摄影',title:'预约拍摄',lede:'在下面选择一个空档，简单说说想拍什么。我会在 48 小时内发送确认；预付 50% 定金即锁定时间。',l1:'1 · 选择时间',tz:'太平洋时间 · 默认 2 小时',l2:'2 · 拍摄类型',l3:'3 · 你的信息',l4:'直接联系我',solo:'单人写真',duo:'双人 / 三人',group:'多人 / 团体',name:'姓名',contact:'联系方式（邮箱 / 微信 / 电话）',style:'风格（可选）',fullDay:'全天',loc:'地点',hrs:'时长（小时）',note:'其他说明',notePh:'人数、服装想法、参考图……',send:'预约这个时间',back:'← 返回',empty:'目前没有空档 —— 请邮件联系我另约时间。',pick:'请先在上方选择时间。',sum:'预约 <b>{d}</b> <b>{t}</b>。',thanks:'谢谢 —— 我会在 48 小时内与你确认。'}
+};
+let lang='en';try{lang=localStorage.getItem('bp-lang')||'en'}catch(_){}
+const days=document.getElementById('days'),slotField=document.getElementById('slotField'),summary=document.getElementById('summary'),btn=document.getElementById('submitBtn');
+let picked=null;
+const fmtDate=d=>new Date(d+'T00:00:00').toLocaleDateString(lang==='zh'?'zh-CN':'en-US',{weekday:'long',month:'long',day:'numeric'});
+const fmtTime=t=>{const [H,M]=t.split(':').map(Number);if(lang==='zh')return `${H}:${String(M).padStart(2,'0')}`;const h=H%12||12;return `${h}:${String(M).padStart(2,'0')} ${H<12?'AM':'PM'}`;};
+function render(){
+  const now=new Date();const min=new Date(now.getTime()+(window.BP_RANGE_DAYS?window.BP_RANGE_DAYS[0]:3)*24*3600*1000-12*3600*1000);const map={};
+  let local=[];try{local=JSON.parse(localStorage.getItem('bp-booked')||'[]')}catch(_){}
+  const taken=new Set([...(window.BP_TAKEN||[]),...local].map(s=>s.trim().replace(/\s+/g,' ')));
+  (window.BP_SLOTS||[]).map(s=>s.trim().split(/\s+/)).filter(([d,t])=>new Date(d+'T'+t)>min&&!taken.has(d+' '+t)).sort((a,b)=>(a[0]+a[1]).localeCompare(b[0]+b[1])).forEach(([d,t])=>{(map[d]=map[d]||[]).push(t);});
+  days.innerHTML='';
+  const ds=Object.keys(map);
+  if(!ds.length){days.innerHTML=`<p class="empty">${T[lang].empty}</p>`;return;}
+  ds.forEach(d=>{
+    const row=document.createElement('div');row.className='day';
+    const dd=document.createElement('div');dd.className='day__date';dd.innerHTML=`${fmtDate(d)}<small>${d}</small>`;
+    const sl=document.createElement('div');sl.className='slots';
+    map[d].forEach(t=>{const b=document.createElement('button');b.type='button';b.className='slot'+(picked===d+' '+t?' is-on':'');b.textContent=fmtTime(t);b.addEventListener('click',()=>{picked=d+' '+t;slotField.value=`${d} ${t} (Pacific)`;update();render();});sl.appendChild(b);});
+    row.append(dd,sl);days.appendChild(row);
+  });
+}
+function update(){
+  if(!picked){summary.textContent=T[lang].pick;btn.disabled=true;return;}
+  const [d,t]=picked.split(' ');summary.innerHTML=T[lang].sum.replace('{d}',fmtDate(d)).replace('{t}',fmtTime(t));btn.disabled=false;
+}
+function apply(l){lang=l;document.documentElement.lang=l;document.querySelectorAll('[data-i18n]').forEach(e=>{const s=T[l][e.dataset.i18n];if(s!=null)e.textContent=s;});document.querySelectorAll('[data-i18n-ph]').forEach(e=>{e.placeholder=T[l][e.dataset.i18nPh]||'';});document.querySelectorAll('.bp-lang__btn').forEach(b=>b.classList.toggle('is-on',b.dataset.lang===l));try{localStorage.setItem('bp-lang',l)}catch(_){}render();update();}
+document.querySelectorAll('.bp-lang__btn').forEach(b=>b.addEventListener('click',()=>apply(b.dataset.lang)));
+document.getElementById('nextUrl').value=location.href.split('#')[0]+'#sent';
+document.getElementById('bookForm').addEventListener('submit',()=>{if(!picked)return;try{const a=JSON.parse(localStorage.getItem('bp-booked')||'[]');if(!a.includes(picked))a.push(picked);localStorage.setItem('bp-booked',JSON.stringify(a));}catch(_){}});
+if(location.hash==='#sent'){summary.textContent=T[lang].thanks;}
+apply(lang);
+})();
+</script>
+</body>
+</html>
