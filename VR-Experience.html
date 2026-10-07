@@ -1,835 +1,982 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<script src="page-loader.js"></script>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<!doctype html><html><head><meta charset=utf8><script src="page-loader.js"></script><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>SPACE TRAVEL — VR Experience</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 <style>
-  /* =========  RESET & BASE  ========= */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    height: 100%; width: 100%;
-    background: #000;
-    color: #fff;
-    font-family: 'Inter', system-ui, sans-serif;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-    user-select: none;
-  }
-  button { font-family: inherit; cursor: pointer; }
-  input { font-family: inherit; }
-
-  /* =========  LETTERBOX STAGE  =========
-     The original frames are 16:9. We center a 16:9 stage and letterbox
-     it inside the viewport so the layout matches the Figma source exactly. */
-  #stage {
-    position: fixed;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    background: #000;
-  }
-  #frame {
-    position: relative;
-    aspect-ratio: 16 / 9;
-    width: 100vw;
-    max-width: calc(100vh * 16 / 9);
-    max-height: 100vh;
-    overflow: hidden;
-    background: #000;
-    box-shadow: 0 0 80px rgba(255,255,255,0.04);
-  }
-
-  /* =========  SCREEN LAYERING  ========= */
-  .screen {
-    position: absolute; inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 700ms ease;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .screen.active { opacity: 1; pointer-events: auto; }
-
-  /* =========  HOTSPOTS  =========
-     Invisible clickable rectangles placed in % over the background. */
-  .hot {
-    position: absolute;
-    background: transparent;
-    border: 0;
-    cursor: pointer;
-    border-radius: 14px;
-    transition: background 250ms ease, box-shadow 250ms ease, transform 200ms ease;
-  }
-  .hot:hover {
-    background: rgba(255,255,255,0.06);
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.18), 0 0 30px rgba(255,255,255,0.12) inset;
-  }
-  .hot.round { border-radius: 50%; }
-  .hot.subtle:hover { background: rgba(255,255,255,0.04); }
-
-  /* =========  PROMPT BUBBLE / TOAST  ========= */
-  #toast {
-    position: absolute;
-    left: 50%; bottom: 4%;
-    transform: translateX(-50%) translateY(20px);
-    padding: 10px 18px;
-    background: rgba(20,20,28,0.72);
-    border: 1px solid rgba(255,255,255,0.14);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-radius: 999px;
-    font-size: 13px;
-    letter-spacing: 0.02em;
-    color: #fff;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 400ms ease, transform 400ms ease;
-    z-index: 100;
-    white-space: nowrap;
-  }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  /* =========  HINT BLINK on first screen  ========= */
-  .pulse { animation: pulse 2.2s ease-in-out infinite; }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.35); }
-    50%      { box-shadow: 0 0 0 18px rgba(255,255,255,0); }
-  }
-
-  /* =========  LOGIN INPUTS  ========= */
-  .login-field {
-    position: absolute;
-    width: 30.5%;
-    height: 9%;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: clamp(12px, 1.6vw, 22px);
-    padding: 0 3.5%;
-    outline: none;
-    letter-spacing: 0.05em;
-  }
-  .login-field::placeholder { color: rgba(255,255,255,0.35); }
-
-  /* =========  COMMUNITY input  ========= */
-  .community-input {
-    position: absolute;
-    left: 6%;
-    top: 64%;
-    width: 51%;
-    height: 12%;
-    background: transparent;
-    border: none;
-    color: #fff;
-    font-size: clamp(12px, 1.5vw, 20px);
-    padding: 0 4%;
-    outline: none;
-    font-style: italic;
-  }
-  .community-input::placeholder { color: rgba(255,255,255,0.45); font-style: italic; }
-
-  /* =========  CAMERA FLASH  ========= */
-  #flash {
-    position: absolute; inset: 0;
-    background: white;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 200;
-  }
-  #flash.fire { animation: flash 0.5s ease-out; }
-  @keyframes flash {
-    0%   { opacity: 0; }
-    20%  { opacity: 0.95; }
-    100% { opacity: 0; }
-  }
-
-  /* =========  ACHIEVEMENT UNLOCK FX  ========= */
-  #unlock-fx {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 150;
-    opacity: 0;
-    background:
-      radial-gradient(circle at center, rgba(255,210,120,0.35) 0%, rgba(0,0,0,0) 60%);
-    transition: opacity 800ms ease;
-  }
-  #unlock-fx.show { opacity: 1; }
-
-  /* =========  WARP / TRANSITION  ========= */
-  #warp {
-    position: absolute; inset: 0;
-    background: black;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 180;
-    transition: opacity 400ms ease;
-  }
-  #warp.show { opacity: 1; }
-
-  /* =========  HINT FOR NAVIGATING  ========= */
-  #helpbar {
-    position: fixed;
-    left: 50%; bottom: 14px;
-    transform: translateX(-50%);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.35);
-    z-index: 500;
-    pointer-events: none;
-    text-align: center;
-  }
-  #helpbar kbd {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.18);
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-family: ui-monospace, monospace;
-    font-size: 10px;
-    color: rgba(255,255,255,0.7);
-  }
-
-  /* small-screen warning */
-  @media (max-width: 600px) and (orientation: portrait) {
-    #rotate-msg { display: flex !important; }
-  }
-  #rotate-msg {
-    display: none;
-    position: fixed; inset: 0;
-    background: #000;
-    color: #fff;
-    z-index: 9999;
-    flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 32px;
-    text-align: center;
-    font-family: 'Cormorant Garamond', serif;
-  }
-  #rotate-msg h2 { font-size: 28px; margin-bottom: 12px; font-weight: 500; }
-  #rotate-msg p { font-size: 14px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; }
-
-  /* small detail: a flashing planet name on community */
-  .greeting-cycle {
-    position: absolute;
-    left: 50%; top: 41%;
-    transform: translateX(-50%);
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(20px, 2.6vw, 38px);
-    color: #f4c47a;
-    text-shadow: 0 0 30px rgba(255,180,80,0.6);
-    pointer-events: none;
-    z-index: 5;
-    opacity: 0;
-    transition: opacity 700ms ease;
-  }
-  .greeting-cycle.show { opacity: 1; }
-
-  /* RANK animation: subtle floating */
-  .floaty { animation: floaty 4s ease-in-out infinite; }
-  @keyframes floaty {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-4px); }
-  }
-
+/* Layout: one full-bleed WebGL world that holds every scene; a thin HUD on top for review controls. Single dark look by choice. */
+:root{
+  --void:#030407;
+  --ink:#f4f6fa;
+  --mute:rgba(244,246,250,.7);
+  --glass:rgba(40,44,54,.66);
+  --edge:rgba(255,255,255,.3);
+  --signal:#7fd4ff;
+  --f-ui:"Fira Sans","Helvetica Neue",Arial,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{background:var(--void);color:var(--ink);font-family:var(--f-ui);overflow:hidden}
+*{box-sizing:border-box}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:fixed;left:16px;right:16px;top:calc(10px + env(safe-area-inset-top,0px));display:flex;gap:8px;align-items:center;flex-wrap:wrap;pointer-events:none;z-index:3}
+.chip{pointer-events:auto;background:var(--glass);border:1px solid var(--edge);border-radius:999px;padding:6px 13px;font-size:13px;color:var(--ink);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.chip b{font-weight:500;letter-spacing:.06em}
+button.chip,select.chip{cursor:pointer;font:500 13px var(--f-ui)}
+select.chip{appearance:none;padding-right:13px}
+select.chip option{background:#15181f}
+button.chip:hover,select.chip:hover{border-color:#fff}
+button.chip:disabled{opacity:.4;cursor:default}
+.chip:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.spacer{flex:1}
+.hint{color:var(--mute)}
+#loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:4;pointer-events:none}
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--glass);border:1px solid var(--edge);padding:9px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:calc(100% - 32px);text-align:center;z-index:5;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#toast.show{opacity:1}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:6}
+#flash.go{animation:fl .5s ease-out}
+@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+#err{position:fixed;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--mute);z-index:9;background:var(--void)}
+.offscreen{position:fixed;left:-9999px;top:0;width:200px;opacity:0}
+#chat{position:fixed;right:16px;bottom:16px;width:min(340px,calc(100% - 32px));height:min(420px,62%);z-index:7;display:flex;flex-direction:column;border-radius:18px;background:rgba(40,46,60,.82);border:1px solid var(--edge);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+#chat header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--edge);font-weight:500}
+#chat header small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+#chat header button{background:none;border:0;color:#fff;font-size:20px;cursor:pointer}
+#msgs{flex:1;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+#msgs p{margin:0;max-width:82%;padding:7px 11px;border-radius:14px;background:rgba(255,255,255,.14);line-height:1.4}
+#msgs p.me{align-self:flex-end;background:rgba(127,212,255,.35)}
+#chatF{display:flex;gap:6px;padding:10px;border-top:1px solid var(--edge)}
+#chatIn{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--edge);border-radius:999px;padding:7px 12px;color:#fff;outline:0;font:14px var(--f-ui)}
+#chatF button{background:rgba(255,255,255,.16);border:1px solid var(--edge);color:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font:500 13px var(--f-ui)}
+@media (max-width:640px){.hint{display:none}}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}#flash.go{animation:none}}
 </style>
-</head>
-<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&family=Spectral:wght@400;500&display=swap">
 
-<div id="rotate-msg">
-  <h2>Please rotate your device</h2>
-  <p>SPACE TRAVEL is best experienced in landscape, on a larger screen.</p>
+<canvas id="c" aria-label="Space Travel in 3D"></canvas>
+<div class="hud">
+  <a class="chip" id="exit-vr" href="Space-Archaeology.html" style="text-decoration:none">← Exit VR</a>
+  <span class="chip" id="where"><b>SPACE TRAVEL</b></span>
+  <button class="chip" id="back" type="button" disabled>← Back</button>
+  <select class="chip" id="jump" aria-label="Jump to a scene"></select>
+  <span class="chip hint" id="hint">Drag to look around · Scroll to zoom</span>
+  <span class="spacer"></span>
+  <button class="chip" id="xr" type="button" hidden>Enter VR</button>
 </div>
+<div id="loading" class="chip" hidden>Loading scene…</div>
+<div id="err" hidden></div>
+<div id="toast" role="status"></div>
+<div id="flash"></div>
+<input id="in-user" class="offscreen" aria-label="Username" autocomplete="off">
+<input id="in-pass" class="offscreen" type="password" aria-label="Password" autocomplete="off">
+<input id="in-hello" class="offscreen" aria-label="Say hello to the universe" autocomplete="off">
+<section id="chat" hidden aria-label="Chat with your crewmate">
+  <header><div>Nova<small>Your crewmate · Friends Mode</small></div><button type="button" id="chatX" aria-label="Close chat">×</button></header>
+  <div id="msgs"></div>
+  <form id="chatF"><input id="chatIn" placeholder="Message Nova…" aria-label="Message"><button type="submit">Send</button></form>
+</section>
 
-<!-- back-to-project link, top-left, always visible -->
-<a id="exit-vr" href="Space-Archaeology.html">← Exit VR</a>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 
-<style>
-  #exit-vr {
-    position: fixed;
-    top: 16px;
-    left: 16px;
-    z-index: 9000;
-    font-size: 11px;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.75);
-    background: rgba(20,20,28,0.65);
-    border: 1px solid rgba(255,255,255,0.18);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    padding: 8px 14px;
-    border-radius: 999px;
-    text-decoration: none;
-    transition: background 250ms ease, color 250ms ease;
+// =====================================================================
+// renderer, camera, shared world
+// =====================================================================
+const canvas=document.getElementById('c');
+let renderer;
+try{renderer=new THREE.WebGLRenderer({canvas,antialias:true,preserveDrawingBuffer:true});}
+catch(e){const el=document.getElementById('err');el.hidden=false;el.textContent='This browser could not start 3D graphics (WebGL). Try a recent Chrome, Safari or Edge.';throw e}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.xr.enabled=true;
+const world=new THREE.Scene();
+const pmrem=new THREE.PMREMGenerator(renderer);
+world.environment=pmrem.fromScene(new RoomEnvironment(),0.04).texture;world.environmentIntensity=0.35;
+const camera=new THREE.PerspectiveCamera(50,1,0.05,6000);
+const rig=new THREE.Group();rig.add(camera);world.add(rig);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// starfield shared by the space scenes
+const stars=(()=>{const grp=new THREE.Group();[[5000,1.3,0.75],[700,2.4,1]].forEach(([n,sz,op])=>{const p=new Float32Array(n*3),c=new Float32Array(n*3);for(let i=0;i<n;i++){const u=Math.random()*2-1,t=Math.random()*Math.PI*2,r=2600,s=Math.sqrt(1-u*u);p[i*3]=s*Math.cos(t)*r;p[i*3+1]=u*r;p[i*3+2]=s*Math.sin(t)*r;const w=0.75+Math.random()*0.25,tint=Math.random();c.set(tint<0.15?[w,w*0.85,w*0.7]:tint<0.3?[w*0.8,w*0.88,w]:[w,w,w],i*3)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));g.setAttribute('color',new THREE.BufferAttribute(c,3));grp.add(new THREE.Points(g,new THREE.PointsMaterial({size:sz,sizeAttenuation:false,vertexColors:true,transparent:true,opacity:op,depthWrite:false,fog:false})))});return grp})();
+world.add(stars);
+
+// =====================================================================
+// layout: Figma frame coordinates -> positions on a curved view
+// every design frame wraps a cylinder of radius R; a frame is H tall
+// =====================================================================
+const R=12,HR=0.785,H=R*HR;
+const L=(FW,FH)=>({FW,FH,theta:(FW/FH)*HR});
+const L16=L(2304,1296), LW=L(5826,1296);
+const EYE=new THREE.Vector3(0,1.6,0);
+function at(lay,x,y,d,eye=EYE){const yaw=(x/lay.FW-0.5)*lay.theta;return new THREE.Vector3(Math.sin(yaw)*d,(0.5-y/lay.FH)*H*d/R,-Math.cos(yaw)*d).add(eye)}
+function sizeOf(lay,w,h,d){return [w/lay.FW*lay.theta*d, h/lay.FH*H*d/R]}
+const texLoader=new THREE.TextureLoader();
+function tex(path,srgb=true){const t=texLoader.load(path);if(srgb)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
+// ---------------------------------------------------------------------
+// stage: the design image (or video) in front, a 360° fill that continues it
+// all around, optional slow forward push, cockpit frame overlay and ship floor
+// ---------------------------------------------------------------------
+const VX=2.2;
+let EDGE=null;
+function edgeTex(){if(EDGE)return EDGE;const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');const id=g.createImageData(256,256);
+  const sm=t=>t<=0?0:t>=1?1:t*t*(3-2*t);
+  for(let y=0;y<256;y++)for(let x=0;x<256;x++){const u=x/255,v=y/255;const a=Math.min(sm(u/0.06),sm((1-u)/0.06),sm(v/0.08),sm((1-v)/0.08));const i=(y*256+x)*4;id.data[i]=id.data[i+1]=id.data[i+2]=255*a;id.data[i+3]=255}
+  g.putImageData(id,0,0);EDGE=new THREE.CanvasTexture(c);return EDGE}
+const CAN_MP4=!!document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"');
+function makeVideo(src){const v=document.createElement('video');v.src=CAN_MP4?src:src.replace('.mp4','.webm');v.muted=true;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';v.crossOrigin='anonymous';const t=new THREE.VideoTexture(v);t.colorSpace=THREE.SRGBColorSpace;return {v,t}}
+function stage(root,S,lay,o){
+  const st={update(){},enter(){},exit(){}};
+  // 360° fill
+  if(o.fill){const ft=tex('vr/tex/fill_'+o.fill+'.jpg');ft.wrapS=THREE.RepeatWrapping;ft.repeat.x=-1;ft.offset.x=1;
+    const fm=new THREE.Mesh(new THREE.CylinderGeometry(R*1.02,R*1.02,H*VX,96,1,true),new THREE.MeshBasicMaterial({map:ft,side:THREE.BackSide,depthWrite:false,fog:false}));
+    fm.position.copy(EYE);fm.renderOrder=-20;root.add(fm);
+    const capC=new THREE.Color(0x000000);const cap=new THREE.Mesh(new THREE.CircleGeometry(R*1.02,48),new THREE.MeshBasicMaterial({color:o.capColor??0x05070b,side:THREE.DoubleSide,depthWrite:false,fog:false}));
+    cap.rotation.x=Math.PI/2;cap.position.set(EYE.x,EYE.y+H*VX/2,EYE.z);cap.renderOrder=-20;root.add(cap);const cap2=cap.clone();cap2.position.y=EYE.y-H*VX/2;root.add(cap2)}
+  // main image / video, two layers for seamless loops
+  const span=lay.theta;const geo=new THREE.CylinderGeometry(R,R,H,96,1,true,Math.PI-span/2,span);
+  const mk=(t,ro)=>{const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:t,alphaMap:edgeTex(),transparent:true,depthWrite:false,side:THREE.BackSide,fog:false}));m.position.copy(EYE);m.renderOrder=ro;root.add(m);return m};
+  const cx=o.center?o.center[0]:0.5,cy=o.center?1-o.center[1]:0.5;
+  const setZ=(t,s)=>{t.repeat.set(-1/s,1/s);t.offset.set(cx+(1-cx)/s,cy-cy/s)};
+  if(o.img){
+    const tA=tex(o.img);tA.wrapS=tA.wrapT=THREE.ClampToEdgeWrapping;const tB=tA.clone();setZ(tA,1);setZ(tB,1);
+    let bot=mk(tA,-15),top=mk(tB,-14);top.material.opacity=0;
+    if(o.zoom){const Z=o.zoom,T=o.period||18;let ph=0;
+      st.update=(dt)=>{if(reduce)return;ph+=dt/T;if(ph>=1){ph-=1;[bot,top]=[top,bot];bot.renderOrder=-15;top.renderOrder=-14}
+        setZ(top.material.map,1+Z*(1+ph));top.material.opacity=1-ph;setZ(bot.material.map,1+Z*ph);bot.material.opacity=1}}
   }
-  #exit-vr:hover { background: rgba(255,255,255,0.12); color: #fff; }
-</style>
-
-<div id="stage">
-  <div id="frame">
-
-    <!-- ============ SCREEN 1 : START ============ -->
-    <div class="screen active" id="s-start" style="background-image:url('uploads/Frame2.jpg');">
-      <button class="hot pulse" style="left:39%;top:73%;width:22%;height:11%;"
-              data-goto="login"></button>
-    </div>
-
-    <!-- ============ SCREEN 2 : LOGIN ============ -->
-    <div class="screen" id="s-login" style="background-image:url('uploads/Frame3.jpg');">
-      <!-- "Enter" title clickable as submit -->
-      <input class="login-field" id="login-user"
-             style="left:35%;top:31%;" placeholder="commander" maxlength="24" />
-      <input class="login-field" id="login-pass" type="password"
-             style="left:35%;top:46%;" placeholder="••••••••" maxlength="32" />
-      <!-- "Enter" word at top is the submit button -->
-      <button class="hot" style="left:43%;top:7%;width:14%;height:10%;"
-              data-action="submit-login" title="Enter the World Space Base"></button>
-    </div>
-
-    <!-- ============ SCREEN 3 : MODE ============ -->
-    <div class="screen" id="s-mode" style="background-image:url('uploads/Frame4.jpg');">
-      <button class="hot" style="left:18%;top:22%;width:64%;height:21%;"
-              data-goto="guide" data-toast="Single Mode selected"></button>
-      <button class="hot" style="left:18%;top:51%;width:64%;height:21%;"
-              data-goto="guide" data-toast="Friends Mode — better with company"></button>
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile" data-toast="Profile"></button>
-    </div>
-
-    <!-- ============ SCREEN 4 : GUIDE ============ -->
-    <div class="screen" id="s-guide" style="background-image:url('uploads/Frame5.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- left tools column -->
-      <button class="hot round" style="left:10%;top:34%;width:7%;height:12%;"
-              data-toast="Tools"></button>
-      <button class="hot round" style="left:10%;top:50%;width:7%;height:12%;"
-              data-toast="Friends"></button>
-      <button class="hot round" style="left:10%;top:66%;width:7%;height:12%;"
-              data-toast="Bookmarks"></button>
-      <!-- 4 guide rows → next -->
-      <button class="hot" style="left:21%;top:25%;width:65%;height:12%;"
-              data-goto="outfit" data-toast="Catch an Object"></button>
-      <button class="hot" style="left:21%;top:39%;width:65%;height:12%;"
-              data-goto="outfit" data-toast="Select"></button>
-      <button class="hot" style="left:21%;top:53%;width:65%;height:12%;"
-              data-goto="outfit" data-toast="Change view or Expand"></button>
-      <button class="hot" style="left:21%;top:67%;width:65%;height:12%;"
-              data-goto="outfit" data-toast="Read the document"></button>
-    </div>
-
-    <!-- ============ SCREEN 5 : OUTFIT ============ -->
-    <div class="screen" id="s-outfit" style="background-image:url('uploads/Frame6.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- Suit selection row of small "rocket" icons (bottom) — clicking advances to destination -->
-      <button class="hot round" style="left:1%;top:67%;width:8%;height:14%;" data-toast="Apollo Suit"></button>
-      <button class="hot round" style="left:11%;top:67%;width:8%;height:14%;" data-toast="ACES Suit"></button>
-      <button class="hot round" style="left:22%;top:67%;width:8%;height:14%;" data-toast="EMU Suit"></button>
-      <button class="hot round pulse" style="left:33%;top:67%;width:8%;height:14%;"
-              data-goto="destination" data-toast="Hybrid Suit equipped"></button>
-      <button class="hot round" style="left:46%;top:67%;width:8%;height:14%;" data-toast="Orlan Suit"></button>
-      <button class="hot round" style="left:58%;top:67%;width:8%;height:14%;" data-toast="Z-2 Suit"></button>
-      <button class="hot round" style="left:69%;top:67%;width:8%;height:14%;" data-toast="Sokol Suit"></button>
-      <button class="hot round" style="left:81%;top:67%;width:8%;height:14%;" data-toast="Feitian Suit"></button>
-      <button class="hot round" style="left:92%;top:67%;width:8%;height:14%;" data-toast="Experimental"></button>
-      <!-- heart icon on info card -->
-      <button class="hot round" style="left:92%;top:21%;width:5%;height:9%;"
-              data-action="favorite" data-toast="Added to favorites ♥"></button>
-    </div>
-
-    <!-- ============ SCREEN 6 : DESTINATION ============ -->
-    <div class="screen" id="s-destination" style="background-image:url('uploads/Frame7.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- four planet cards. each launches the warp -->
-      <button class="hot" style="left:0%;top:5%;width:25%;height:92%;"
-              data-action="warp" data-planet="MARS"></button>
-      <button class="hot" style="left:25%;top:5%;width:25%;height:92%;"
-              data-action="warp" data-planet="Moon"></button>
-      <button class="hot" style="left:50%;top:5%;width:25%;height:92%;"
-              data-action="warp" data-planet="Jupiter"></button>
-      <button class="hot" style="left:75%;top:5%;width:25%;height:92%;"
-              data-action="warp" data-planet="Pluto"></button>
-    </div>
-
-    <!-- ============ SCREEN 7 : TRANSITION ============ -->
-    <div class="screen" id="s-transition" style="background-image:url('uploads/Frame8.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- click anywhere to continue -->
-      <button class="hot subtle" style="left:0;top:0;width:100%;height:100%;border-radius:0"
-              data-goto="cockpit-debris"></button>
-    </div>
-
-    <!-- ============ SCREEN 8 : COCKPIT - DEBRIS ============ -->
-    <div class="screen" id="s-cockpit-debris" style="background-image:url('uploads/Frame9.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- right side nav buttons (icon column) -->
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;"
-              data-goto="destination" data-toast="Home"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;"
-              data-action="camera" data-toast="Photo captured"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;"
-              data-action="save" data-toast="Saved"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;"
-              data-goto="community-share" data-toast="Community"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;"
-              data-goto="achievements" data-toast="Achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;"
-              data-action="share" data-toast="Link copied"></button>
-      <!-- bottom HUD: clickable rings -->
-      <button class="hot round" style="left:69%;top:87%;width:7%;height:12%;"
-              data-toast="Defunct Satellites — current view"></button>
-      <button class="hot round" style="left:77%;top:87%;width:7%;height:12%;"
-              data-goto="cockpit-glove" data-toast="Lost Tools"></button>
-      <button class="hot round" style="left:85%;top:87%;width:7%;height:12%;"
-              data-goto="cockpit-docking" data-toast="Remnants of Explosions"></button>
-      <button class="hot round" style="left:93%;top:87%;width:7%;height:12%;"
-              data-goto="document" data-toast="Documents"></button>
-    </div>
-
-    <!-- ============ SCREEN 9 : COCKPIT - LOST GLOVE ============ -->
-    <div class="screen" id="s-cockpit-glove" style="background-image:url('uploads/Frame11.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- target reticle in center -->
-      <button class="hot round pulse" style="left:46.5%;top:69%;width:7%;height:12%;"
-              data-action="capture-object" data-toast="Object identified: Jerry Linenger's Lost Glove"></button>
-      <!-- right column -->
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- bottom rings -->
-      <button class="hot round" style="left:69%;top:87%;width:7%;height:12%;"
-              data-goto="cockpit-debris" data-toast="Defunct Satellites"></button>
-      <button class="hot round" style="left:77%;top:87%;width:7%;height:12%;"
-              data-toast="Lost Tools — current view"></button>
-      <button class="hot round" style="left:85%;top:87%;width:7%;height:12%;"
-              data-goto="cockpit-docking" data-toast="Remnants of Explosions"></button>
-      <button class="hot round" style="left:93%;top:87%;width:7%;height:12%;"
-              data-goto="document" data-toast="Documents"></button>
-    </div>
-
-    <!-- ============ SCREEN 10 : COCKPIT - DOCKING ============ -->
-    <div class="screen" id="s-cockpit-docking" style="background-image:url('uploads/Frame12.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- eye icon center → triggers actual docking view -->
-      <button class="hot round pulse" style="left:46.5%;top:69%;width:7%;height:12%;"
-              data-goto="docking-view" data-toast="Switching windows..."></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <button class="hot round" style="left:69%;top:87%;width:7%;height:12%;"
-              data-goto="cockpit-debris" data-toast="Defunct Satellites"></button>
-      <button class="hot round" style="left:77%;top:87%;width:7%;height:12%;"
-              data-goto="cockpit-glove" data-toast="Lost Tools"></button>
-      <button class="hot round" style="left:85%;top:87%;width:7%;height:12%;"
-              data-toast="Remnants — current view"></button>
-      <button class="hot round" style="left:93%;top:87%;width:7%;height:12%;"
-              data-goto="document" data-toast="Documents"></button>
-    </div>
-
-    <!-- ============ SCREEN 11 : DOCKING VIEW ============ -->
-    <div class="screen" id="s-docking-view" style="background-image:url('uploads/Frame13.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- two reticles -->
-      <button class="hot round pulse" style="left:46%;top:38%;width:7%;height:12%;"
-              data-action="capture-object" data-toast="Spacecraft identified"></button>
-      <button class="hot round" style="left:62%;top:65%;width:7%;height:12%;"
-              data-goto="mars-approach" data-toast="Expand view"></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-    </div>
-
-    <!-- ============ SCREEN 12 : DOCUMENT ============ -->
-    <div class="screen" id="s-document" style="background-image:url('uploads/Frame14.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <!-- mail icon -->
-      <button class="hot round" style="left:14%;top:18%;width:8%;height:14%;" data-toast="Inbox"></button>
-      <!-- right column -->
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- read full → trigger achievement -->
-      <button class="hot pulse" style="left:18%;top:34%;width:60%;height:42%;border-radius:24px;"
-              data-action="unlock-achievement" data-toast="Reading Outer Space Treaty…"></button>
-    </div>
-
-    <!-- ============ SCREEN 13 : MARS APPROACH ============ -->
-    <div class="screen" id="s-mars-approach" style="background-image:url('uploads/Frame15.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <button class="hot" style="left:55%;top:30%;width:35%;height:40%;"
-              data-goto="mars-surface" data-toast="Approaching surface"></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-    </div>
-
-    <!-- ============ SCREEN 14 : MARS SURFACE ============ -->
-    <div class="screen" id="s-mars-surface" style="background-image:url('uploads/Frame16.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- bottom rings -->
-      <button class="hot round" style="left:25%;top:84%;width:6%;height:13%;"
-              data-toast="Curiosity & Perseverance Rovers"></button>
-      <button class="hot round" style="left:32%;top:84%;width:6%;height:13%;"
-              data-goto="cockpit-glove" data-toast="Lost Tools"></button>
-      <button class="hot round" style="left:39%;top:84%;width:6%;height:13%;"
-              data-goto="cockpit-docking"></button>
-      <button class="hot round" style="left:46%;top:84%;width:6%;height:13%;"
-              data-goto="document" data-toast="Documents"></button>
-    </div>
-
-    <!-- ============ SCREEN 15 : ACHIEVEMENT UNLOCK ============ -->
-    <div class="screen" id="s-achievement" style="background-image:url('uploads/Frame17.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- click the medal to view achievement collection -->
-      <button class="hot" style="left:25%;top:80%;width:50%;height:14%;border-radius:36px;"
-              data-goto="achievements" data-toast="View all achievements"></button>
-    </div>
-
-    <!-- ============ SCREEN 16 : ACHIEVEMENTS WALL ============ -->
-    <div class="screen" id="s-achievements" style="background-image:url('uploads/Frame18.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="ranking"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- eye icon to view detail -->
-      <button class="hot round" style="left:82%;top:42%;width:7%;height:11%;"
-              data-goto="profile" data-toast="View profile"></button>
-    </div>
-
-    <!-- ============ SCREEN 17 : RANKING ============ -->
-    <div class="screen" id="s-ranking" style="background-image:url('uploads/Frame19-4752ea29.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="profile"></button>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <button class="hot" style="left:14%;top:33%;width:74%;height:16%;border-radius:28px;"
-              data-toast="Smart E — 287 explorations"></button>
-      <button class="hot" style="left:14%;top:50%;width:74%;height:16%;border-radius:28px;"
-              data-toast="Conqueror — 246 explorations"></button>
-      <button class="hot" style="left:14%;top:67%;width:74%;height:16%;border-radius:28px;"
-              data-toast="PixelPPT — 198 explorations"></button>
-    </div>
-
-    <!-- ============ SCREEN 18 : COMMUNITY - SHARE ============ -->
-    <div class="screen" id="s-community-share" style="background-image:url('uploads/Frame20-ab726ddd.jpg');">
-      <input class="community-input" id="community-text"
-             placeholder='type "hello" here to the universe' />
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;"
-              data-goto="community-greeting" data-toast="Posted to the universe"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- spaceship side -->
-      <button class="hot" style="left:62%;top:14%;width:38%;height:42%;"
-              data-goto="community-greeting" data-toast="Boarding the express line"></button>
-    </div>
-
-    <!-- ============ SCREEN 19 : COMMUNITY - GREETING ============ -->
-    <div class="screen" id="s-community-greeting" style="background-image:url('uploads/Frame21-64606acb.jpg');">
-      <div class="greeting-cycle" id="greeting-cycle"></div>
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <button class="hot" style="left:42%;top:32%;width:18%;height:18%;border-radius:50%;"
-              data-goto="solar-map" data-toast="Open the universe map"></button>
-    </div>
-
-    <!-- ============ SCREEN 20 : PROFILE ============ -->
-    <div class="screen" id="s-profile" style="background-image:url('uploads/Frame23-68491930.jpg');">
-      <button class="hot round" style="left:3.2%;top:5.5%;width:7%;height:12.5%;"
-              data-goto="destination" data-toast="Back to destinations"></button>
-      <!-- four planet cards -->
-      <button class="hot" style="left:7%;top:22%;width:21%;height:65%;border-radius:18px;"
-              data-toast="Mars — visited 2004.08.19"></button>
-      <button class="hot" style="left:30%;top:22%;width:21%;height:65%;border-radius:18px;"
-              data-toast="Moon — visited 2005.03.07"></button>
-      <button class="hot" style="left:53%;top:22%;width:21%;height:65%;border-radius:18px;"
-              data-toast="Neptune — visited 2006.11.05"></button>
-      <button class="hot" style="left:76%;top:22%;width:21%;height:65%;border-radius:18px;"
-              data-toast="Pluto — unvisited"></button>
-      <!-- bottom-right rocket -->
-      <button class="hot round" style="left:91.5%;top:82%;width:7%;height:14%;"
-              data-goto="solar-map" data-toast="Open the universe map"></button>
-    </div>
-
-    <!-- ============ SCREEN 21 : SOLAR MAP ============ -->
-    <div class="screen" id="s-solar-map" style="background-image:url('uploads/Frame25-afdd2fbb.jpg');">
-      <button class="hot round" style="left:91.5%;top:14%;width:6%;height:10%;" data-goto="destination"></button>
-      <button class="hot round" style="left:91.5%;top:26%;width:6%;height:10%;" data-action="camera"></button>
-      <button class="hot round" style="left:91.5%;top:38%;width:6%;height:10%;" data-action="save"></button>
-      <button class="hot round" style="left:91.5%;top:50%;width:6%;height:10%;" data-goto="community-share"></button>
-      <button class="hot round" style="left:91.5%;top:62%;width:6%;height:10%;" data-goto="achievements"></button>
-      <button class="hot round" style="left:91.5%;top:74%;width:6%;height:10%;" data-action="share"></button>
-      <!-- planets clickable -->
-      <button class="hot round" style="left:6%;top:32%;width:11%;height:24%;"
-              data-action="warp" data-planet="Mercury"></button>
-      <button class="hot round" style="left:22%;top:23%;width:14%;height:38%;"
-              data-action="warp" data-planet="Uranus"></button>
-      <button class="hot round" style="left:42%;top:0%;width:10%;height:16%;"
-              data-action="warp" data-planet="Mars" data-toast=""></button>
-      <button class="hot round" style="left:41%;top:15%;width:10%;height:18%;"
-              data-action="warp" data-planet="Jupiter"></button>
-      <button class="hot round" style="left:40%;top:33%;width:12%;height:24%;"
-              data-action="warp" data-planet="Earth"></button>
-      <button class="hot round" style="left:39%;top:57%;width:14%;height:24%;"
-              data-action="warp" data-planet="Moon"></button>
-      <button class="hot round" style="left:39%;top:83%;width:14%;height:22%;"
-              data-action="warp" data-planet="Sun"></button>
-      <button class="hot round" style="left:55%;top:18%;width:22%;height:38%;"
-              data-action="warp" data-planet="Saturn"></button>
-      <button class="hot round" style="left:81%;top:33%;width:6%;height:14%;"
-              data-action="warp" data-planet="Neptune"></button>
-    </div>
-
-    <!-- ============ OVERLAYS ============ -->
-    <div id="warp"></div>
-    <div id="flash"></div>
-    <div id="unlock-fx"></div>
-    <div id="toast"></div>
-
-  </div>
-</div>
-
-<div id="helpbar">
-  press <kbd>Esc</kbd> for menu · <kbd>←</kbd> back · <kbd>H</kbd> home
-</div>
-
-<script>
-  /* =========  STATE  ========= */
-  const state = {
-    history: ['start'],
-    achievements: new Set(),
-  };
-
-  /* =========  CORE: GO TO SCREEN  ========= */
-  function go(id, opts = {}) {
-    const target = document.getElementById('s-' + id);
-    if (!target) return;
-    const current = document.querySelector('.screen.active');
-    if (current === target) return;
-    if (current) current.classList.remove('active');
-    target.classList.add('active');
-    if (!opts.silent) state.history.push(id);
+  if(o.video){
+    const A=makeVideo(o.video),B=makeVideo(o.video);[A.t,B.t].forEach(t=>setZ(t,1));
+    let cur=A,nxt=B,fading=false,fadeT=0;const FADE=o.fade??1.2,rate=o.rate??0.6;
+    let bot=mk(A.t,-15),top=mk(B.t,-14);top.material.opacity=0;
+    const playV=v=>{v.playbackRate=rate;const p=v.play();if(p&&p.catch)p.catch(()=>{})};
+    st.enter=()=>{cur=A;nxt=B;fading=false;bot.material.map=A.t;top.material.map=B.t;top.material.opacity=0;B.v.pause();A.v.currentTime=0;playV(A.v);st.ended=false};
+    st.exit=()=>{A.v.pause();B.v.pause()};
+    st.update=(dt)=>{const v=cur.v;if(!v.duration)return;v.playbackRate=rate;
+      if(o.once){if(v.ended||v.currentTime>=v.duration-0.05){if(!st.ended){st.ended=true;o.onEnd&&o.onEnd()}}return}
+      if(!fading&&v.currentTime>=v.duration-FADE*rate){fading=true;fadeT=0;top.material.map=cur.t;bot.material.map=nxt.t;nxt.v.currentTime=0;playV(nxt.v);top.renderOrder=-14;bot.renderOrder=-15;top.material.opacity=1}
+      if(fading){fadeT+=dt;top.material.opacity=Math.max(0,1-fadeT/FADE);if(fadeT>=FADE){fading=false;cur.v.pause();[cur,nxt]=[nxt,cur];bot.material.map=cur.t;top.material.opacity=0}}};
   }
-  function back() {
-    if (state.history.length < 2) return;
-    state.history.pop();
-    const prev = state.history[state.history.length - 1];
-    go(prev, { silent: true });
-  }
+  // cockpit frame overlay (rotation-only view, so a near radius keeps alignment and hides objects behind pillars)
+  if(o.frame){const ft=tex(o.frame);ft.repeat.x=-1;ft.offset.x=1;ft.wrapS=THREE.RepeatWrapping;const r=2.4;
+    const fm=new THREE.Mesh(new THREE.CylinderGeometry(r,r,H*r/R,96,1,true,Math.PI-span/2,span),new THREE.MeshBasicMaterial({map:ft,transparent:true,depthWrite:false,side:THREE.BackSide,fog:false,alphaTest:0.02}));
+    fm.position.copy(EYE);fm.renderOrder=-5;root.add(fm)}
+  // forward drift of dust outside the windows
+  if(o.dust){const n=420,pos=new Float32Array(n*3),P=[];const spawn=(i,far)=>{const yaw=(Math.random()-0.5)*1.9,el=(Math.random()-0.35)*0.5,d=far?11.5:3+Math.random()*8.5;P[i]={yaw,el,d};};
+    for(let i=0;i<n;i++)spawn(i,false);const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const pts=new THREE.Points(g,new THREE.PointsMaterial({color:0xdfe8ff,size:0.035,transparent:true,opacity:0.75,depthWrite:false,fog:false}));pts.renderOrder=-6;root.add(pts);
+    const prev=st.update;st.update=(dt)=>{prev(dt);for(let i=0;i<n;i++){const p=P[i];p.d-=dt*(0.55+0.0*p.d);if(p.d<2.6)spawn(i,true);const k=p.d;pos[i*3]=Math.sin(p.yaw)*k*1.0;pos[i*3+1]=EYE.y+Math.tan(p.el)*k;pos[i*3+2]=-Math.cos(p.yaw)*k}
+      // things spread outward as they approach (vanishing point straight ahead)
+      g.attributes.position.needsUpdate=true}}
+  // ship floor under the cockpit: its rim meets the bottom edge of the view
+  if(o.base){const rim=EYE.y/((H/2)/R);
+    const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle='#0c0f14';g.fillRect(0,0,512,512);
+    g.strokeStyle='rgba(120,140,170,.25)';g.lineWidth=2;for(let i=0;i<=8;i++){g.beginPath();g.arc(256,256,i*32,0,Math.PI*2);g.stroke()}
+    for(let i=0;i<16;i++){const a=i/16*Math.PI*2;g.beginPath();g.moveTo(256,256);g.lineTo(256+Math.cos(a)*256,256+Math.sin(a)*256);g.stroke()}
+    const gr=g.createRadialGradient(256,256,0,256,256,256);gr.addColorStop(0,'rgba(0,0,0,0)');gr.addColorStop(1,'rgba(0,0,0,.55)');g.fillStyle=gr;g.fillRect(0,0,512,512);
+    const bt=new THREE.CanvasTexture(c);bt.colorSpace=THREE.SRGBColorSpace;
+    const floor=new THREE.Mesh(new THREE.CircleGeometry(rim,96),new THREE.MeshStandardMaterial({map:bt,roughness:0.45,metalness:0.6,fog:false}));floor.rotation.x=-Math.PI/2;floor.position.set(EYE.x,0,EYE.z);floor.renderOrder=-4;root.add(floor);
+    const strip=new THREE.Mesh(new THREE.RingGeometry(rim-0.06,rim-0.03,128,1,Math.PI*0.25,Math.PI*1.5),new THREE.MeshBasicMaterial({color:0x6fb6ff,side:THREE.DoubleSide,fog:false}));strip.rotation.x=-Math.PI/2;strip.rotation.z=Math.PI;strip.position.set(EYE.x,0.005,EYE.z);root.add(strip);
+    const cm=new THREE.MeshStandardMaterial({color:0x1a2029,roughness:0.5,metalness:0.7});
+    [-1,1].forEach(s=>{const con=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.75,1.6),cm);con.position.set(EYE.x+s*1.9,0.375,EYE.z+0.2);con.rotation.y=-s*0.3;root.add(con);
+      const top=new THREE.Mesh(new THREE.PlaneGeometry(0.7,1.3),new THREE.MeshBasicMaterial({color:0x14324a,fog:false}));top.rotation.x=-Math.PI/2;top.position.set(0,0.376,0);con.add(top);
+      for(let k=0;k<6;k++){const b=new THREE.Mesh(new THREE.CircleGeometry(0.03,12),new THREE.MeshBasicMaterial({color:[0x6fb6ff,0xffb46f,0x7fffb2][k%3],fog:false}));b.rotation.x=-Math.PI/2;b.position.set(-0.22+(k%3)*0.22,0.378,-0.4+Math.floor(k/3)*0.3);con.add(b)}});
+    const seat=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.6,0.08,32),cm);seat.position.set(EYE.x,0.05,EYE.z+0.4);root.add(seat);
+    root.add(new THREE.HemisphereLight(0x9fb8e0,0x0a0f1a,0.6));}
+  (S.stages||(S.stages=[])).push(st);return st;
+}
 
-  /* =========  TOAST  ========= */
-  let toastTimer;
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
-  }
+// =====================================================================
+// canvas UI panels (drawn in Figma units, shown as planes in 3D)
+// =====================================================================
+const ICON={
+ user:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 21a7.5 7.5 0 0 1 15 0',
+ lock:'M6 11h12v10H6zM8.5 11V7.5a3.5 3.5 0 0 1 7 0V11',
+ home:'M3.5 11.5L12 4.5l8.5 7M6 10v10h12V10',
+ camera:'M4 8h3.2l1.8-2.6h6l1.8 2.6H20v11.5H4zM12 17a3.6 3.6 0 1 0 0-7.2 3.6 3.6 0 0 0 0 7.2z',
+ map:'M4 6.5h16v11H4zM14 17.5l2.5 2.5M17 13.5a1 1 0 1 0 0-.01',
+ chat:'M4 5h16v10.5H9.5L5 19.5V15.5H4zM9 10.3a.6.6 0 1 0 0-.01M12 10.3a.6.6 0 1 0 0-.01M15 10.3a.6.6 0 1 0 0-.01',
+ medal:'M9 3h6M10 3v4M14 3v4M12 21.5a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM12 12.5l1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z',
+ share:'M13.5 6l6.5 6-6.5 6M20 12H10a6 6 0 0 0-6 6',
+ eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+ target:'M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM12 2v3M12 19v3M2 12h3M19 12h3',
+ rocket:'M12 2.5c3 2.2 4.6 5.8 4.6 9.6L15 16H9l-1.6-3.9c0-3.8 1.6-7.4 4.6-9.6zM12 11.1a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2zM8.6 13.5L6 16.5l3.2-.5M15.4 13.5l2.6 3-3.2-.5M10.5 18.5L12 21l1.5-2.5',
+ mail:'M3 5.5h18v13H3zM3 6.5l9 7 9-7',
+ move:'M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3',
+ zoom:'M11 17a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM20 20l-4.5-4.5M8.5 11h5M11 8.5v5',
+ rotate:'M20 12a8 8 0 1 1-2.4-5.7M20 4v5h-5',
+ palm:'M7 11V6a1.5 1.5 0 0 1 3 0v4M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9a1.5 1.5 0 0 1 3 0v4a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.5-4a1.5 1.5 0 0 1 2.5-1.5L7 13',
+ wrench:'M14.5 4.5a4.5 4.5 0 0 0 5 5.6l-9.6 9.6a2.1 2.1 0 0 1-3-3l9.6-9.6a4.5 4.5 0 0 0-2-2.6z',
+ crew:'M12 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM6 19.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM18 19.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM10.6 9.2L7.4 15M13.4 9.2l3.2 5.8M8.5 17h7',
+ bookmark:'M6.5 3.5h11v17l-5.5-4-5.5 4z',
+ send:'M3 11.5L21 4l-7.5 18-2.5-7.5z',
+ heart:'M12 20.5s-7.5-4.6-9.3-9.2C1.4 8 3.4 4.5 6.9 4.5c2 0 3.6 1.1 5.1 3 1.5-1.9 3.1-3 5.1-3 3.5 0 5.5 3.5 4.2 6.8-1.8 4.6-9.3 9.2-9.3 9.2z',
+ radar:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 12l6-6',
+ person:'M12 7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5zM8 22v-7H6.5V9.5h11V15H16v7z',
+ close:'M6 6l12 12M18 6L6 18',
+};
+const PATHS={};for(const k in ICON)PATHS[k]=new Path2D(ICON[k]);
+function icon(g,k,cx,cy,s,{color='#fff',lw=1.6,fill=false}={}){g.save();g.translate(cx-s/2,cy-s/2);g.scale(s/24,s/24);g.lineWidth=lw;g.strokeStyle=color;g.fillStyle=color;g.lineCap='round';g.lineJoin='round';if(fill)g.fill(PATHS[k]);g.stroke(PATHS[k]);g.restore()}
+function rr(g,x,y,w,h,r){r=Math.min(r,w/2,h/2);g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+const TONES={
+ light:{fill:'rgba(215,222,235,.2)',stroke:'rgba(255,255,255,.5)',hot:'rgba(235,240,250,.34)'},
+ dark:{fill:'rgba(14,16,22,.5)',stroke:'rgba(255,255,255,.3)',hot:'rgba(60,66,80,.6)'},
+ warm:{fill:'rgba(150,150,142,.55)',stroke:'rgba(255,255,255,.42)',hot:'rgba(175,175,166,.68)'},
+ panel:{fill:'rgba(8,12,20,.8)',stroke:'rgba(255,255,255,.42)',hot:'rgba(20,26,38,.86)'},
+};
+function glass(g,x,y,w,h,r,tone='light',hot=false){const T=TONES[tone];rr(g,x+1.5,y+1.5,w-3,h-3,r);g.fillStyle=hot?T.hot:T.fill;g.fill();
+  const gr=g.createLinearGradient(0,y,0,y+h*.45);gr.addColorStop(0,'rgba(255,255,255,.13)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fill();
+  g.lineWidth=hot?3:2;g.strokeStyle=hot?'#fff':T.stroke;g.stroke()}
+function txt(g,s,x,y,size,{w=400,color='#fff',align='left',font='Fira Sans',spacing=0}={}){g.font=`${w} ${size}px "${font}"`;g.fillStyle=color;g.textAlign=align;g.textBaseline='alphabetic';try{g.letterSpacing=spacing+'px'}catch(e){}g.fillText(s,x,y);try{g.letterSpacing='0px'}catch(e){}g.textAlign='left'}
+function wrap(g,s,x,y,maxW,lh,size,opts={}){g.font=`${opts.w||400} ${size}px "Fira Sans"`;const words=s.split(' ');let line='';for(const w of words){const t=line?line+' '+w:w;if(g.measureText(t).width>maxW&&line){txt(g,line,x,y,size,opts);line=w;y+=lh}else line=t}if(line)txt(g,line,x,y,size,opts);return y}
+function fit(g,s,maxW,size,w=400,font='Fira Sans'){let f=size;do{g.font=`${w} ${f}px "${font}"`;f-=2}while(g.measureText(s).width>maxW&&f>12);return f+2}
 
-  /* =========  CAMERA FLASH  ========= */
-  function fireFlash() {
-    const f = document.getElementById('flash');
-    f.classList.remove('fire');
-    void f.offsetWidth; // restart anim
-    f.classList.add('fire');
-  }
+// a panel: rect in frame units, placed at distance d on a layout
+function panel(root,lay,rect,d,draw,opts={}){
+  const [x,y,w,h]=rect;const [mw,mh]=sizeOf(lay,w,h,d);
+  const k=Math.min(2,2048/w,2048/h);const cv=document.createElement('canvas');cv.width=Math.max(2,Math.round(w*k));cv.height=Math.max(2,Math.round(h*k));
+  const g=cv.getContext('2d');const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(mw,mh),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,toneMapped:false,fog:false}));
+  const eye=opts.eye||EYE;const p=at(lay,x+w/2,y+h/2,d,eye);m.position.copy(p);m.lookAt(eye.x,p.y,eye.z);
+  m.renderOrder=opts.order??10;
+  const P=m.userData;Object.assign(P,{w,h,regions:[],hover:null,kind:'panel'},opts);
+  P.redraw=()=>{g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.setTransform(k,0,0,k,0,0);P.regions=[];draw(g,P);t.needsUpdate=true};
+  P.region=(id,x,y,w,h,act)=>P.regions.push({id,x,y,w,h,act});
+  P.redraw();root.add(m);return m;
+}
+// world-space panel (for the suit hall, modals)
+function wpanel(parent,mw,pxW,pxH,draw,opts={}){
+  const k=Math.min(2,2048/pxW,2048/pxH);const cv=document.createElement('canvas');cv.width=Math.round(pxW*k);cv.height=Math.round(pxH*k);
+  const g=cv.getContext('2d');const t=new THREE.CanvasTexture(cv);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=renderer.capabilities.getMaxAnisotropy();
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(mw,mw*pxH/pxW),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,toneMapped:false,fog:false}));
+  m.renderOrder=opts.order??10;const P=m.userData;Object.assign(P,{w:pxW,h:pxH,regions:[],hover:null,kind:'panel'},opts);
+  P.redraw=()=>{g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,cv.width,cv.height);g.setTransform(k,0,0,k,0,0);P.regions=[];draw(g,P);t.needsUpdate=true};
+  P.region=(id,x,y,w,h,act)=>P.regions.push({id,x,y,w,h,act});
+  P.redraw();parent.add(m);return m;
+}
+// simple button panel: whole surface is one region
+function button(root,lay,rect,d,draw,act,opts={}){return panel(root,lay,rect,d,(g,P)=>{draw(g,P,P.hover==='b');P.region('b',0,0,P.w,P.h,act)},opts)}
+function pill(root,lay,rect,d,label,act,tone='light',size){return button(root,lay,rect,d,(g,P,hot)=>{glass(g,0,0,P.w,P.h,P.h/2,tone,hot);txt(g,label,P.w/2,P.h/2+(size||P.h*.36)*.36,size||P.h*.4,{w:500,align:'center'})},act)}
+function iconBtn(root,lay,rect,d,ic,act,tone='light'){return button(root,lay,rect,d,(g,P,hot)=>{glass(g,0,0,P.w,P.h,P.w*.26,tone,hot);icon(g,ic,P.w/2,P.h/2,P.w*.52,{lw:1.5})},act)}
 
-  /* =========  WARP TRANSITION  ========= */
-  function warpTo(planet) {
-    const w = document.getElementById('warp');
-    w.classList.add('show');
-    setTimeout(() => {
-      go('transition');
-      w.classList.remove('show');
-      toast('Destination set: ' + planet);
-    }, 420);
-  }
+// =====================================================================
+// models from Tripo (packed as JS modules; textures decoded through <img>)
+// =====================================================================
+const loader=new GLTFLoader();const modelCache={};
+function b64ToBuf(s){const bin=atob(s);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
+function getModel(name){
+  if(!modelCache[name])modelCache[name]=(async()=>{
+    const mod=await import('./vr/models/'+name+'.js');
+    const cib=window.createImageBitmap;let gl;
+    try{window.createImageBitmap=undefined;const pr=loader.parseAsync(b64ToBuf(mod.default),'');window.createImageBitmap=cib;gl=await pr}finally{window.createImageBitmap=cib}
+    gl.scene.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return gl.scene})();
+  return modelCache[name];
+}
+// fit a model into a holder: largest dimension = size, centered, facing +Z
+async function model(name,size,{byHeight=false,turn=-Math.PI/2}={}){
+  const src=await getModel(name);const inner=src.clone(true);inner.rotation.y=turn;
+  const b=new THREE.Box3().setFromObject(inner),s=b.getSize(new THREE.Vector3());const sc=size/(byHeight?s.y:Math.max(s.x,s.y,s.z));inner.scale.setScalar(sc);
+  const b2=new THREE.Box3().setFromObject(inner),c=b2.getCenter(new THREE.Vector3());inner.position.sub(c);
+  const holder=new THREE.Group();holder.add(inner);holder.userData.radius=b2.getSize(new THREE.Vector3()).length()/2;return holder;
+}
 
-  /* =========  ACHIEVEMENT UNLOCK  ========= */
-  function unlockAchievement(name) {
-    if (state.achievements.has(name)) {
-      go('achievement');
-      return;
+// =====================================================================
+// app state
+// =====================================================================
+const G={mode:'single',suit:0,dest:'Mars',favs:new Set(),caught:new Set(),medals:new Set(),photos:[],hello:'',user:'',pass:''};
+const DEST={
+ Mars:{d:'~225 million km',t:'6–9 months',desc:'Has the largest volcano (Olympus Mons) and a thin atmosphere, mainly carbon dioxide. Scientists are very interested in its potential for past or future life.',tex:'mars'},
+ Moon:{d:'~384,400 km',t:'3 days',desc:'No atmosphere, extreme temperature variations, and surface features such as craters and maria.',tex:'moon'},
+ Jupiter:{d:'~778 million km',t:'13 months',desc:'Gas giant mainly composed of hydrogen and helium. It has a famous Great Red Spot (a giant storm), strong magnetic fields.',tex:'jupiter'},
+ Pluto:{d:'~5.9 billion km',t:'9.5 years',desc:'Classified as a dwarf planet in the Kuiper Belt. It has a thin nitrogen atmosphere, icy mountains, and five known moons.',tex:'pluto'},
+};
+const MEDALS=[
+ {k:'launch',n:'First Launch',m:'medal_star'},
+ {k:'sat',n:'Satellite Spotter',m:'medal_hex'},
+ {k:'debris',n:'Debris Hunter',m:'medal_shield'},
+ {k:'glove',n:'Lost Tool Finder',m:'medal_glove'},
+ {k:'rover',n:'Mars Explorer',m:'medal_mars'},
+ {k:'treaty',n:'Outer Space Treaty Witness',m:'medal'},
+];
+const RECORDS={
+ satellite:{cat:'Defunct Satellites',att:'A defunct satellite was discovered',name:'Kosmos 2251 & Iridium 33 Collision',time:'2009',src:'A defunct Russian satellite Kosmos 2251 collided with an active American communications satellite Iridium 33 at an altitude of ~790 km.',imp:'Created over 2,000 trackable fragments and tens of thousands of smaller pieces, one of the worst satellite collisions in history.',medal:'sat'},
+ debris_b:{cat:'Defunct Satellites',att:'A broken solar panel was discovered',name:'Iridium 33 Solar Array Fragment',time:'2009',src:'A piece of solar panel torn off Iridium 33 in its collision with Kosmos 2251.',imp:'Fragments like this still circle Earth, so new satellites must be steered around them.',medal:'sat'},
+ debris_a:{cat:'Remnants of Explosions',att:'A group of space debris was discovered',name:'Fengyun-1C Breakup',time:'2007',src:'A weather satellite destroyed by an anti-satellite missile test at ~865 km altitude.',imp:'Produced more than 3,000 trackable fragments, the largest debris-creating event ever recorded.',medal:'debris'},
+ glove:{cat:'LostTools',att:'A lost tool was discovered',name:'Jerry Linenger’s Lost Glove',time:'1997',src:'During an EVA outside the Mir Space Station, astronaut Jerry Linenger accidentally lost his glove while conducting maintenance.',imp:'The glove orbited Earth for months as space debris before burning up, one of the most famous lost tools in space.',medal:'glove'},
+ rover:{cat:'Remnants of Explosions',att:'Machines were discovered on the surface',name:'Curiosity & Perseverance Rovers',time:'2012 / 2021',src:'NASA missions designed to explore Mars’ surface, study geology, and search for signs of ancient life.',imp:'Provided groundbreaking data on Mars’ climate and habitability, and produced oxygen from the Martian atmosphere.',medal:'rover'},
+};
+
+// =====================================================================
+// shared scene parts: avatar, side nav, detection panel
+// =====================================================================
+function avatar(root,lay,act=()=>go('passport')){return iconBtn(root,lay,lay===LW?[1830,80,162,162]:[43,49,162,162],3,'user',act)}
+const NAV=[['home','Shop',()=>openShop()],['camera','Shoot',()=>shoot()],['map','Map',()=>go('map')],['chat','Chat',()=>openChat()],['medal','Medal wall',()=>go('wall')],['share','Share progress',()=>go('share')]];
+function navBar(root,lay,x,y){
+  return panel(root,lay,[x,y,128,982],3,(g,P)=>{glass(g,0,0,P.w,P.h,64,'light');
+    NAV.forEach(([ic,label,act],i)=>{const bx=10,by=50+151*i;const hot=P.hover===ic;rr(g,bx+6,by+4,96,96,48);g.fillStyle=hot?'rgba(255,255,255,.3)':'rgba(255,255,255,.1)';g.fill();g.lineWidth=1.5;g.strokeStyle='rgba(255,255,255,.4)';g.stroke();icon(g,ic,bx+54,by+52,52,{lw:1.4});P.region(ic,bx,by,108,107,act)})});
+}
+const CATS=[['Defunct Satellites','dock'],['LostTools','glove'],['Remnants of Explosions','rovers'],['Documents','station']];
+function detectionPanel(root,lay,rect,getRec,opts={}){
+  return panel(root,lay,rect,2.6,(g,P)=>{
+    const W=P.w,Hh=P.h;rr(g,2,2,W-4,Hh-4,22);g.fillStyle='rgba(6,9,15,.82)';g.fill();g.lineWidth=2;g.strokeStyle='rgba(255,255,255,.45)';g.stroke();
+    const rec=getRec();const sx=W/2191;g.save();g.scale(sx,Hh/227);
+    icon(g,'radar',160,104,118,{lw:1.1});
+    txt(g,'Attention!',262,58,24,{w:600,color:'#ffd27a'});
+    wrap(g,rec?rec.att:(opts.idle||'Look around the window'),262,92,200,22,18,{color:'rgba(255,255,255,.85)'});
+    g.fillStyle='rgba(255,255,255,.35)';g.fillRect(484,16,1.5,190);g.fillRect(1402,16,1.5,190);
+    txt(g,'detection result',499,34,18,{color:'rgba(255,255,255,.7)'});
+    if(rec&&rec.caught){
+      rr(g,606,42,118,118,14);g.strokeStyle='rgba(255,255,255,.5)';g.stroke();icon(g,rec.icon||'target',665,101,64,{lw:1.2});
+      const rows=[['Name',rec.name],['Time',rec.time],['Source',rec.src],['Impact',rec.imp]];let y=34;
+      rows.forEach(([k,v],i)=>{txt(g,k,740,y+10,17,{w:600});const end=wrap(g,v,900,y+10,480,19,15,{color:'rgba(255,255,255,.88)'});y=Math.max(y+30,end+16)});
+    }else{
+      rr(g,606,42,118,118,14);g.setLineDash([6,6]);g.strokeStyle='rgba(255,255,255,.45)';g.stroke();g.setLineDash([]);icon(g,'target',665,101,58,{lw:1.2,color:'rgba(255,255,255,.7)'});
+      txt(g,opts.prompt||'Grab the object and pull it toward you to catch it.',740,95,20,{color:'rgba(255,255,255,.9)'});
+      txt(g,'Its record appears here once it is caught.',740,125,16,{color:'rgba(255,255,255,.6)'});
     }
-    state.achievements.add(name);
-    const fx = document.getElementById('unlock-fx');
-    fx.classList.add('show');
-    toast('Achievement unlocked!');
-    setTimeout(() => {
-      go('achievement');
-      setTimeout(() => fx.classList.remove('show'), 800);
-    }, 700);
-  }
+    const cx=[1504,1662,1806,1966];
+    CATS.forEach(([label,to],i)=>{const hot=P.hover==='c'+i;g.beginPath();g.arc(cx[i],92,51,0,Math.PI*2);g.fillStyle=hot?'rgba(255,255,255,.22)':'rgba(255,255,255,.04)';g.fill();g.lineWidth=hot?3:1.6;g.strokeStyle='#fff';g.stroke();
+      const parts=label.split(' ');parts.length===1?txt(g,label,cx[i],98,16,{align:'center'}):parts.length===2?(txt(g,parts[0],cx[i],88,16,{align:'center'}),txt(g,parts[1],cx[i],108,16,{align:'center'})):(txt(g,parts[0],cx[i],78,15,{align:'center'}),txt(g,parts[1],cx[i],97,15,{align:'center'}),txt(g,parts[2],cx[i],116,15,{align:'center'}));
+      P.region('c'+i,(cx[i]-55)*sx,(92-55)*Hh/227,110*sx,110*Hh/227,()=>go(to))});
+    g.restore();
+  },{order:12});
+}
 
-  /* =========  BIND HOTSPOTS  ========= */
-  document.querySelectorAll('.hot').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const dest = btn.dataset.goto;
-      const toastMsg = btn.dataset.toast;
-      const action = btn.dataset.action;
+// =====================================================================
+// grabbing: pull an object toward you to catch it
+// =====================================================================
+function targetRing(){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.strokeStyle='#fff';g.lineWidth=5;g.beginPath();g.arc(128,128,108,0,Math.PI*2);g.stroke();
+  [[0,1],[1,0],[0,-1],[-1,0]].forEach(([dx,dy])=>{g.beginPath();g.moveTo(128+dx*90,128+dy*90);g.lineTo(128+dx*124,128+dy*124);g.stroke()});
+  const t=new THREE.CanvasTexture(c);return new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,opacity:.7,fog:false}))}
+function makeGrabbable(S,holder,key,onCatch,opts={}){
+  const r=holder.userData.radius||0.5;
+  const hit=new THREE.Mesh(new THREE.SphereGeometry(r*0.75,12,8),new THREE.MeshBasicMaterial({visible:false}));holder.add(hit);
+  const ring=targetRing();ring.scale.setScalar(r*2.3);holder.add(ring);
+  Object.assign(hit.userData,{kind:'grab',holder,key,onCatch,scan:!!opts.scan});
+  holder.userData.home=holder.position.clone();holder.userData.ring=ring;holder.userData.phase=Math.random()*6;
+  S.grabs.push(hit);S.floaters.push(holder);return hit;
+}
+let grab=null;
+function catchIt(S,hd){
+  const h=hd.holder;S.grabs.splice(S.grabs.indexOf(hd.hit),1);
+  const start=h.position.clone(),s0=h.scale.x,t0=performance.now();
+  S.anims.push(now=>{const t=Math.min(1,(now-t0)/600);h.scale.setScalar(s0*(1-t));h.position.lerpVectors(start,camera.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0,-0.5,0)),t);if(t>=1){h.visible=false;return true}});
+  hd.onCatch();
+}
 
-      if (action === 'submit-login') {
-        const user = document.getElementById('login-user').value.trim();
-        if (!user) {
-          toast('Please enter a commander name');
-          document.getElementById('login-user').focus();
-          return;
-        }
-        toast('Welcome aboard, ' + user);
-        setTimeout(() => go('mode'), 600);
-        return;
-      }
-      if (action === 'warp') {
-        warpTo(btn.dataset.planet || 'Destination');
-        return;
-      }
-      if (action === 'camera') {
-        fireFlash();
-        toast(toastMsg || 'Photo captured');
-        return;
-      }
-      if (action === 'save') {
-        toast(toastMsg || 'Saved to logbook');
-        return;
-      }
-      if (action === 'share') {
-        toast(toastMsg || 'Link copied');
-        return;
-      }
-      if (action === 'favorite') {
-        toast(toastMsg || 'Added to favorites');
-        return;
-      }
-      if (action === 'capture-object') {
-        toast(toastMsg || 'Object captured');
-        setTimeout(() => unlockAchievement('Object Catcher'), 700);
-        return;
-      }
-      if (action === 'unlock-achievement') {
-        unlockAchievement('Outer Space Treaty Witness');
-        return;
-      }
+// =====================================================================
+// scenes
+// =====================================================================
+const SC={};
+function scene(id,def){SC[id]=Object.assign({id,lay:L16,eye:EYE.clone(),yaw:[-1.1,1.1],pitch:[-0.35,0.35],fov:50,bg:0x000000,stars:true,clickables:null,grabs:[],floaters:[],anims:[],spin:[]},def)}
+function lights(root,{amb=0.75,key=1.6,keyPos=[4,6,3]}={}){root.add(new THREE.AmbientLight(0xffffff,amb));const d=new THREE.DirectionalLight(0xffffff,key);d.position.set(...keyPos);root.add(d)}
 
-      if (toastMsg) toast(toastMsg);
-      if (dest) go(dest);
-    });
-  });
+// ---------- 01 Start ----------
+scene('start',{n:'01 Start',stars:true,async build(root,S){
+  stage(root,S,L16,{img:'vr/tex/bg_start_hd.jpg',fill:'start'});
+  panel(root,L16,[340,250,1624,290],3.2,(g,P)=>{const f=fit(g,'SPACE TRAVEL',P.w-40,230,400,'Spectral');g.shadowColor='rgba(0,0,0,.4)';g.shadowBlur=24;txt(g,'SPACE TRAVEL',P.w/2,P.h*0.72,f,{font:'Spectral',align:'center',spacing:6})});
+  pill(root,L16,[843,957,619,132],3,'start',()=>go('enter'));
+  lights(root);const rk=await model('rocket',2.4,{byHeight:true,turn:0});rk.position.copy(at(L16,1900,620,6.5));root.add(rk);S.rocket=rk;
+},update(dt,S,t){if(S.rocket){S.rocket.rotation.y+=dt*0.4;S.rocket.position.y=at(L16,1900,620,6.5).y+Math.sin(t*0.9)*0.12}}});
 
-  /* =========  KEYBOARD  ========= */
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      go('mode');
-    } else if (e.key === 'ArrowLeft') {
-      back();
-    } else if (e.key === 'h' || e.key === 'H') {
-      go('destination');
-    }
-  });
+// ---------- 02 Enter ----------
+function field(root,rect,ic,inputId,placeholder,secret){
+  const el=document.getElementById(inputId);
+  const p=panel(root,L16,rect,3,(g,P)=>{const hot=P.hover==='f'||document.activeElement===el;glass(g,0,0,P.w,P.h,40,'light',hot);
+    rr(g,0,0,162,162,40);g.fillStyle='rgba(255,255,255,.12)';g.fill();g.strokeStyle='rgba(255,255,255,.45)';g.lineWidth=2;g.stroke();icon(g,ic,81,81,74,{lw:1.5});
+    const v=el.value;const shown=secret?'•'.repeat(v.length):v;txt(g,shown||placeholder,210,104,secret&&v?72:58,{color:v?'#fff':'rgba(255,255,255,.55)'});
+    if(document.activeElement===el&&Math.floor(performance.now()/500)%2===0){g.font=`400 ${secret&&v?72:58}px "Fira Sans"`;const wv=v?g.measureText(shown).width:0;g.fillStyle='#fff';g.fillRect(212+wv,46,3,72)}
+    P.region('f',0,0,P.w,P.h,()=>{el.focus();p.userData.redraw()})});
+  el.addEventListener('input',()=>p.userData.redraw());el.addEventListener('blur',()=>p.userData.redraw());
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){el.blur();go('mode')}});
+  return p;
+}
+scene('enter',{n:'02 Enter',build(root,S){
+  stage(root,S,L16,{img:'vr/tex/bg_enter_hd.jpg',fill:'enter'});
+  panel(root,L16,[900,120,504,130],3,(g,P)=>txt(g,'Enter',P.w/2,100,100,{w:500,align:'center'}));
+  S.f1=field(root,[716,389,809,162],'user','in-user','Username',false);
+  S.f2=field(root,[716,637,809,162],'lock','in-pass','Password',true);
+  pill(root,L16,[1000,846,304,104],3,'Enter',()=>go('mode'));
+  panel(root,L16,[560,1046,1184,180],3,(g,P)=>{txt(g,'Welcome to the World Space Base.',P.w/2,70,56,{align:'center'});txt(g,'You are the No.288 visitor.',P.w/2,140,56,{align:'center'})});
+},update(dt,S){const a=document.activeElement;if(a&&a.id==='in-user')S.f1.userData.redraw();if(a&&a.id==='in-pass')S.f2.userData.redraw()}});
 
-  /* =========  COMMUNITY: GREETING CYCLE  ========= */
-  const greetings = [
-    'Hello', '你好', 'Hola', 'Bonjour', 'Hallo', 'Ciao',
-    'Olá', 'Здравствуйте', 'مرحبا', 'नमस्ते', 'こんにちは',
-    'Merhaba', '안녕하세요', 'Sawubona', 'Kia ora'
-  ];
-  let gi = 0;
-  const gEl = document.getElementById('greeting-cycle');
-  function cycleGreeting() {
-    if (!document.getElementById('s-community-greeting').classList.contains('active')) {
-      setTimeout(cycleGreeting, 1500);
-      return;
-    }
-    gEl.textContent = greetings[gi % greetings.length];
-    gEl.classList.add('show');
-    setTimeout(() => {
-      gEl.classList.remove('show');
-      gi++;
-      setTimeout(cycleGreeting, 400);
-    }, 1500);
-  }
-  setTimeout(cycleGreeting, 800);
+// ---------- 03 Mode ----------
+scene('mode',{n:'03 Mode',build(root,S){
+  stage(root,S,L16,{img:'vr/tex/bg_mode_hd.jpg',fill:'mode'});
+  panel(root,L16,[900,120,504,130],3,(g,P)=>txt(g,'Mode',P.w/2,100,100,{w:500,align:'center'}));
+  button(root,L16,[430,326,1445,289],3,(g,P,hot)=>{glass(g,0,0,P.w,P.h,70,'light',hot);icon(g,'person',496,145,150,{fill:true,lw:1});txt(g,'Single Mode',615,182,100,{w:500})},()=>{G.mode='single';go('guide')});
+  button(root,L16,[430,689,1445,289],3,(g,P,hot)=>{glass(g,0,0,P.w,P.h,70,'light',hot);icon(g,'person',456,137,150,{fill:true,lw:1});icon(g,'person',545,137,150,{fill:true,lw:1});txt(g,'Friends Mode',617,190,100,{w:500})},()=>{G.mode='friends';go('guide')});
+  avatar(root,L16);
+}});
 
-  /* =========  PRELOAD IMAGES  ========= */
-  const allImgs = [
-    'Frame2','Frame3','Frame4','Frame5','Frame6','Frame7','Frame8','Frame9',
-    'Frame11','Frame12','Frame13','Frame14','Frame15','Frame16','Frame17',
-    'Frame18','Frame19-4752ea29','Frame20-ab726ddd','Frame21-64606acb','Frame23-68491930','Frame25-afdd2fbb'
-  ];
-  allImgs.forEach(name => {
-    const img = new Image();
-    img.src = 'uploads/' + name + '.jpg';
-  });
+// ---------- 04 Guide ----------
+const GESTURES=[['target','Catch an Object','Look at an object, pinch, and pull it toward you'],['rocket','Select','Look at a button and tap your thumb and index finger together'],['eye','Change view or Expand','Pinch the eye button to switch windows or open details'],['mail','Read the document','Catch a document, then pinch twice to open it'],['move','Move','Pinch and drag to move a panel or object around you'],['zoom','Zoom','Pinch with both hands and pull apart to zoom in'],['rotate','Rotate','Pinch with both hands and twist to turn an object'],['palm','Open the menu','Turn your palm up and look at it to bring up the side menu']];
+const STEPS=[['Pick a mode','Travel alone in Single Mode, or with a crewmate in Friends Mode.'],['Choose your suit','Tap the small rockets in the suit hall. Your pick stands on the center stage.'],['Pick a destination','Browse Mars, the Moon, Jupiter and Pluto, then tap the rocket on a card to launch.'],['Explore from the cockpit','Look around. The detection panel flags satellites, lost tools, debris and documents.'],['Catch and read','Grab what you spot and pull it in. Its real story appears on the panel.'],['Earn achievements','Each discovery earns a medal. Photos you shoot are saved to your medal wall.'],['Share your progress','Say hello to the universe and see who else is out there.']];
+scene('guide',{n:'04 Guide',build(root,S){
+  stage(root,S,L16,{img:'vr/tex/bg_guide_hd.jpg',fill:'guide'});S.tab=0;S.scroll=0;
+  panel(root,L16,[900,90,504,130],3,(g,P)=>txt(g,'Guide',P.w/2,100,100,{w:500,align:'center'}));
+  panel(root,L16,[191,308,218,870],3.02,(g,P)=>glass(g,0,0,P.w,P.h,60,'light'),{order:5});
+  const tabs=[['wrench',444],['crew',662],['bookmark',880]].map(([ic,y],i)=>button(root,L16,[219,y,162,162],3,(g,P,hot)=>{const on=S.tab===i;glass(g,0,0,P.w,P.h,40,'light',hot||on);if(on){rr(g,3,3,P.w-6,P.h-6,38);g.lineWidth=5;g.strokeStyle='#fff';g.shadowColor='#fff';g.shadowBlur=16;g.stroke();g.shadowBlur=0}icon(g,ic,81,81,80,{lw:1.5})},()=>{S.tab=i;S.scroll=0;tabs.forEach(t=>t.userData.redraw());S.body.userData.redraw()}));
+  S.body=panel(root,L16,[507,305,1525,870],3,(g,P)=>{
+    glass(g,0,0,P.w,P.h,48,'light');g.save();rr(g,0,0,P.w,P.h,44);g.clip();g.translate(0,-S.scroll);let y=110;
+    if(S.tab===0){txt(g,'TOOLS · GESTURES',113,72,30,{w:600,color:'rgba(255,255,255,.75)',spacing:4});
+      GESTURES.forEach(([ic,b,t])=>{glass(g,113,y-8,142,142,40,'light');icon(g,ic,184,y+63,74,{lw:1.5});txt(g,b,359,y+58,76,{w:600});txt(g,t,361,y+108,34,{color:'rgba(255,255,255,.78)'});y+=208});}
+    else if(S.tab===1){txt(g,'HOW TO PLAY',113,72,30,{w:600,color:'rgba(255,255,255,.75)',spacing:4});
+      STEPS.forEach(([b,t],i)=>{g.beginPath();g.arc(184,y+60,56,0,Math.PI*2);g.fillStyle='rgba(255,255,255,.14)';g.fill();g.strokeStyle='rgba(255,255,255,.5)';g.lineWidth=2;g.stroke();txt(g,String(i+1),184,y+80,56,{w:600,align:'center'});txt(g,b,290,y+52,62,{w:600});wrap(g,t,292,y+102,1080,42,34,{color:'rgba(255,255,255,.78)'});y+=190});}
+    else{txt(g,'FAVORITES',113,72,30,{w:600,color:'rgba(255,255,255,.75)',spacing:4});const f=[...G.favs];
+      if(!f.length)wrap(g,'Nothing saved yet. Tap the heart on a space suit or a destination card and it will show up here.',113,200,1200,60,44,{color:'rgba(255,255,255,.85)'});
+      f.forEach(k=>{const [t,n]=k.split(':');icon(g,'heart',184,y+60,80,{fill:true,lw:1});txt(g,n,290,y+60,62,{w:600});txt(g,t==='suit'?'Space suit':'Destination',292,y+106,34,{color:'rgba(255,255,255,.7)'});y+=170});}
+    S.maxScroll=Math.max(0,y-P.h+150);g.restore();
+    if(S.maxScroll>0){const th=P.h*P.h/(P.h+S.maxScroll);g.fillStyle='rgba(255,255,255,.55)';rr(g,P.w-70,40+(P.h-80-th)*(S.scroll/S.maxScroll),5,th,3);g.fill()}
+    const hot=P.hover==='done';glass(g,1183,743,300,96,48,'light',hot);txt(g,'Done',1333,805,44,{w:600,align:'center'});P.region('done',1183,743,300,96,()=>go('hall'));
+  },{scroll:(dy)=>{S.scroll=THREE.MathUtils.clamp(S.scroll+dy,0,S.maxScroll||0);S.body.userData.redraw()}});
+  avatar(root,L16);
+},enter(S){S.body.userData.redraw()}});
 
-  /* =========  HELP BAR AUTO-FADE  ========= */
-  setTimeout(() => {
-    document.getElementById('helpbar').style.transition = 'opacity 1.5s';
-    document.getElementById('helpbar').style.opacity = '0';
-  }, 7000);
+// ---------- 05 Suit hall ----------
+const SUITS=[
+ {f:'hybrid',n:'Hybrid Suit',y:'1983',d:'NASA Johnson Space Center',t:'Combines a hard upper torso (HUT) for durability and life-support integration with soft limbs and joints for mobility.'},
+ {f:'apollo_a7l',n:'Apollo A7L',y:'1968',d:'ILC Dover',t:'The suit of the Apollo moonwalks, built from many layers of fabric to protect astronauts from heat, cold and micrometeoroids.'},
+ {f:'orlan',n:'Orlan',y:'1977',d:'NPP Zvezda',t:'A semi-rigid Russian spacewalk suit that cosmonauts enter through a hatch in the back. Still used on the ISS today.'},
+ {f:'gemini_g4c',n:'Gemini G4C',y:'1965',d:'David Clark Company',t:'Worn on the first American spacewalk, adding extra layers to a flight pressure suit so it could be used outside the capsule.'},
+ {f:'aces',n:'ACES “Pumpkin Suit”',y:'1994',d:'David Clark Company',t:'The orange launch and entry suit of the Space Shuttle era, built to keep the crew alive if the cabin lost pressure.'},
+ {f:'xemu',n:'xEMU',y:'2019',d:'NASA Johnson Space Center',t:'A next-generation exploration suit with a rear-entry hatch and better mobility, developed for Artemis missions to the Moon.'},
+ {f:'ocss',n:'Orion Crew Survival System',y:'2019',d:'NASA / David Clark Company',t:'An orange launch and entry suit for the Orion spacecraft, tailored to each astronaut and able to support them for days.'},
+ {f:'sokol',n:'Sokol KV-2',y:'1980',d:'NPP Zvezda',t:'A lightweight pressure suit worn inside Soyuz during launch and landing, the longest-serving rescue suit in spaceflight.'},
+];
+scene('hall',{n:'05 Outfit Select',eye:new THREE.Vector3(0,1.65,6.2),yaw:[-1.3,1.3],pitch:[-0.45,0.3],fov:55,bg:0x5f605b,stars:false,fog:[0x5f605b,14,30],async build(root,S){
+  const CAM=S.eye;
+  const ALC_R=7.4,ROCK_R=5.3,N=7;const ANG=[...Array(N)].map((_,i)=>THREE.MathUtils.degToRad(-105+i*35));
+  function ctex(w,h,draw,rx=1,ry=1){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);return t}
+  root.add(new THREE.AmbientLight(0xffffff,0.92));
+  const spot=new THREE.SpotLight(0xfffaf0,55,14,THREE.MathUtils.degToRad(20),0.6,1.6);spot.position.set(0,6.2,1.4);spot.target.position.set(0,0.4,0);spot.castShadow=true;spot.shadow.mapSize.set(1024,1024);spot.shadow.bias=-0.0004;root.add(spot,spot.target);
+  const key=new THREE.DirectionalLight(0xfffaf0,0.9);key.position.set(-3,5,6);root.add(key);
+  const wall=new THREE.Mesh(new THREE.CylinderGeometry(8.2,8.2,5,96,1,true),new THREE.MeshBasicMaterial({map:ctex(2048,512,(g,w,hh)=>{const gr=g.createLinearGradient(0,0,0,hh);gr.addColorStop(0,'#666762');gr.addColorStop(0.26,'#6d6e69');gr.addColorStop(0.28,'#62635c');gr.addColorStop(1,'#56574f');g.fillStyle=gr;g.fillRect(0,0,w,hh);
+    const ly=(1-3.45/5)*hh;
+    for(let k=0;k<=N;k++){const a=THREE.MathUtils.degToRad(-122.5+k*35);for(const off of [0,2*Math.PI]){const x=(0.5-a/(2*Math.PI))*w+(off?w:0);[x,x-w].forEach(xx=>{if(xx<-80||xx>w+80)return;
+      g.save();g.translate(xx,ly);g.scale(1,6.5);const r=g.createRadialGradient(0,0,2,0,0,34);r.addColorStop(0,'rgba(255,248,230,.55)');r.addColorStop(0.55,'rgba(255,248,230,.16)');r.addColorStop(1,'rgba(255,248,230,0)');g.fillStyle=r;g.beginPath();g.arc(0,0,34,0,Math.PI);g.fill();g.restore();
+      g.save();g.translate(xx,ly);g.scale(1,2.6);const u=g.createRadialGradient(0,0,2,0,0,26);u.addColorStop(0,'rgba(255,248,230,.25)');u.addColorStop(1,'rgba(255,248,230,0)');g.fillStyle=u;g.beginPath();g.arc(0,0,26,Math.PI,2*Math.PI);g.fill();g.restore()})}}
+    const fl=g.createLinearGradient(0,hh*0.8,0,hh);fl.addColorStop(0,'rgba(0,0,0,0)');fl.addColorStop(1,'rgba(0,0,0,.18)');g.fillStyle=fl;g.fillRect(0,0,w,hh)}),side:THREE.BackSide}));wall.position.y=2.5;root.add(wall);
+  const ceil=new THREE.Mesh(new THREE.CircleGeometry(8.2,96),new THREE.MeshBasicMaterial({color:0x666762}));ceil.rotation.x=Math.PI/2;ceil.position.y=5;root.add(ceil);
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(8.2,96),new THREE.MeshBasicMaterial({map:ctex(512,512,(g,w,h)=>{const gr=g.createRadialGradient(256,256,0,256,256,256);gr.addColorStop(0,'#8a8e86');gr.addColorStop(0.22,'#80837b');gr.addColorStop(0.55,'#62635d');gr.addColorStop(0.85,'#4f504a');gr.addColorStop(1,'#4b4c44');g.fillStyle=gr;g.fillRect(0,0,w,h);ANG.forEach(an=>{const X=Math.sin(an)*6.6,Z=-Math.cos(an)*6.6;const cx=(X/16.4+0.5)*w,cy=(Z/16.4+0.5)*h;const r=g.createRadialGradient(cx,cy,2,cx,cy,34);r.addColorStop(0,'rgba(255,250,236,.16)');r.addColorStop(1,'rgba(255,250,236,0)');g.fillStyle=r;g.fillRect(cx-40,cy-40,80,80)})})}));floor.rotation.x=-Math.PI/2;root.add(floor);
+  const fs=new THREE.Mesh(new THREE.CircleGeometry(8.2,96),new THREE.ShadowMaterial({opacity:0.28}));fs.rotation.x=-Math.PI/2;fs.position.y=0.002;fs.receiveShadow=true;root.add(fs);
+  const led=new THREE.Mesh(new THREE.TorusGeometry(8.05,0.018,8,160),new THREE.MeshBasicMaterial({color:0xd9d4c5}));led.rotation.x=Math.PI/2;led.position.y=3.45;root.add(led);
+  const glow=new THREE.Mesh(new THREE.CylinderGeometry(8.08,8.08,0.22,96,1,true),new THREE.MeshBasicMaterial({color:0xd8d3c4,transparent:true,side:THREE.BackSide,depthWrite:false,alphaMap:ctex(4,128,(g)=>{const gr=g.createLinearGradient(0,0,0,128);gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.5,'rgba(255,255,255,.3)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.fillRect(0,0,4,128)})}));glow.position.y=3.42;root.add(glow);
+  // pedestal
+  const ped=new THREE.Group();root.add(ped);const side=new THREE.MeshLambertMaterial({color:0x6a6b65});
+  const p1=new THREE.Mesh(new THREE.CylinderGeometry(1.35,1.42,0.26,96),[side,new THREE.MeshBasicMaterial({color:0xa3a49c}),side]);p1.position.y=0.13;p1.castShadow=true;
+  const p2=new THREE.Mesh(new THREE.CylinderGeometry(1.18,1.22,0.12,96),[new THREE.MeshLambertMaterial({color:0x8a8b84}),new THREE.MeshBasicMaterial({color:0xa9aaa2}),side]);p2.position.y=0.32;
+  const pr=new THREE.Mesh(new THREE.TorusGeometry(1.2,0.01,6,128),new THREE.MeshBasicMaterial({color:0xc4c5bd}));pr.rotation.x=Math.PI/2;pr.position.y=0.385;
+  const ps=new THREE.Mesh(new THREE.CircleGeometry(1.17,96),new THREE.ShadowMaterial({opacity:0.3}));ps.rotation.x=-Math.PI/2;ps.position.y=0.382;ps.receiveShadow=true;ped.add(p1,p2,pr,ps);
+  // cases
+  // case back wall: warm grey with a soft down-light cone and the suit's shadow
+  const back=new THREE.MeshBasicMaterial({map:ctex(256,512,(g,w,hh)=>{const gr=g.createLinearGradient(0,0,0,hh);gr.addColorStop(0,'#a4a59d');gr.addColorStop(0.35,'#82837c');gr.addColorStop(1,'#6e6f68');g.fillStyle=gr;g.fillRect(0,0,w,hh);
+    g.save();g.translate(128,0);g.scale(1,2.4);let r=g.createRadialGradient(0,0,4,0,0,150);r.addColorStop(0,'rgba(255,252,240,.85)');r.addColorStop(0.5,'rgba(255,252,240,.3)');r.addColorStop(1,'rgba(255,250,236,0)');g.fillStyle=r;g.fillRect(-128,0,256,220);g.restore();
+    g.beginPath();g.moveTo(98,0);g.lineTo(158,0);g.lineTo(236,hh);g.lineTo(20,hh);g.closePath();let c=g.createLinearGradient(0,0,0,hh);c.addColorStop(0,'rgba(255,248,230,.38)');c.addColorStop(1,'rgba(255,248,230,.02)');g.fillStyle=c;g.fill();
+    g.save();g.translate(140,300);g.scale(1,2.9);r=g.createRadialGradient(0,0,4,0,0,64);r.addColorStop(0,'rgba(20,20,16,.48)');r.addColorStop(1,'rgba(20,20,16,0)');g.fillStyle=r;g.beginPath();g.arc(0,0,64,0,Math.PI*2);g.fill();g.restore();
+    const sh=g.createLinearGradient(0,hh*0.82,0,hh);sh.addColorStop(0,'rgba(0,0,0,0)');sh.addColorStop(1,'rgba(0,0,0,.25)');g.fillStyle=sh;g.fillRect(0,0,w,hh);
+    [0,w-14].forEach(x=>{const e=g.createLinearGradient(x,0,x+14,0);e.addColorStop(x?0:1,'rgba(0,0,0,0)');e.addColorStop(x?1:0,'rgba(0,0,0,.22)');g.fillStyle=e;g.fillRect(x,0,14,hh)})})});
+  const frame=new THREE.MeshBasicMaterial({color:0x565752}),inner=new THREE.MeshBasicMaterial({color:0x6c6d67}),cab=new THREE.MeshBasicMaterial({color:0x5d5e58}),bar=new THREE.MeshBasicMaterial({color:0xf2efe6});
+  const scr=new THREE.MeshBasicMaterial({map:ctex(128,96,(g,w,h)=>{g.fillStyle='#3b4851';g.fillRect(0,0,w,h);const gr=g.createLinearGradient(0,0,w,h);gr.addColorStop(0,'#55697a');gr.addColorStop(1,'#3a4954');g.fillStyle=gr;g.fillRect(6,6,w-12,h-12);g.fillStyle='rgba(255,255,255,.18)';g.fillRect(14,16,60,6);g.fillRect(14,30,40,4)})});
+  const alc=[];
+  for(let i=0;i<N;i++){const a=ANG[i],grp=new THREE.Group();grp.position.set(Math.sin(a)*ALC_R,0,-Math.cos(a)*ALC_R);grp.lookAt(0,0,0);
+    const W=1.55,D=0.95,H0=0.95,H1=3.15;
+    const b=new THREE.Mesh(new THREE.PlaneGeometry(W,H1-H0),back);b.position.set(0,(H0+H1)/2,-D/2);
+    const sl=new THREE.Mesh(new THREE.BoxGeometry(0.08,H1-H0,D),[inner,inner,frame,frame,frame,frame]);sl.position.set(-W/2,(H0+H1)/2,0);const sr=sl.clone();sr.position.x=W/2;
+    const tp=new THREE.Mesh(new THREE.BoxGeometry(W+0.08,0.12,D),frame);tp.position.set(0,H1,0);
+    const lb=new THREE.Mesh(new THREE.BoxGeometry(W-0.1,0.02,0.05),bar);lb.position.set(0,H1-0.07,D/2-0.12);
+    const bs=new THREE.Mesh(new THREE.BoxGeometry(W+0.08,H0,D+0.1),cab);bs.position.set(0,H0/2,0.05);
+    const sh=new THREE.Mesh(new THREE.BoxGeometry(W,0.02,D),new THREE.MeshBasicMaterial({color:0x8e8f88}));sh.position.set(0,H0+0.01,0);
+    grp.add(b,sl,sr,tp,lb,bs,sh);for(let k=-1;k<=1;k++){const s=new THREE.Mesh(new THREE.PlaneGeometry(0.4,0.28),scr);s.position.set(k*0.46,0.66,D/2+0.101);s.rotation.x=-0.12;grp.add(s)}
+    const pl=new THREE.PointLight(0xfffaf0,2.2,2.8,1.5);pl.position.set(0,H1-0.25,0.3);grp.add(pl);root.add(grp);alc.push({grp,slot:new THREE.Vector3(0,H0+0.02,0)})}
+  // UI
+  S.state={sel:G.suit,alc:[0,1,2,3,4,5,6,7].filter(i=>i!==G.suit),busy:false};
+  const card=wpanel(root,2.25,1040,600,(g,P)=>{const s=SUITS[S.state.sel];glass(g,0,0,P.w,P.h,44,'warm');
+    const f=fit(g,s.n,P.w-200,76);txt(g,s.n,52,112,f);txt(g,'First Release Year: '+s.y,52,178,38);txt(g,'Designer: '+s.d,52,228,38);wrap(g,s.t,52,330,P.w-104,50,36,{color:'rgba(255,255,255,.92)'});
+    icon(g,'heart',950,82,92,{fill:G.favs.has('suit:'+s.n),lw:1.3});P.region('heart',890,20,120,120,()=>{const k='suit:'+s.n;G.favs.has(k)?G.favs.delete(k):G.favs.add(k);toast((G.favs.has(k)?'Saved to Favorites: ':'Removed from Favorites: ')+s.n);card.userData.redraw()})});
+  card.position.set(2.45,2.15,0.9);
+  const conf=wpanel(root,1.5,720,150,(g,P)=>{glass(g,0,0,P.w,P.h,75,'warm',P.hover==='b');txt(g,'Confirm suit',P.w/2,94,54,{w:500,align:'center'});P.region('b',0,0,P.w,P.h,()=>{G.suit=S.state.sel;toast(SUITS[G.suit].n+' confirmed');go('dest')})});conf.position.set(2.45,1.18,0.9);
+  const title=wpanel(root,3.4,1200,200,(g,P)=>{g.shadowColor='rgba(0,0,0,.25)';g.shadowBlur=18;txt(g,'Outfit Select',P.w/2,140,120,{align:'center'})});title.position.set(0,4.15,-1.2);
+  const av=wpanel(root,0.42,200,200,(g,P)=>{glass(g,0,0,P.w,P.h,48,'warm',P.hover==='b');icon(g,'user',100,100,104,{lw:1.5});P.region('b',0,0,P.w,P.h,()=>go('passport'))});av.position.set(-2.7,3.35,0.4);
+  for(const p of [card,conf,title,av])p.lookAt(CAM.x,p.position.y,CAM.z);
+  const rockets=[];for(let i=0;i<N;i++){const a=ANG[i];const m=wpanel(root,0.62,256,256,(g,P)=>{const hot=P.hover==='b';g.beginPath();g.arc(128,128,122,0,Math.PI*2);g.fillStyle=hot?'rgba(255,255,255,.42)':'rgba(255,255,255,.22)';g.fill();g.lineWidth=5;g.strokeStyle=hot?'#fff':'rgba(255,255,255,.7)';g.stroke();g.save();g.translate(128,128);g.rotate(-Math.PI/4);g.translate(-128,-128);icon(g,'rocket',128,128,150,{lw:1.4});g.restore();P.region('b',0,0,256,256,()=>trySuit(S.state.alc[i]))});
+    m.position.set(Math.sin(a)*ROCK_R,0.42,-Math.cos(a)*ROCK_R);m.lookAt(CAM.x*0.3,1.9,CAM.z*0.3+1);rockets.push(m)}
+  // suits
+  S.models=await Promise.all(SUITS.map(async(s,i)=>{const h=await model(s.f,1.0,{byHeight:true});const inner=h.children[0];inner.position.y+=0.5;
+    const hit=new THREE.Mesh(new THREE.BoxGeometry(0.62,1.02,0.5),new THREE.MeshBasicMaterial({visible:false}));hit.position.y=0.51;h.add(hit);hit.userData.kind='suit';hit.userData.act=()=>{if(i!==S.state.sel)trySuit(i)};root.add(h);return h}));
+  const pose=w=>{if(w<0)return{pos:new THREE.Vector3(0,0.38,0),rotY:0,s:1.9};const g=alc[w].grp;return{pos:g.localToWorld(alc[w].slot.clone()),rotY:g.rotation.y,s:1.72}};
+  const place=(i,w)=>{const m=S.models[i],P=pose(w);m.position.copy(P.pos);m.rotation.set(0,P.rotY,0);m.scale.setScalar(P.s)};
+  place(S.state.sel,-1);S.state.alc.forEach((s,k)=>place(s,k));
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;const la=(a,b,t)=>{let d=((b-a+Math.PI)%(Math.PI*2))-Math.PI;if(d<-Math.PI)d+=Math.PI*2;return a+d*t};
+  function trySuit(i){const st=S.state;if(st.busy||i===st.sel)return;const slot=st.alc.indexOf(i);if(slot<0)return;st.busy=true;const prev=st.sel;
+    const parts=[{m:S.models[i],from:pose(slot),to:pose(-1)},{m:S.models[prev],from:{pos:S.models[prev].position.clone(),rotY:S.models[prev].rotation.y,s:S.models[prev].scale.x},to:pose(slot)}];
+    st.alc[slot]=prev;st.sel=i;card.userData.redraw();const t0=performance.now(),dur=reduce?10:1250;
+    S.anims.push(now=>{const t=Math.min(1,(now-t0)/dur),e=ease(t);for(const p of parts){p.m.position.lerpVectors(p.from.pos,p.to.pos,e);p.m.position.y+=Math.sin(Math.PI*t)*0.6;p.m.rotation.y=la(p.from.rotY,p.to.rotY,e);p.m.scale.setScalar(THREE.MathUtils.lerp(p.from.s,p.to.s,e))}
+      if(t>=1){st.busy=false;S.sway=0;toast('Now wearing: '+SUITS[st.sel].n);return true}})}
+  S.ped=ped;S.sway=0;S.trySuit=trySuit;S.rockets=rockets;S.conf=conf;
+},update(dt,S){if(!S.state.busy&&!reduce){S.sway+=dt;S.models[S.state.sel].rotation.y=Math.sin(S.sway*0.45)*0.42}S.ped.rotation.y=S.models[S.state.sel].rotation.y}});
+
+// ---------- 06 Destination Browse ----------
+function planet(texName,r){const m=new THREE.Mesh(new THREE.SphereGeometry(r,64,32),new THREE.MeshLambertMaterial({map:tex('vr/tex/planet_'+texName+'.jpg')}));return m}
+scene('dest',{n:'06 Destination Browse',build(root,S){
+  // the design image as-is (only its buttons were lifted out); live buttons sit exactly where they were
+  stage(root,S,L16,{img:'vr/tex/bg_dest_hd.jpg',fill:'dest'});
+  const cols=[['Mars',414,1138,430,912],['Moon',996,1145,1012,918],['Jupiter',1536,1139,1552,912],['Pluto',2078,1151,2094,924]];
+  cols.forEach(([name,rx,ry,hx,hy])=>{const open=name==='Mars';
+    button(root,L16,[rx,ry,75,75],3,(g,P,hot)=>{g.beginPath();g.arc(P.w/2,P.h/2,P.w/2-2,0,Math.PI*2);g.fillStyle=hot?'rgba(255,255,255,.35)':'rgba(255,255,255,.12)';g.fill();g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=1.5;g.stroke();
+      g.save();g.translate(P.w/2,P.h/2);g.rotate(open?-Math.PI/4:0);g.translate(-P.w/2,-P.h/2);icon(g,open?'rocket':'lock',P.w/2,P.h/2,P.w*0.56,{lw:1.4,color:open?'#ffb27a':'rgba(255,255,255,.6)'});g.restore()},
+      ()=>{if(!open){toast(name+' opens in a later version. This demo flies to Mars.');return}G.dest=name;toast('Launching to Mars');go('warp')});
+    const hb=button(root,L16,[hx,hy,62,62],3,(g,P,hot)=>{icon(g,'heart',P.w/2,P.h/2,P.w*0.72,{fill:G.favs.has('dest:'+name),lw:1.4,color:hot?'#fff':'rgba(255,255,255,.9)'})},
+      ()=>{const k='dest:'+name;G.favs.has(k)?G.favs.delete(k):G.favs.add(k);toast((G.favs.has(k)?'Saved to Favorites: ':'Removed from Favorites: ')+name);hb.userData.redraw()})});
+  avatar(root,L16);
+}});
+
+// ---------- 07 Warp ----------
+scene('warp',{n:'07 Warp',build(root,S){
+  stage(root,S,L16,{img:'vr/tex/bg_warp_hd.jpg',fill:'warp',zoom:0.25,period:3});
+  const n=600,pos=new Float32Array(n*6);S.streaks=[];for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,r=1.5+Math.random()*9;S.streaks.push({a,r,z:-Math.random()*80,v:30+Math.random()*50})}
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));S.geo=geo;
+  root.add(new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0xfff2dc,transparent:true,opacity:0.8,fog:false})));
+  panel(root,L16,[441,551,1421,193],3,(g,P)=>{glass(g,0,0,P.w,P.h,96,'light');txt(g,'Welcome to Space Travel',P.w/2,124,84,{align:'center'})},{order:12});
+  const tap=new THREE.Mesh(new THREE.SphereGeometry(8,16,8),new THREE.MeshBasicMaterial({visible:false,side:THREE.BackSide}));tap.position.copy(EYE);tap.userData={kind:'tap',act:()=>go('debris')};root.add(tap);
+},enter(S){G.medals.add('launch');S.timer=2.8},update(dt,S){const a=S.geo.attributes.position.array;S.streaks.forEach((s,i)=>{s.z+=s.v*dt;if(s.z>2)s.z=-80;const x=Math.cos(s.a)*s.r,y=Math.sin(s.a)*s.r+1.6;a.set([x,y,s.z,x,y,s.z-2-s.v*0.06],i*6)});S.geo.attributes.position.needsUpdate=true;
+  S.timer-=dt;if(S.timer<=0&&cur===S){S.timer=1e9;go('debris')}}});
+
+// ---------- cockpits ----------
+const DET=[2063,960,1700,176];
+function cockpit(id,def){scene(id,Object.assign({lay:LW,yaw:[-2.4,2.4],pitch:[-0.85,0.75],fov:58,bg:0x000000,hud:true,stars:true},def))}
+function nextBtn(root,label,to){return pill(root,LW,[3030,800,480,104],2.7,label,()=>go(to),'light',38)}
+async function addCatchable(root,S,name,size,x,y,d,recKey,extra={}){
+  const h=await model(name,size,extra);h.position.copy(at(LW,x,y,d));root.add(h);
+  h.rotation.set(Math.random()*0.6,Math.random()*Math.PI,Math.random()*0.4);
+  makeGrabbable(S,h,recKey,()=>{const Rr=RECORDS[recKey];G.caught.add(recKey);G.medals.add(Rr.medal);S.rec={...Rr,caught:true,icon:extra.icon||'target'};S.det.userData.redraw();toast('Caught: '+Rr.name+' · new record on the panel')},extra);return h;
+}
+function panelTex(base,line,w=512,h=512,rx=1,ry=1){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.fillStyle=base;g.fillRect(0,0,w,h);
+  g.strokeStyle=line;g.lineWidth=3;for(let i=0;i<=4;i++){g.beginPath();g.moveTo(0,i*h/4);g.lineTo(w,i*h/4);g.stroke()}for(let i=0;i<=2;i++){g.beginPath();g.moveTo(i*w/2,0);g.lineTo(i*w/2,h);g.stroke()}
+  g.fillStyle='rgba(0,0,0,.2)';for(let i=0;i<40;i++){g.beginPath();g.arc(Math.random()*w,Math.random()*h,2,0,6.3);g.fill()}
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);t.anisotropy=8;return t}
+function glassTex(floor=false){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
+  g.fillStyle='rgba(150,185,215,0.10)';g.fillRect(0,0,512,512);
+  const sh=g.createLinearGradient(0,0,512,512);sh.addColorStop(0.35,'rgba(255,255,255,0)');sh.addColorStop(0.5,'rgba(220,235,255,0.07)');sh.addColorStop(0.65,'rgba(255,255,255,0)');g.fillStyle=sh;g.fillRect(0,0,512,512);
+  g.strokeStyle='rgba(200,225,255,0.35)';g.lineWidth=2;g.strokeRect(1,1,510,510);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;if(!floor)t.repeat.set(6,1);t.anisotropy=8;return t}
+// ---------------------------------------------------------------------
+// cockpit completion: everything here lies OUTSIDE the design image's frame.
+// The design image covers ±101° around you and ±21.4° up/down; the 3D parts
+// start exactly at its edges and continue the design's pillars, dashboard and
+// colours (sampled from the design) into a closed cabin.
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// planet below the ship: seen through the glass lower cockpit.
+// Procedural surface (no repeats, sharp at any distance) coloured with a
+// ramp sampled from the design's own planet pixels; it turns slowly so the
+// ground keeps flowing under you as the ship moves forward.
+// ---------------------------------------------------------------------
+const NOISE_GLSL=`
+vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
+vec4 permute(vec4 x){return mod289(((x*34.)+1.)*x);}vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
+ vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;
+ i=mod289(i);vec4 p=permute(permute(permute(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));
+ float n_=.142857142857;vec3 ns=n_*D.wyz-D.xzx;vec4 j=p-49.*floor(p*ns.z*ns.z);vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);
+ vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
+ vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+ vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+ vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+ vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));}
+`;
+function planetBelow(root,S,cfg){
+  const dl=THREE.MathUtils.degToRad(cfg.limb??22),D=10,Rp=D*Math.cos(dl);   // limb sits cfg.limb° below the horizon
+  const ramp=tex('vr/tex/ramp_'+cfg.ramp+'.png');ramp.minFilter=ramp.magFilter=THREE.LinearFilter;ramp.generateMipmaps=false;ramp.wrapS=ramp.wrapT=THREE.ClampToEdgeWrapping;
+  const mat=new THREE.ShaderMaterial({depthTest:false,depthWrite:false,fog:false,
+    uniforms:{ramp:{value:ramp},kind:{value:cfg.kind||0},freq:{value:cfg.freq||30},contrast:{value:cfg.contrast||1.1},bias:{value:cfg.bias||0},
+      haze:{value:new THREE.Color(cfg.haze||0x9fc4ff)},sun:{value:new THREE.Vector3(...(cfg.sun||[0.4,0.8,-0.45])).normalize()}},
+    vertexShader:`varying vec3 vP;varying vec3 vN;varying vec3 vV;void main(){vP=position;vec4 w=modelMatrix*vec4(position,1.);vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-w.xyz);gl_Position=projectionMatrix*viewMatrix*w;}`,
+    fragmentShader:NOISE_GLSL+`uniform sampler2D ramp;uniform int kind;uniform float freq,contrast,bias;uniform vec3 haze,sun;varying vec3 vP;varying vec3 vN;varying vec3 vV;
+    float fw;
+    float oct(float f){return clamp(1.5-fw*f*2.5,0.,1.);}
+    float field(vec3 p){
+      float s=0.,a=.5,f=1.;
+      if(kind==0){ // cloud deck over sea: domain-warped fbm
+        vec3 q=p+vec3(snoise(p*.3),snoise(p*.3+7.3),snoise(p*.3+3.1))*.35;
+        for(int i=0;i<7;i++){s+=a*snoise(q*f)*oct(f*freq);f*=2.03;a*=.55;}float c=smoothstep(-.05,.45,s);return mix(s*.6-.15,.35+s*.3,c);}
+      if(kind==1){ // land and sea
+        vec3 q=p+vec3(snoise(p*.35+1.7),snoise(p*.35+9.2),snoise(p*.35+4.4))*1.4;
+        for(int i=0;i<7;i++){s+=a*snoise(q*f)*oct(f*freq);f*=2.1;a*=.52;}return s*1.1;}
+      if(kind==2){ // snowy ridges
+        for(int i=0;i<7;i++){float n=1.-abs(snoise(p*f));s+=a*(n*n-.45)*oct(f*freq);f*=2.05;a*=.5;}return s*.9;}
+      // canyon country: stretched ridges with terraces
+      vec3 q=vec3(p.x*.45,p.y,p.z*1.6);
+      for(int i=0;i<6;i++){float n=1.-abs(snoise(q*f+float(i)*1.3));s+=a*(n*n-.45)*oct(f*freq);f*=2.0;a*=.5;}
+      return s*.9;}
+    void main(){
+      vec3 p=normalize(vP)*freq;fw=length(fwidth(normalize(vP)));
+      float h=field(p);
+      vec3 t1=normalize(cross(normalize(vP),vec3(0.,0.,1.)));vec3 t2=cross(normalize(vP),t1);float e=.035;
+      float hx=field(p+t1*e),hy=field(p+t2*e);
+      vec3 nrm=normalize(normalize(vP)*.10-(t1*(hx-h)+t2*(hy-h))*(kind==0?0.6:1.6));
+      float lit=kind==3?.45+.8*max(dot(nrm,sun),0.):.6+.5*max(dot(nrm,sun),0.);
+      float v=clamp(.5+bias+h*contrast,.1,.97);
+      vec3 c=texture2D(ramp,vec2(v,.5)).rgb*lit;
+      float fr=1.-abs(dot(normalize(vN),normalize(vV)));
+      c=mix(c,haze,smoothstep(.55,1.,fr)*.85);
+      gl_FragColor=vec4(c,1.);
+      #include <colorspace_fragment>
+    }`});
+  const sph=new THREE.Mesh(new THREE.SphereGeometry(Rp,256,128),mat);
+  const piv=new THREE.Group();piv.position.set(EYE.x,EYE.y-D,EYE.z);piv.add(sph);root.add(piv);sph.renderOrder=-19;sph.frustumCulled=false;
+  sph.rotation.y=cfg.yaw||0;
+  const sp=cfg.speed??0.004;
+  (S.stages||(S.stages=[])).push({enter(){},exit(){},update(dt){if(!reduce)piv.rotation.x+=dt*sp}});
+  return piv}
+
+async function cockpitShell(root,S,cfg){
+  const g=new THREE.Group();root.add(g);const V=(...a)=>new THREE.Vector3(...a);
+  const th=LW.theta,half=th/2,tanE=(H/2)/R;           // image half-span (yaw) and edge slope
+  const yTopAt=r=>EYE.y+r*tanE, yBotAt=r=>EYE.y-r*tanE;
+  const yawOf=u=>(u-0.5)*th, P=(yaw,r,y)=>V(Math.sin(yaw)*r,y,-Math.cos(yaw)*r);
+  const metal=new THREE.MeshStandardMaterial({color:cfg.metal||0x62778a,metalness:0.55,roughness:0.42,envMapIntensity:0.6});
+  const dark=new THREE.MeshStandardMaterial({color:cfg.dark||0x16191f,metalness:0.4,roughness:0.6});
+  const wallM=new THREE.MeshStandardMaterial({map:panelTex('#2a323d','rgba(10,14,20,.7)',512,512,8,2),metalness:0.45,roughness:0.55,side:THREE.DoubleSide});
+  const ceilM=new THREE.MeshStandardMaterial({map:panelTex('#20262f','rgba(8,12,18,.75)',512,512,3,3),metalness:0.4,roughness:0.6,side:THREE.DoubleSide});
+  const dashM=new THREE.MeshStandardMaterial({map:panelTex('#0b0d12','rgba(60,70,85,.35)',512,256,10,1),metalness:0.4,roughness:0.6,side:THREE.DoubleSide});
+  const floorM=new THREE.MeshStandardMaterial({map:panelTex('#1a1f27','rgba(120,140,170,.16)',512,512,3,3),metalness:0.5,roughness:0.6});
+  const glow=new THREE.MeshBasicMaterial({color:0xd6ecff,toneMapped:false});
+  function beam(A,B,w,d,mat){const len=A.distanceTo(B);const m=new THREE.Mesh(new THREE.BoxGeometry(w,len,d),mat);m.position.copy(A).add(B).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(V(0,1,0),B.clone().sub(A).normalize());const out=V(m.position.x,0,m.position.z).normalize();m.rotateOnWorldAxis(V(0,1,0),0);m.lookAt(m.position.clone().sub(out));m.quaternion.setFromUnitVectors(V(0,1,0),B.clone().sub(A).normalize());g.add(m);return m}
+  function arcTube(r,y,y0,y1,rad,mat){const pts=[];for(let i=0;i<=40;i++){const a=y0+(y1-y0)*i/40;pts.push(P(a,r,y))}const m=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),80,rad,8,false),mat);g.add(m);return m}
+  function band(r,y0,y1,a0,a1,mat){const seg=new THREE.CylinderGeometry(r,r,y1-y0,64,1,true,Math.PI-a1,a1-a0);const m=new THREE.Mesh(seg,mat);m.position.set(EYE.x,(y0+y1)/2,EYE.z);g.add(m);return m}
+  const r0=2.4,hdrY=yTopAt(2.28)+0.2,ceilY=hdrY+0.16;
+  // ---- above the image: pillars continue from where they leave the top edge, into a roof header and ceiling
+  for(const p of cfg.pillars){const a=yawOf(p.u),w=Math.min(0.32,p.w*th*r0);
+    const A=P(a,r0,yTopAt(r0)-0.02),B=P(a+p.lean*0.16,2.28,hdrY);beam(A,B,w,0.16,metal);
+    beam(P(a,r0-0.06,yTopAt(r0-0.06)),P(a+p.lean*0.16,2.22,hdrY-0.02),0.022,0.03,glow)}
+  arcTube(2.28,hdrY,-half,half,0.1,metal);arcTube(2.2,hdrY-0.13,-half,half,0.012,glow);
+  if(cfg.topBar){for(const [u0,u1] of cfg.topBar){band(r0-0.01,yTopAt(r0),hdrY+0.05,yawOf(u0),yawOf(u1),dark)}}
+  const ceil=new THREE.Mesh(new THREE.CircleGeometry(2.5,64),ceilM);ceil.rotation.x=Math.PI/2;ceil.position.set(0,ceilY,0);g.add(ceil);
+  const cring=new THREE.Mesh(new THREE.RingGeometry(1.05,1.09,64),glow);cring.rotation.x=Math.PI/2;cring.position.set(0,ceilY-0.01,0.2);g.add(cring);
+  const oh=await model('overhead',1.5,{turn:0});oh.rotation.x=Math.PI/2;oh.position.set(0,ceilY-0.17,0.35);g.add(oh);
+  // roof ring wall between header and ceiling
+  band(2.45,hdrY,ceilY,-Math.PI,Math.PI,wallM);
+  // ---- below the image: a glass lower cockpit. Mullions continue the design's dashboard and sills down to a
+  //      glass floor, so the planet below stays in view.
+  if(cfg.planet)planetBelow(root,S,cfg.planet);
+  const glassM=new THREE.MeshStandardMaterial({map:glassTex(),transparent:true,depthWrite:false,metalness:0.3,roughness:0.06,side:THREE.DoubleSide,envMapIntensity:0.8});
+  const floorG=new THREE.MeshStandardMaterial({map:glassTex(true),transparent:true,depthWrite:false,metalness:0.3,roughness:0.06,side:THREE.DoubleSide});
+  const [d0,d1]=cfg.dash;const rd=2.25,rs=2.35;
+  const dashGeo=band(rd,0,yBotAt(rd)+0.01,yawOf(d0),yawOf(d1),glassM);dashGeo.renderOrder=2;
+  arcTube(rd-0.02,yBotAt(rd)-0.03,yawOf(d0),yawOf(d1),0.05,metal);           // console lip where the design's dashboard ends
+  for(let k=0;k<=3;k++){const a=yawOf(d0+(d1-d0)*k/3);beam(P(a,rd-0.02,0),P(a,rd-0.02,yBotAt(rd)-0.03),k%3?0.03:0.09,0.05,metal)}
+  for(const [a0,a1] of [[-half,yawOf(d0)],[yawOf(d1),half]]){const b=band(rs,0,yBotAt(rs)+0.01,a0,a1,glassM);b.renderOrder=2;arcTube(rs-0.04,yBotAt(rs)-0.02,a0,a1,0.06,metal);
+    const n=Math.max(1,Math.round((a1-a0)/0.6));for(let k=0;k<=n;k++){const a=a0+(a1-a0)*k/n;beam(P(a,rs-0.03,0),P(a,rs-0.03,yBotAt(rs)-0.03),k%n?0.03:0.08,0.05,metal)}}
+  arcTube(rd-0.03,0.05,yawOf(d0),yawOf(d1),0.01,glow);
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(2.45,96),floorG);floor.rotation.x=-Math.PI/2;floor.position.y=0.002;floor.renderOrder=3;g.add(floor);
+  // floor structure: rim, rings and radial ribs (metal), a solid deck under the pilot seat
+  const rib=(a,r0_,r1_)=>beam(V(Math.sin(a)*r0_,0.02,-Math.cos(a)*r0_),V(Math.sin(a)*r1_,0.02,-Math.cos(a)*r1_),0.035,0.03,metal);
+  for(let k=0;k<8;k++)rib((k+0.5)/8*Math.PI*2,0.62,2.42);
+  for(const rr_ of [1.55]){const t=new THREE.Mesh(new THREE.TorusGeometry(rr_,0.02,6,128),metal);t.rotation.x=Math.PI/2;t.position.y=0.02;g.add(t)}
+  const rim=new THREE.Mesh(new THREE.TorusGeometry(2.42,0.05,8,160),metal);rim.rotation.x=Math.PI/2;rim.position.y=0.03;g.add(rim);
+  const deck=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.66,0.06,64),dark);deck.position.y=0.03;g.add(deck);
+  const dring=new THREE.Mesh(new THREE.TorusGeometry(0.64,0.008,6,96),glow);dring.rotation.x=Math.PI/2;dring.position.y=0.065;g.add(dring);
+  // ---- behind: B-pillars at the image's side edges, then the closed cabin
+  for(const s of [-1,1]){beam(P(s*half,2.4,0),P(s*half,2.4,ceilY),0.3,0.24,metal);beam(P(s*(half+0.03),2.32,0.1),P(s*(half+0.03),2.32,ceilY-0.1),0.02,0.02,glow)}
+  band(2.42,0,hdrY,half,2*Math.PI-half,wallM);
+  const doorA=Math.PI;const door=new THREE.Mesh(new THREE.BoxGeometry(1.1,2.2,0.05),dark);door.position.copy(P(doorA,2.36,1.1));door.lookAt(EYE.x,1.1,EYE.z);g.add(door);
+  for(const [dx,dy,w,hh] of [[-0.58,1.1,0.03,2.24],[0.58,1.1,0.03,2.24],[0,2.23,1.2,0.03]]){const f=new THREE.Mesh(new THREE.BoxGeometry(w,hh,0.03),glow);f.position.set(dx,dy-1.1,0.04);door.add(f)}
+  for(const a of [Math.PI-0.75,Math.PI+0.75]){const wp=await model('wallpanel',1.7,{turn:-Math.PI/2});wp.position.copy(P(a,2.05,1.45));wp.lookAt(EYE.x,1.45,EYE.z);g.add(wp)}
+  const seat=await model('seat',1.35,{byHeight:true,turn:Math.PI});seat.position.set(0,0.68,0.6);g.add(seat);
+  const s2=await model('seat',1.3,{byHeight:true,turn:Math.PI});s2.position.copy(P(2.3,1.25,0.65));s2.rotation.y=-0.6;g.add(s2);
+  // soft cabin light (short range)
+  const l1=new THREE.PointLight(0xdbeaff,5,4.5,1.6);l1.position.set(0,2.9,0.5);g.add(l1);
+  const l2=new THREE.PointLight(0xffe2c0,2,4,1.8);l2.position.set(0,2.2,1.6);g.add(l2);
+  g.add(new THREE.HemisphereLight(0x8fa4c0,0x10141a,0.35));
+  return g;
+}
+
+cockpit('debris',{n:'08 Leaving Earth · Debris Field',async build(root,S){
+  stage(root,S,LW,{img:'vr/tex/outside_debris_hd.jpg',fill:'cockpit_debris',zoom:0.14,period:16,center:[0.5,0.38],frame:'vr/tex/frame_debris_hd.webp',dust:true});lights(root,{amb:0.8,key:1.8,keyPos:[3,6,2]});
+  await cockpitShell(root,S,{pillars:[{u:0.205,w:0.05,lean:-1},{u:0.672,w:0.04,lean:1}],dash:[0.31,0.66],planet:{ramp:'debris',kind:0,limb:22,freq:14,bias:0.08,contrast:1.0,speed:0.005,haze:0x8fb8e8}});
+  S.det=detectionPanel(root,LW,DET,()=>S.rec||{att:'A group of space debris was discovered'});
+  navBar(root,LW,3797,157);avatar(root,LW);nextBtn(root,'Continue to Mars orbit →','glove');
+  await addCatchable(root,S,'satellite',1.7,2950,430,6,'satellite',{turn:0,icon:'radar'});
+  await addCatchable(root,S,'debris_a',0.75,2480,560,4.6,'debris_a',{turn:0});
+  await addCatchable(root,S,'debris_b',0.95,3380,600,5,'debris_b',{turn:0});
+}});
+cockpit('glove',{n:'09 Mars Orbit · Lost Glove',async build(root,S){
+  stage(root,S,LW,{video:'vr/vid/glove_hd.mp4',fill:'glove',rate:0.6});lights(root,{amb:0.8,key:1.6,keyPos:[2,5,4]});
+  await cockpitShell(root,S,{pillars:[{u:0.275,w:0.05,lean:-1},{u:0.7,w:0.05,lean:1}],dash:[0.34,0.65],topBar:[[0.3,0.68]],planet:{ramp:'glove',kind:1,limb:20,freq:16,speed:0.004,haze:0x7fa8d8,bias:0.12,contrast:0.8}});
+  S.det=detectionPanel(root,LW,DET,()=>S.rec||{att:'A lost tool was discovered'});
+  navBar(root,LW,3797,157);avatar(root,LW);nextBtn(root,'Continue to docking →','dock');
+  await addCatchable(root,S,'glove',0.55,3183,595,4.2,'glove',{turn:0,icon:'palm'});
+}});
+cockpit('dock',{n:'10 Docking',async build(root,S){
+  stage(root,S,LW,{img:'vr/tex/outside_dock_hd.jpg',fill:'cockpit_dock',zoom:0.14,period:16,center:[0.5,0.4],frame:'vr/tex/frame_dock_hd.webp',dust:true});lights(root,{amb:0.8,key:1.6});
+  await cockpitShell(root,S,{pillars:[{u:0.27,w:0.06,lean:-1},{u:0.72,w:0.05,lean:1}],dash:[0.37,0.64],topBar:[[0.71,0.93]],planet:{ramp:'dock',kind:2,limb:18,freq:30,speed:0.004,haze:0xdfe6f0,bias:0.08}});
+  panel(root,LW,DET,2.6,(g,P)=>{g.save();g.scale(P.w/2191,P.h/227);P.w=2191;P.h=227;rr(g,2,2,P.w-4,P.h-4,22);g.fillStyle='rgba(6,9,15,.82)';g.fill();g.lineWidth=2;g.strokeStyle='rgba(255,255,255,.45)';g.stroke();
+    icon(g,'radar',160,104,118,{lw:1.1});txt(g,'Attention!',262,58,24,{w:600,color:'#ffd27a'});wrap(g,'There are spaceships ready for docking',262,92,200,22,18,{color:'rgba(255,255,255,.85)'});
+    g.fillStyle='rgba(255,255,255,.35)';g.fillRect(484,16,1.5,190);txt(g,'Please switch windows for spaceship docking!',540,125,46,{w:500});g.restore();P.w=DET[2];P.h=DET[3]},{order:12});
+  S.eyeBtn=iconBtn(root,LW,[2843,790,139,142],2.7,'eye',()=>go('eva'));
+  panel(root,LW,[2738,935,350,50],2.7,(g,P)=>txt(g,'Switch window',P.w/2,38,34,{align:'center',color:'rgba(255,255,255,.85)'}));
+  navBar(root,LW,3803,157);avatar(root,LW);
+  S.ship=await model('soyuz',2.6,{turn:0});root.add(S.ship);S.t=0;
+},enter(S){S.t=0},update(dt,S){S.t+=dt;const k=Math.min(1,S.t/14);S.ship.position.copy(at(LW,2700,470,THREE.MathUtils.lerp(16,7,k)));S.ship.rotation.y=0.6+S.t*0.05;S.ship.rotation.z=Math.sin(S.t*0.3)*0.08}});
+cockpit('rovers',{n:'13 Mars Canyon · Rovers',async build(root,S){
+  stage(root,S,LW,{video:'vr/vid/mars_hd.mp4',fill:'mars',rate:0.6});lights(root,{amb:0.85,key:1.6,keyPos:[-5,6,3]});
+  await cockpitShell(root,S,{pillars:[{u:0.285,w:0.05,lean:-1},{u:0.7,w:0.05,lean:1}],dash:[0.33,0.66],topBar:[[0.31,0.69]],planet:{ramp:'rovers',kind:3,limb:10,freq:120,contrast:0.9,speed:0.0012,haze:0xc89a72,bias:0.02}});
+  S.det=detectionPanel(root,LW,DET,()=>S.rec||{att:'Machines were discovered on the surface'},{prompt:'Point at the rover and hold to scan it.'});
+  navBar(root,LW,3797,157);avatar(root,LW);nextBtn(root,'Complete the journey →','achieve');
+  const rv=await model('rover',1.6,{turn:0});rv.position.copy(at(LW,1650,640,8));rv.rotation.y=0.9;root.add(rv);
+  makeGrabbable(S,rv,'rover',()=>{const Rr=RECORDS.rover;G.caught.add('rover');G.medals.add('rover');S.rec={...Rr,caught:true,icon:'radar'};S.det.userData.redraw();toast('Scanned: '+Rr.name)},{scan:true});
+  rv.userData.ring.scale.multiplyScalar(0.7);
+}});
+
+// ---------- 10b EVA: step outside to the station ----------
+scene('eva',{n:'10b EVA · To the Station',build(root,S){
+  stage(root,S,L16,{video:'vr/vid/eva.mp4',fill:'station',rate:1,once:true,onEnd:()=>{if(cur===S)go('station')}});
+  panel(root,L16,[640,1080,1024,120],3,(g,P)=>{glass(g,0,0,P.w,P.h,60,'dark');txt(g,'Spacewalk to the station · tap to skip',P.w/2,76,44,{align:'center'})},{order:12});
+  const tap=new THREE.Mesh(new THREE.SphereGeometry(8,16,8),new THREE.MeshBasicMaterial({visible:false,side:THREE.BackSide}));tap.position.copy(EYE);tap.userData={kind:'tap',act:()=>go('station')};root.add(tap);
+}});
+
+// ---------- 11 Station ----------
+scene('station',{n:'11 Station · Document',build:async(root,S)=>{
+  stage(root,S,L16,{video:'vr/vid/station.mp4',fill:'station',rate:0.5});lights(root,{amb:0.85,key:1.4});
+  navBar(root,L16,2125,157);avatar(root,L16);
+  panel(root,L16,[300,420,640,80],3,(g,P)=>txt(g,'A document is drifting by. Catch it.',0,52,40,{color:'rgba(255,255,255,.9)'}));
+  const env=await model('envelope',0.55,{turn:0});env.position.copy(at(L16,474,282,3.4));root.add(env);
+  makeGrabbable(S,env,'doc',()=>{G.caught.add('doc');openDoc()});
+}});
+
+// ---------- 17 Achievement ----------
+scene('achieve',{n:'17 Achievement',build:async(root,S)=>{
+  stage(root,S,L16,{img:'vr/tex/bg_achieve_hd.jpg',fill:'achieve'});lights(root,{amb:0.9,key:2.2,keyPos:[2,4,5]});
+  panel(root,L16,[575,981,1154,296],3,(g,P)=>{glass(g,0,0,P.w,P.h,60,'light');txt(g,'Achievement',P.w/2,120,58,{align:'center'});txt(g,'Become an Outer Space Treaty Witness',P.w/2,200,58,{align:'center'})},{order:12});
+  iconBtn(root,L16,[1880,960,139,142],3,'medal',()=>go('wall'));
+  navBar(root,L16,2125,157);avatar(root,L16);
+  S.medal=await model('medal',0.9,{turn:0});S.medal.position.copy(at(L16,1152,600,2.7));root.add(S.medal);
+},enter(S){G.medals.add('treaty');S.timer=4.5},update(dt,S){if(S.medal)S.medal.rotation.y+=dt*1.2;S.timer-=dt;if(S.timer<=0&&cur===S){S.timer=1e9;go('wall')}}});
+
+// ---------- 18 Medal wall ----------
+scene('wall',{n:'18 Medal Wall',build:async(root,S)=>{
+  lights(root,{amb:0.9,key:2,keyPos:[1,4,6]});
+  panel(root,L16,[593,60,1118,130],3,(g,P)=>txt(g,'Achievements',P.w/2,105,104,{align:'center'}));
+  S.slots=[];
+  for(let i=0;i<MEDALS.length;i++){const M=MEDALS[i];const x=230+i*320;
+    const fr=panel(root,L16,[x,300,280,470],3.4,(g,P)=>{const on=G.medals.has(M.k);glass(g,0,0,P.w,P.h,36,'dark');wrap(g,M.n,P.w/2,370,240,40,32,{align:'center',color:on?'#fff':'rgba(255,255,255,.5)'});if(!on)txt(g,'Locked',P.w/2,450,26,{align:'center',color:'rgba(255,255,255,.45)'})},{order:5});
+    const m=await model(M.m,0.55,{turn:0});m.position.copy(at(L16,x+140,470,3.25));root.add(m);m.userData.base=m.position.y;
+    m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.orig=o.material.color.clone()}});S.slots.push({M,fr,m});}
+  S.photos=panel(root,L16,[230,860,1560,300],3,(g,P)=>{glass(g,0,0,P.w,P.h,36,'dark');txt(g,'My Photos · '+G.photos.length,40,62,38,{w:500});
+    if(!G.photos.length)txt(g,'Use Shoot in the side menu while exploring. Your photos land here.',40,170,34,{color:'rgba(255,255,255,.72)'});
+    G.photos.slice(-5).forEach((img,i)=>{if(img.complete){g.save();rr(g,40+i*300,95,280,170,14);g.clip();g.drawImage(img,40+i*300,95,280,170);g.restore()}})});
+  iconBtn(root,L16,[1830,900,139,142],3,'eye',()=>go('ranking'));
+  panel(root,L16,[1800,1050,200,50],3,(g,P)=>txt(g,'Ranking',P.w/2,38,34,{align:'center',color:'rgba(255,255,255,.85)'}));
+  navBar(root,L16,2125,157);avatar(root,L16);
+},enter(S){S.slots.forEach(({M,fr,m})=>{const on=G.medals.has(M.k);fr.userData.redraw();m.traverse(o=>{if(o.isMesh){o.material.color.copy(on?new THREE.Color(0xffffff):new THREE.Color(0x1c1c1c));o.material.transparent=!on;o.material.opacity=on?1:0.55}})});S.photos.userData.redraw()},
+update(dt,S,t){S.slots.forEach(({M,m},i)=>{if(G.medals.has(M.k)){m.rotation.y+=dt*0.8;m.position.y=m.userData.base+Math.sin(t*1.2+i)*0.03}else m.rotation.y=0.3})}});
+
+// ---------- 19 Ranking ----------
+scene('ranking',{n:'19 Ranking',build(root,S){
+  panel(root,L16,[519,140,1080,130],3,(g,P)=>txt(g,'Ranking List',P.w/2,105,100,{align:'center'}));
+  const rows=[['Smart E','12,480','#f2c94c'],['Conqueror','11,960','#d6dde6'],['PixelPPT','10,315','#e3a77a'],['You · '+(G.user||'FFFLY'),String(500*G.medals.size+120*G.caught.size),'#7fd4ff']];
+  S.rows=rows.map(([n,sc,c],i)=>panel(root,L16,[400,330+i*200,1470,170],3,(g,P)=>{glass(g,0,0,P.w,P.h,50,i===3?'light':'dark');
+    g.beginPath();g.arc(105,85,62,0,Math.PI*2);g.fillStyle=c;g.globalAlpha=.85;g.fill();g.globalAlpha=1;txt(g,i<3?String(i+1):'·',105,110,68,{w:600,align:'center',color:'#111'});
+    txt(g,i===3?'You · '+(G.user||'FFFLY'):n,220,108,64,{w:500});txt(g,i===3?String(500*G.medals.size+120*G.caught.size):sc,P.w-60,108,58,{align:'right',color:'rgba(255,255,255,.85)'})},{order:10}));
+  navBar(root,L16,2125,157);avatar(root,L16);
+},enter(S){S.rows.forEach(r=>r.userData.redraw())}});
+
+// ---------- 20 Share ----------
+scene('share',{n:'20 Share Progress',build:async(root,S)=>{
+  lights(root,{amb:0.7,key:1.6,keyPos:[-5,3,4]});
+  const earth=planet('earth',9);earth.position.set(-14,-8,-22);root.add(earth);S.earth=earth;
+  panel(root,L16,[79,158,1270,969],3,(g,P)=>{glass(g,0,0,P.w,P.h,60,'dark');wrap(g,'We have many space stations across the universe, and you are welcome to share this with your cosmic friends. The universe is vast, and every civilization deserves respect. If you ever encounter extraterrestrial beings, remember to learn how to say ‘hello’ in their language.',59,110,1150,74,56)},{order:9});
+  const el=document.getElementById('in-hello');
+  S.inp=panel(root,L16,[138,759,1152,300],2.95,(g,P)=>{const foc=document.activeElement===el;glass(g,0,0,P.w,P.h,44,'light',foc||P.hover==='f');
+    const v=el.value;txt(g,v||'type “hello” here to the universe',110,170,56,{color:v?'#fff':'rgba(255,255,255,.6)'});
+    if(foc&&Math.floor(performance.now()/500)%2===0){g.font='400 56px "Fira Sans"';g.fillStyle='#fff';g.fillRect(112+(v?g.measureText(v).width:0),112,3,72)}
+    P.region('f',0,0,960,P.h,()=>{el.focus();S.inp.userData.redraw()});
+    const hot=P.hover==='send';g.beginPath();g.arc(1040,150,62,0,Math.PI*2);g.fillStyle=hot?'rgba(255,255,255,.4)':'rgba(255,255,255,.18)';g.fill();g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=2;g.stroke();icon(g,'send',1040,150,64,{lw:1.5});
+    P.region('send',970,80,140,140,()=>sendHello())},{order:12});
+  function sendHello(){G.hello=el.value.trim()||'Hello';el.blur();toast('Sent to the universe: '+G.hello);go('community')}
+  el.addEventListener('keydown',e=>{if(e.key==='Enter')sendHello()});el.addEventListener('input',()=>S.inp.userData.redraw());el.addEventListener('blur',()=>S.inp.userData.redraw());
+  panel(root,L16,[1410,734,630,190],3,(g,P)=>{glass(g,0,0,P.w,P.h,36,'dark');wrap(g,'You may take this spacecraft to our headquarters in the Solar System. From this station, you can transfer to the Milky Way express line.',31,52,568,34,28)});
+  S.ship=await model('soyuz',1.6,{turn:0});S.ship.position.copy(at(L16,1720,470,5));root.add(S.ship);
+  navBar(root,L16,2140,215);avatar(root,L16);
+},update(dt,S,t){S.earth.rotation.y+=dt*0.02;if(S.ship){S.ship.rotation.y+=dt*0.25;S.ship.position.y=at(L16,1720,470,5).y+Math.sin(t)*0.06}if(document.activeElement&&document.activeElement.id==='in-hello')S.inp.userData.redraw()}});
+
+// ---------- 21 Community ----------
+const HELLOS='Hello 你好 Hola Bonjour Hallo Ciao Olá Здравствуйте مرحبا नमस्ते สวัสดี Γειά σας Merhaba שלום Jambo こんにちは Sawubona Kia ora Halo Hej Salut Selam Habari Privet Servus Ahoj Cześć Bok Sveiki 안녕하세요 Tere Moi Halló Kumusta Mabuhay Vanakkam Dumela Mhoro'.split(' ');
+function wordSprite(word,size=64,color='#fff'){const c=document.createElement('canvas');const g=c.getContext('2d');g.font=`500 ${size}px "Fira Sans"`;const w=Math.ceil(g.measureText(word).width)+20;c.width=w;c.height=size*1.5;g.font=`500 ${size}px "Fira Sans"`;g.fillStyle=color;g.textBaseline='middle';g.fillText(word,10,c.height/2);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,fog:false}));s.scale.set(w/c.height*0.5,0.5,1);return s}
+scene('community',{n:'21 Community',build(root,S){
+  panel(root,L16,[778,70,747,140],3,(g,P)=>txt(g,'Community',P.w/2,110,104,{align:'center'}));
+  panel(root,L16,[925,355,344,308],3.4,(g,P)=>{g.strokeStyle='#fff';g.lineWidth=7;rr(g,30,90,284,140,60);g.stroke();g.beginPath();g.arc(112,160,30,0,Math.PI*2);g.arc(232,160,30,0,Math.PI*2);g.stroke();g.beginPath();g.moveTo(150,230);g.lineTo(172,200);g.lineTo(194,230);g.stroke();txt(g,'SPACE TRAVEL',P.w/2,290,30,{w:600,align:'center',spacing:3})});
+  S.cloud=new THREE.Group();S.cloud.position.copy(EYE);root.add(S.cloud);
+  HELLOS.forEach((w,i)=>{const s=wordSprite(w,64);const a=0.75+i/HELLOS.length*(Math.PI*2-1.5)+Math.random()*0.05,el=(Math.random()-0.5)*0.9,d=5+Math.random()*3;if(i%4===0){const fa=(i/HELLOS.length-0.5)*1.3,fe=-0.32-Math.random()*0.18;s.position.set(Math.sin(fa)*d*Math.cos(fe),Math.sin(fe)*d,-Math.cos(fa)*d*Math.cos(fe))}else s.position.set(Math.sin(a)*d*Math.cos(el),Math.sin(el)*d*0.8,-Math.cos(a)*d*Math.cos(el));s.material.opacity=0.65+Math.random()*0.35;S.cloud.add(s)});
+  navBar(root,L16,2144,157);avatar(root,L16);
+},enter(S){if(S.mine)S.cloud.remove(S.mine);if(G.hello){S.mine=wordSprite(G.hello,72,'#9fe0ff');S.mine.position.set(0,-0.9,-3.6);S.mine.scale.multiplyScalar(1.3);S.cloud.add(S.mine)}},
+update(dt,S){S.cloud.rotation.y+=dt*0.03;if(S.mine)S.mine.position.applyAxisAngle(new THREE.Vector3(0,1,0),-dt*0.03)}});
+
+// ---------- 23 Passport ----------
+scene('passport',{n:'23 Passport',build(root,S){
+  stage(root,S,L16,{img:'vr/tex/bg_passport_hd.jpg',fill:'passport'});
+  [['Mars',434],['Moon',962],['Neptune',1493],['Pluto',2026]].forEach(([n,x])=>{const hb=button(root,L16,[x,377,64,64],3,(g,P,hot)=>{icon(g,'heart',P.w/2,P.h/2,P.w*0.72,{fill:G.favs.has('dest:'+n),lw:1.4,color:hot?'#fff':'rgba(255,255,255,.9)'})},
+    ()=>{const k='dest:'+n;G.favs.has(k)?G.favs.delete(k):G.favs.add(k);toast((G.favs.has(k)?'Saved to Favorites: ':'Removed from Favorites: ')+n);hb.userData.redraw()})});
+  iconBtn(root,L16,[2177,1123,105,105],3,'rocket',()=>go('dest'));
+  avatar(root,L16,()=>back());
+}});
+
+// ---------- 25 Star map ----------
+scene('map',{n:'25 Star Map',build(root,S){
+  root.add(new THREE.AmbientLight(0xffffff,0.35));const sunL=new THREE.PointLight(0xfff1d6,60,0,1.2);
+  panel(root,L16,[800,60,704,130],3,(g,P)=>txt(g,'Star Map',P.w/2,105,100,{align:'center'}));
+  const sys=new THREE.Group();sys.position.copy(at(L16,1100,640,9));sys.rotation.x=0.5;sys.scale.setScalar(0.62);root.add(sys);sys.add(sunL);S.sys=sys;
+  const sunTex=(()=>{const c=document.createElement('canvas');c.width=256;c.height=128;const g=c.getContext('2d');for(let i=0;i<2500;i++){g.fillStyle=`hsl(${20+Math.random()*25},100%,${45+Math.random()*25}%)`;g.fillRect(Math.random()*256,Math.random()*128,3,3)}const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t})();
+  const sun=new THREE.Mesh(new THREE.SphereGeometry(0.6,48,24),new THREE.MeshBasicMaterial({map:sunTex}));sys.add(sun);
+  const P=[['Mercury','mercury',0.13,1.1,4.1],['Earth','earth',0.2,1.7,1],['Mars','mars',0.17,2.3,0.53],['Jupiter','jupiter',0.42,3.2,0.084],['Saturn','saturn',0.36,4.2,0.034],['Neptune','neptune',0.26,5.0,0.006],['Pluto','pluto',0.1,5.6,0.004]];
+  S.orbs=[];
+  P.forEach(([n,tx,r,d,sp],i)=>{const ring=new THREE.Mesh(new THREE.RingGeometry(d-0.006,d+0.006,160),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0.35,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;sys.add(ring);
+    const piv=new THREE.Group();piv.rotation.y=i*1.3;sys.add(piv);const p=planet(tx,r);p.position.x=d;piv.add(p);
+    if(n==='Saturn'){const sr=new THREE.Mesh(new THREE.RingGeometry(r*1.3,r*2.1,64),new THREE.MeshBasicMaterial({color:0xcbbf9e,transparent:true,opacity:0.7,side:THREE.DoubleSide}));sr.rotation.x=-Math.PI/2.4;p.add(sr)}
+    if(n==='Earth'){const mp=new THREE.Group();p.add(mp);const mo=planet('moon',0.06);mo.position.x=0.36;mp.add(mo);S.moonPiv=mp}
+    p.userData.kind='planet';p.userData.act=()=>toast(n+(DEST[n]?' · '+DEST[n].d+' away · '+DEST[n].t+' to travel':''));S.orbs.push({piv,sp,p});(S.extra||(S.extra=[])).push(p)});
+  navBar(root,L16,2125,157);avatar(root,L16);
+},update(dt,S){if(reduce)return;S.orbs.forEach(o=>{o.piv.rotation.y+=dt*o.sp*0.35;o.p.rotation.y+=dt*0.6});if(S.moonPiv)S.moonPiv.rotation.y+=dt*1.2}});
+
+// =====================================================================
+// modals (shop, document) shown in front of the current view
+// =====================================================================
+let modal=null;
+function placeInView(m,d=2.3){const p=camera.getWorldPosition(new THREE.Vector3());const dir=camera.getWorldDirection(new THREE.Vector3());dir.y=0;dir.normalize();m.position.copy(p).addScaledVector(dir,d);m.position.y=p.y-0.05;m.lookAt(p.x,m.position.y,p.z)}
+function closeModal(){if(modal){modal.parent.remove(modal);modal=null}}
+function openShop(){closeModal();const items=[['user','Suit skin · Pumpkin Orange',120],['map','Saturn ring pass',300],['mail','Mars postcard set',40],['zoom','Deep-space lens',220],['rocket','Rocket sticker pack',25],['chat','Mission control radio',80]];
+  modal=wpanel(world,2.4,1200,760,(g,P)=>{glass(g,0,0,P.w,P.h,48,'panel');txt(g,'Space Shop',60,100,64,{w:500});txt(g,'Spend star coins on gear for your next trip.',62,150,30,{color:'rgba(255,255,255,.75)'});
+    items.forEach(([ic,n,p],i)=>{const x=60+(i%3)*370,y=200+Math.floor(i/3)*240;const hot=P.hover==='i'+i;glass(g,x,y,340,210,24,'light',hot);icon(g,ic,x+60,y+65,64,{lw:1.4});txt(g,n,x+26,y+150,28,{w:500});txt(g,'★ '+p,x+26,y+188,26,{color:'rgba(255,255,255,.75)'});P.region('i'+i,x,y,340,210,()=>toast(n+' added to your bag'))});
+    const hot=P.hover==='x';glass(g,P.w-220,P.h-110,170,74,37,'light',hot);txt(g,'Close',P.w-135,P.h-61,32,{w:500,align:'center'});P.region('x',P.w-220,P.h-110,170,74,closeModal)},{order:30});
+  placeInView(modal)}
+function openDoc(){closeModal();
+  modal=wpanel(world,2.2,1300,980,(g,P)=>{
+    // frosted glass: milky translucent fill, soft sheen, fine grain, bright edge
+    rr(g,2,2,P.w-4,P.h-4,44);g.fillStyle='rgba(70,78,92,.5)';g.fill();g.fillStyle='rgba(222,230,242,.2)';g.fill();
+    const sh=g.createLinearGradient(0,0,P.w,P.h);sh.addColorStop(0,'rgba(255,255,255,.22)');sh.addColorStop(0.45,'rgba(255,255,255,.04)');sh.addColorStop(1,'rgba(255,255,255,.12)');g.fillStyle=sh;g.fill();
+    g.save();g.clip();for(let i=0;i<2600;i++){g.fillStyle=`rgba(255,255,255,${Math.random()*0.08})`;g.fillRect(Math.random()*P.w,Math.random()*P.h,2,2)}g.restore();
+    rr(g,2,2,P.w-4,P.h-4,44);g.lineWidth=3;g.strokeStyle='rgba(255,255,255,.6)';g.stroke();
+    icon(g,'mail',96,92,64,{lw:1.4});txt(g,'Document recovered',150,112,48,{w:500});
+    const rows=[['Name','Outer Space Treaty'],['Time','Signed in 1967, entered into force on October 10, 1967'],['Source','Drafted under the United Nations, signed by major spacefaring nations including the USA, USSR, and later China, to regulate activities in outer space'],['Impact','Established core principles such as peaceful use of space, non-appropriation of celestial bodies, free exploration for all, responsibility of states, and prevention of harmful contamination, becoming the legal foundation of international space law']];
+    let y=210;rows.forEach(([k,v])=>{txt(g,k.toUpperCase(),70,y,26,{w:600,color:'rgba(255,255,255,.7)',spacing:3});y=wrap(g,v,70,y+46,1160,42,33,{color:'#fff'})+62});
+    const hot=P.hover==='k';glass(g,P.w-480,P.h-128,420,86,43,'light',hot);txt(g,'Keep the document',P.w-270,P.h-73,34,{w:600,align:'center'});
+    P.region('k',P.w-480,P.h-128,420,86,()=>{closeModal();toast('Next stop: the Mars surface');go('rovers')})},{order:30});
+  placeInView(modal,2.1)}
+function shoot(){const f=document.getElementById('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');
+  renderer.render(world,camera);const url=renderer.domElement.toDataURL('image/jpeg',0.6);const img=new Image();img.src=url;G.photos.push(img);toast('Photo saved to your medal wall')}
+function openChat(){if(G.mode!=='friends'){toast('Chat is available in Friends Mode');return}document.getElementById('chat').hidden=false;const m=document.getElementById('msgs');if(!m.children.length)addMsg('Hey! I can see the debris field from my window. Want to check it out?',0);document.getElementById('chatIn').focus()}
+function addMsg(t,me){const p=document.createElement('p');p.textContent=t;if(me)p.className='me';const m=document.getElementById('msgs');m.appendChild(p);m.scrollTop=1e6}
+document.getElementById('chatF').addEventListener('submit',e=>{e.preventDefault();const i=document.getElementById('chatIn');const v=i.value.trim();if(!v)return;addMsg(v,1);i.value='';setTimeout(()=>addMsg(['Copy that, heading there now.','Look to your left, there is a satellite!','Nice catch. It is on your medal wall now.'][Math.floor(Math.random()*3)],0),700)});
+document.getElementById('chatX').onclick=()=>document.getElementById('chat').hidden=true;
+
+// =====================================================================
+// scene switching
+// =====================================================================
+let cur=null;const hist=[];const roots={};
+const view={yaw:0,pitch:0,fov:50};
+async function go(id,{noHist=false}={}){
+  const S=SC[id];if(!S)return;closeModal();
+  if(cur&&cur.id!==id&&!noHist)hist.push(cur.id);
+  if(!roots[id]){const root=new THREE.Group();roots[id]=root;root.visible=false;world.add(root);const ld=document.getElementById('loading');ld.hidden=false;
+    try{await S.build(root,S)}catch(e){console.error('build',id,e)}ld.hidden=true;S.clickables=null;
+    if(S.hud)root.traverse(o=>{if(o.userData&&o.userData.kind==='panel'){o.material.depthTest=false;o.renderOrder=Math.max(o.renderOrder,20)}})}
+  if(cur&&roots[cur.id]){roots[cur.id].visible=false;(cur.stages||[]).forEach(s=>s.exit())}
+  cur=S;roots[id].visible=true;
+  world.background=new THREE.Color(S.bg);world.fog=S.fog?new THREE.Fog(...S.fog):null;stars.visible=S.stars;
+  rig.position.set(S.eye.x,0,S.eye.z);camera.position.set(0,S.eye.y,0);view.yaw=0;view.pitch=0;view.fov=S.fov;applyView();
+  if(renderer.xr.isPresenting)xrPlace();
+  (S.stages||[]).forEach(s=>s.enter());if(S.enter)S.enter(S);
+  document.getElementById('where').innerHTML='<b>'+S.n.replace(/^\d+ /,'').toUpperCase()+'</b>';
+  document.getElementById('jump').value=id;document.getElementById('back').disabled=!hist.length;
+  document.getElementById('hint').textContent=S.grabs.length?'Drag to look around · Press and hold an object to grab it, pull it in to catch it':'Drag to look around · Scroll to zoom';
+}
+function back(){if(hist.length)go(hist.pop(),{noHist:true})}
+function applyView(){if(renderer.xr.isPresenting)return;camera.rotation.set(view.pitch,view.yaw,0,'YXZ');camera.fov=view.fov;camera.updateProjectionMatrix()}
+const ORDER=['start','enter','mode','guide','hall','dest','warp','debris','glove','dock','eva','station','rovers','achieve','wall','ranking','share','community','passport','map'];
+const jump=document.getElementById('jump');ORDER.forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=SC[k].n;jump.appendChild(o)});
+jump.onchange=()=>go(jump.value);document.getElementById('back').onclick=back;
+
+// =====================================================================
+// input: look, click, hover, grab, spin, scroll
+// =====================================================================
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
+function clickList(S){if(!S.clickables){const list=[];roots[S.id].traverse(o=>{if(o.userData&&(o.userData.kind==='panel'||o.userData.kind==='suit'||o.userData.kind==='spin'||o.userData.kind==='planet'||o.userData.kind==='tap'))list.push(o)});S.clickables=list}return S.clickables}
+function castFrom(e){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);return ray}
+function hitTest(rc){if(!cur)return null;const objs=[...(modal?[modal]:[]),...cur.grabs,...clickList(cur)];const hits=rc.intersectObjects(objs,false);
+  for(const h of hits){const u=h.object.userData;if(u.kind==='panel'){const reg=regionAt(h);if(reg)return{h,reg};if(u.scroll)return{h,scroll:u.scroll};continue}return{h}}return null}
+function regionAt(h){const P=h.object.userData;if(!h.uv)return null;const x=h.uv.x*P.w,y=(1-h.uv.y)*P.h;for(let i=P.regions.length-1;i>=0;i--){const r=P.regions[i];if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return r}return null}
+let down=null,hoverP=null,hoverId=null;
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);const rc=castFrom(e);const t=hitTest(rc);down={x:e.clientX,y:e.clientY,yaw:view.yaw,pitch:view.pitch,t,moved:false};
+  if(t&&t.h.object.userData.kind==='grab'){const u=t.h.object.userData;if(u.scan){startScan(u,t.h.object);return}grab={hit:t.h.object,holder:u.holder,onCatch:u.onCatch,dist:t.h.distance,pull:t.h.distance,ray:rc.ray.clone()};canvas.style.cursor='grabbing'}
+  if(t&&t.h.object.userData.kind==='spin'){down.spin=t.h.object;t.h.object.userData.dragging=true}
+  if(t&&t.scroll)down.scroll=t.scroll;});
+canvas.addEventListener('pointermove',e=>{
+  const rc=castFrom(e);
+  if(down){const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.hypot(dx,dy)>6)down.moved=true;
+    if(grab){grab.ray=rc.ray.clone();return}
+    if(down.spin){down.spin.rotation.y=(down.spin.userData.r0??(down.spin.userData.r0=down.spin.rotation.y))+dx*0.01;return}
+    if(down.scroll){down.scroll(-(e.movementY||0)*1.6);return}
+    if(scan)return;
+    const k=view.fov/50*0.0042;view.yaw=THREE.MathUtils.clamp(down.yaw+dx*k,cur.yaw[0],cur.yaw[1]);view.pitch=THREE.MathUtils.clamp(down.pitch+dy*k,cur.pitch[0],cur.pitch[1]);applyView();return}
+  const t=hitTest(rc);const P=t&&t.reg?t.h.object:null,id=t&&t.reg?t.reg.id:null;
+  if(P!==hoverP||id!==hoverId){const old=hoverP;hoverP=P;hoverId=id;if(old){old.userData.hover=null;old.userData.redraw()}if(P){P.userData.hover=id;P.userData.redraw()}}
+  canvas.style.cursor=t?(t.h.object.userData.kind==='grab'?'grab':(t.reg||t.h.object.userData.kind!=='panel')?'pointer':'default'):'default';
+});
+canvas.addEventListener('pointerup',e=>{
+  if(grab){const g=grab;grab=null;canvas.style.cursor='default';if(g.pull<1.9&&cur.grabs.includes(g.hit))catchIt(cur,{hit:g.hit,holder:g.holder,onCatch:g.onCatch});else{g.holder.userData.home=g.holder.position.clone()}down=null;return}
+  if(scan){cancelScan()}
+  if(down&&down.spin){down.spin.userData.dragging=false;down.spin.userData.r0=undefined}
+  if(down&&!down.moved&&down.t){const t=down.t;if(t.reg)t.reg.act();else if(t.h.object.userData.act)t.h.object.userData.act()}
+  down=null;});
+canvas.addEventListener('wheel',e=>{e.preventDefault();const t=hitTest(castFrom(e));if(t&&(t.scroll||(t.reg&&t.h.object.userData.scroll))){(t.scroll||t.h.object.userData.scroll)(e.deltaY*0.8);return}
+  view.fov=THREE.MathUtils.clamp(view.fov+e.deltaY*0.03,30,70);applyView()},{passive:false});
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='Escape'){closeModal();document.getElementById('chat').hidden=true}if(e.key==='Enter'&&cur&&cur.id==='enter')go('mode')});
+// scanning (rover): hold for a moment
+let scan=null;
+function startScan(u,hit){scan={u,hit,t:0};u.holder.userData.ring.material.opacity=1;toast('Scanning… keep holding')}
+function cancelScan(){if(scan&&scan.t<1){toast('Scan interrupted');scan.u.holder.userData.ring.material.opacity=.7}scan=null}
+
+// =====================================================================
+// WebXR: Vision Pro Safari / Quest browser
+// =====================================================================
+const xrBtn=document.getElementById('xr');let baseRef=null;
+if(navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(ok=>{xrBtn.hidden=!ok}).catch(()=>{})}
+xrBtn.onclick=async()=>{try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','hand-tracking']});renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(s);baseRef=renderer.xr.getReferenceSpace();camera.rotation.set(0,0,0);xrPlace();s.addEventListener('end',()=>{baseRef=null;go(cur.id,{noHist:true})})}catch(e){toast('VR is not available in this view. Open the page directly in the headset browser.')}};
+function xrPlace(){if(cur)rig.position.set(cur.eye.x,0,cur.eye.z)}
+const xrRay=new THREE.Raycaster(),tm=new THREE.Matrix4();const xrGrab=[null,null];
+for(let i=0;i<2;i++){const c=renderer.xr.getController(i);rig.add(c);
+  const cast=()=>{tm.identity().extractRotation(c.matrixWorld);xrRay.ray.origin.setFromMatrixPosition(c.matrixWorld);xrRay.ray.direction.set(0,0,-1).applyMatrix4(tm);return xrRay};
+  c.addEventListener('selectstart',()=>{const t=hitTest(cast());if(!t)return;const u=t.h.object.userData;if(u.kind==='grab'){if(u.scan){const Rr=u.onCatch;cur.grabs.splice(cur.grabs.indexOf(t.h.object),1);Rr();return}xrGrab[i]={hit:t.h.object,holder:u.holder,onCatch:u.onCatch,c,dist:t.h.distance}}else if(t.reg)t.reg.act();else if(u.act)u.act()});
+  c.addEventListener('selectend',()=>{const g=xrGrab[i];if(!g)return;xrGrab[i]=null;const head=camera.getWorldPosition(new THREE.Vector3());if(g.holder.position.distanceTo(head)<1.2&&cur.grabs.includes(g.hit))catchIt(cur,g);else g.holder.userData.home=g.holder.position.clone()})}
+
+// =====================================================================
+// loop
+// =====================================================================
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+const clock=new THREE.Clock();let T=0;
+renderer.setAnimationLoop(()=>{const dt=Math.min(clock.getDelta(),0.05);T+=dt;if(!cur)return;
+  (cur.stages||[]).forEach(s=>s.update(dt));(cur.ticks||[]).forEach(f=>f(dt));if(cur.update)cur.update(dt,cur,T);
+  // floating objects drift and tumble; the target ring pulses
+  for(const f of cur.floaters){if(!f.visible||(grab&&grab.holder===f)||xrGrab.some(g=>g&&g.holder===f))continue;const hm=f.userData.home;f.position.y=hm.y+Math.sin(T*0.7+f.userData.phase)*0.06;f.position.x=hm.x+Math.cos(T*0.5+f.userData.phase)*0.04;if(!reduce){f.rotation.y+=dt*0.25;f.rotation.x+=dt*0.08}
+    const ring=f.userData.ring;if(ring)ring.material.opacity=0.45+Math.sin(T*3+f.userData.phase)*0.25}
+  if(grab){grab.pull=THREE.MathUtils.lerp(grab.pull,1.4,1-Math.pow(0.15,dt));const p=grab.ray.origin.clone().addScaledVector(grab.ray.direction,grab.pull);grab.holder.position.lerp(p,1-Math.pow(0.001,dt));grab.holder.rotation.y+=dt}
+  for(let i=0;i<2;i++){const g=xrGrab[i];if(!g)continue;tm.identity().extractRotation(g.c.matrixWorld);const o=new THREE.Vector3().setFromMatrixPosition(g.c.matrixWorld);const d=new THREE.Vector3(0,0,-1).applyMatrix4(tm);g.dist=THREE.MathUtils.lerp(g.dist,0.5,1-Math.pow(0.2,dt));g.holder.position.lerp(o.addScaledVector(d,g.dist),1-Math.pow(0.001,dt))}
+  if(scan){scan.t+=dt/1.2;const r=scan.u.holder.userData.ring;r.scale.setScalar((scan.u.holder.userData.radius||1)*2.3*(1-scan.t*0.3));if(scan.t>=1){cur.grabs.splice(cur.grabs.indexOf(scan.hit),1);r.visible=false;scan.u.onCatch();scan=null}}
+  cur.anims=cur.anims.filter(a=>!a(performance.now()));
+  renderer.render(world,camera);
+});
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2400)}
+
+await Promise.all(['400 40px "Fira Sans"','500 40px "Fira Sans"','600 40px "Fira Sans"','400 40px "Spectral"','500 40px "Spectral"'].map(f=>document.fonts.load(f).catch(()=>{})));
+window.__app={go,SC,G,renderer,world,camera,view,roots,at,LW,L16,closeModal,get cur(){return cur}};
+go(location.hash&&SC[location.hash.slice(1)]?location.hash.slice(1):'start');
 </script>
 
-</body>
-</html>
+</body></html>
